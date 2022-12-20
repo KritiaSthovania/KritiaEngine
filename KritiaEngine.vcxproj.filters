@@ -203,6 +203,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="vcpkg.json" />
   </ItemGroup>
 </Project>
