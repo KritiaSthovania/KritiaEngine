@@ -25,13 +25,14 @@ KritiaEngine::Material::Material(const char* name, std::shared_ptr<Shader> shade
 	this->shader = shader;
 }
 
-void KritiaEngine::Material::ApplyShaderOnRender(const Matrix4x4& projection, const Matrix4x4& view, const Matrix4x4& model, const Vector3 &viewPos, const Vector3 &pos)
+void KritiaEngine::Material::ApplyShaderOnRender(const Matrix4x4& model, const Vector3 &viewPos, const Vector3 &pos)
 {
-	RenderManager::ApplyMaterialShaderOnRender(projection, view, model, viewPos, pos, shader, mainTextureID, specularMapID);
+	RenderManager::ApplyMaterialShaderOnRender(model, viewPos, pos, shader, mainTextureID, specularMapID);
 }
 
 void Material::Initialize() {
 	shader->Use();
+	shader->UniformBlockBinding(shader->GetUniformBlockIndex("MatricesVP"), RenderManager::UniformBindingPoint::MatricesVP);
 	if (mainTexture != nullptr) {
 		if (renderMode == Transparent) {
 			mainTextureID = RenderManager::Load2DTexture(mainTexture, true);

@@ -103,6 +103,14 @@ bool KritiaEngine::Shader::HasUniform(const std::string& uniformName) const {
     }
 }
 
+unsigned int KritiaEngine::Shader::GetUniformBlockIndex(const std::string& name) const {
+    return glGetUniformBlockIndex(id, name.c_str());
+}
+
+void KritiaEngine::Shader::UniformBlockBinding(unsigned int index, unsigned int bindingPoint) {
+    glUniformBlockBinding(id, index, bindingPoint);
+}
+
 void KritiaEngine::Shader::CheckCompileErrors(unsigned int shader, std::string type)
 {
     int success;

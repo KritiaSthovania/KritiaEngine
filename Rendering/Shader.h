@@ -33,6 +33,8 @@ namespace KritiaEngine {
         void SetVec3(const std::string& name, const Vector3& vec3) const;
         void SetMat3(const std::string& name, const Matrix3x3& mat3) const;
         bool HasUniform(const std::string& uniformName) const;
+        unsigned int GetUniformBlockIndex(const std::string& name) const;
+        void UniformBlockBinding(unsigned int index, unsigned int bindingPoint);
     private:
         bool loaded = false;
         GLuint id;

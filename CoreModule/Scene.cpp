@@ -119,6 +119,8 @@ void KritiaEngine::SceneManagement::Scene::InitializeRenderQueue() {
 }
 
 void KritiaEngine::SceneManagement::Scene::Render(std::shared_ptr<Camera> camera) {
+    Matrix4x4 projection = Matrix4x4::Perspective(camera->Zoom, (float)Settings::ScreenWidth / Settings::ScreenHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistant);
+    RenderManager::UpdateUniformBufferMatricesVP(camera->GetViewMatrix(), projection);
     RenderOpaque(camera);
     RenderSkybox(camera);
     RenderTransparent(camera);

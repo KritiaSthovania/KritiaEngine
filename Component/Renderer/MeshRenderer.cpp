@@ -35,14 +35,12 @@ void MeshRenderer::Render(std::shared_ptr<KritiaEngine::Camera> camera) {
 	model = Mathf::Translate(model, Transform()->Position);
 	model *= Quaternion::RotationMatrix(Transform()->Rotation);
 	model = Mathf::Scale(model, Transform()->Scale);
-	Matrix4x4 projection = Matrix4x4::Perspective(camera->Zoom, (float)Settings::ScreenWidth / Settings::ScreenHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistant);
-	Matrix4x4 view = camera->GetViewMatrix();
 	for (int i = 0; i < meshFilter->mesh->submeshSize; i++) {
-		materials[i]->ApplyShaderOnRender(projection, view, model, camera->GetPosition(), Transform()->Position);
+		materials[i]->ApplyShaderOnRender(model, camera->GetPosition(), Transform()->Position);
 		meshFilter->RenderSubmesh(i);
 	}
 	for (int i = this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(); i < materials.size(); i++) {
-		materials[i]->ApplyShaderOnRender(projection, view, model, camera->GetPosition(), Transform()->Position);
+		materials[i]->ApplyShaderOnRender(model, camera->GetPosition(), Transform()->Position);
 		meshFilter->RenderSubmesh(i - this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size());
 	}
 }

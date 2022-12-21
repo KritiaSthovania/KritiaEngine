@@ -7,6 +7,7 @@
 namespace KritiaEngine {
 	class Mesh : public Object{
 		friend class MeshFilter;
+		friend class RenderManager;
 	public:
 		struct Vertex {
 			Vector3 Position;
@@ -25,8 +26,6 @@ namespace KritiaEngine {
 	private:
 		std::vector<unsigned int> VAOs, VBOs, EBOs;
 		bool isSetup = false;
-		void Setup();
-		void RenderSubmesh(int index);
 		static std::vector<float> GetDefaultCubeVertices();
 	};
 

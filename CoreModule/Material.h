@@ -34,12 +34,10 @@ namespace KritiaEngine {
         /// Compile Shader, Load Texture
         /// </summary>
 		void Initialize();
-		void ApplyShaderOnRender(const Matrix4x4& projection, const Matrix4x4& view, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos);
-		void SetMainLightProperties();
-		void SetPointLightProperties(const Vector3 &pos);
-		void SetSpotLightProperties(const Vector3 &pos);
-		int w_diffuse, h_diffuse, r_diffuse, w_specular, h_specular, r_specular, diffuseSamplerIndex = 0, specularSamplerIndex = 1;
-		unsigned int m_VertexShader, m_FragmentShader, m_ShaderProgram, mainTextureID, specularMapID;
+		void ApplyShaderOnRender(const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos);
+		int diffuseSamplerIndex = 0, specularSamplerIndex = 1;
+		unsigned int mainTextureID, specularMapID;
+		unsigned int matricesVPID;
 	};
 }
 

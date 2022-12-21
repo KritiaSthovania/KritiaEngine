@@ -10,11 +10,12 @@ bool KritiaEngine::RenderManager::blendEnabled = true;
 bool KritiaEngine::RenderManager::backFaceCullingEnabled = true;
 unsigned int KritiaEngine::RenderManager::skyboxVAO = 1;
 unsigned int KritiaEngine::RenderManager::skyboxVBO = 1;
-
+unsigned int KritiaEngine::RenderManager::uniformBufferIDMatricesVP = 0;
 
 void KritiaEngine::RenderManager::Initialize() {
 	if (Settings::UseOpenGL) {
 		OpenGLInitialize();
+		CreateUniformBuffer(&uniformBufferIDMatricesVP, MatricesVP);
 	}
 	CreateSkybox();
 }
@@ -113,7 +114,7 @@ void KritiaEngine::RenderManager::RenderSkybox(unsigned int skyboxTexutureID, Ma
 	glDepthFunc(GL_LESS); // set depth function back to default
 }
 
-void KritiaEngine::RenderManager::ApplyMaterialShaderOnRender(const Matrix4x4& projection, const Matrix4x4& view, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos,
+void KritiaEngine::RenderManager::ApplyMaterialShaderOnRender(const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos,
 	                                                          std::shared_ptr<Shader> shader, unsigned int mainTextureID, unsigned int specularMapID) {
 	if (Settings::UseOpenGL) {
 		shader->Use();
@@ -121,9 +122,7 @@ void KritiaEngine::RenderManager::ApplyMaterialShaderOnRender(const Matrix4x4& p
 		SetMainLightProperties(shader);
 		SetPointLightProperties(pos, shader);
 		SetSpotLightProperties(pos, shader);
-		// MVP matrix
-		shader->SetMat4("projection", projection);
-		shader->SetMat4("view", view);
+		// model matrix
 		shader->SetMat4("model", model);
 		Matrix4x4 mat4 = model;
 		Matrix3x3 normalMatrix = Matrix3x3({ mat4.GetEntry(0, 0), mat4.GetEntry(1, 0), mat4.GetEntry(2, 0),
@@ -138,6 +137,64 @@ void KritiaEngine::RenderManager::ApplyMaterialShaderOnRender(const Matrix4x4& p
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, specularMapID);
 	}
+}
+
+void KritiaEngine::RenderManager::CreateUniformBuffer(unsigned int* id, UniformBindingPoint bindingPoint) {
+	if (bindingPoint == MatricesVP) {
+		glGenBuffers(1, id);
+		glBindBuffer(GL_UNIFORM_BUFFER, *id);
+		glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		glBindBufferRange(GL_UNIFORM_BUFFER, MatricesVP, *id, 0, 2 * sizeof(glm::mat4));
+	}
+}
+
+void KritiaEngine::RenderManager::SetupMesh(std::shared_ptr<Mesh> mesh) {
+	if (Settings::UseOpenGL) {
+		mesh->isSetup = true;
+		mesh->submeshSize = mesh->submeshIndices.size();
+		mesh->VAOs.resize(mesh->submeshSize);
+		mesh->VBOs.resize(mesh->submeshSize);
+		mesh->EBOs.resize(mesh->submeshSize);
+		for (int i = 0; i < mesh->submeshSize; i++) {
+			glGenVertexArrays(1, &mesh->VAOs[i]);
+			glGenBuffers(1, &mesh->VBOs[i]);
+			glGenBuffers(1, &mesh->EBOs[i]);
+
+			glBindVertexArray(mesh->VAOs[i]);
+			glBindBuffer(GL_ARRAY_BUFFER, mesh->VBOs[i]);
+
+			glBufferData(GL_ARRAY_BUFFER, mesh->submeshVertices[i].size() * sizeof(Mesh::Vertex), &mesh->submeshVertices[i][0], GL_STATIC_DRAW);
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBOs[i]);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->submeshIndices[i].size() * sizeof(unsigned int), &mesh->submeshIndices[i][0], GL_STATIC_DRAW);
+
+			// 顶点位置
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)0);
+			// 顶点法线
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, Normal));
+			// 顶点纹理坐标
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, TexCoord));
+
+			glBindVertexArray(0);
+		}
+	}
+}
+
+void KritiaEngine::RenderManager::RenderSubmesh(std::shared_ptr<Mesh> mesh, int submeshIndex) {
+	glBindVertexArray(mesh->VAOs[submeshIndex]);
+	glDrawElements(GL_TRIANGLES, mesh->submeshIndices[submeshIndex].size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
+void KritiaEngine::RenderManager::UpdateUniformBufferMatricesVP(Matrix4x4 view, Matrix4x4 projection) {
+	glBindBuffer(GL_UNIFORM_BUFFER, uniformBufferIDMatricesVP);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr((glm::mat4)view));
+	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr((glm::mat4)projection));
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void KritiaEngine::RenderManager::OpenGLInitialize() {
