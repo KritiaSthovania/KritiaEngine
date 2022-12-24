@@ -8,6 +8,7 @@
 namespace KritiaEngine {
 	class Material : public Object
 	{
+		friend class RenderManager;
 		friend class MeshRenderer;
 	public:
 		enum RenderMode {
@@ -29,6 +30,7 @@ namespace KritiaEngine {
 		std::shared_ptr<Texture> mainTexture;
 		std::shared_ptr<Texture> specularMap;
 		std::shared_ptr<Shader> shader;
+		bool GPUInstancingEnabled = false;
 	private:
 		/// <summary>
         /// Compile Shader, Load Texture
@@ -38,6 +40,7 @@ namespace KritiaEngine {
 		int diffuseSamplerIndex = 0, specularSamplerIndex = 1;
 		unsigned int mainTextureID, specularMapID;
 		unsigned int matricesVPID;
+		bool initialized = false;
 	};
 }
 

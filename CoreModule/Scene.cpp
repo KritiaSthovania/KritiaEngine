@@ -60,6 +60,21 @@ void Scene::InitializeLighting() {
 void Scene::InitializeGameObjects() {
     // 暂时不读取文件
     // 生成导入的人物模型：
+    //std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(new Mesh());
+    //AssetDatabase::ImportModel("./Assets/Models/rock/rock.obj", mesh);
+    ////mesh->submeshMaterials[0]->GPUInstancingEnabled = true;
+    //for (int i = 0; i < 10000; i++) {
+    //    std::shared_ptr<GameObject> object = std::shared_ptr<GameObject>(new GameObject());
+    //    std::shared_ptr<MeshFilter> meshFilter = object->AddComponent<MeshFilter>();
+    //    meshFilter->mesh = mesh;
+    //    std::shared_ptr<MeshRenderer> renderer = object->AddComponent<MeshRenderer>();
+    //    object->Transform()->Scale = Vector3(1, 1, 1);
+    //    float randomx = rand() / (double)(RAND_MAX) * 10 - 5;
+    //    float randomz = rand() / (double)(RAND_MAX) * 10 - 5;
+    //    object->Transform()->Position = Vector3(randomx, -5, randomz);
+    //    rootGameObjects.push_back(object);
+    //}
+
     std::shared_ptr<GameObject> object = std::shared_ptr<GameObject>(new GameObject());
     std::shared_ptr<MeshFilter> meshFilter = object->AddComponent<MeshFilter>();
     //mesh->Vertices = vertices_map;
@@ -76,9 +91,23 @@ void Scene::InitializeGameObjects() {
     material->shininess = 32;
     material->mainTexture = std::shared_ptr<Texture>(new Texture("./Assets/Textures/blending_transparent_window.png"));
     material->renderMode = Material::Transparent;
+    material->GPUInstancingEnabled = true;
     //material->specularMap = std::shared_ptr<Texture>(new Texture("./Assets/Textures/container_specular.png"));
-    renderer->materials.push_back(material);
+    mesh->submeshMaterials[0] = material;
+    //renderer->materials.push_back(material);
     rootGameObjects.push_back(object);
+
+    std::shared_ptr<GameObject> object3 = std::shared_ptr<GameObject>(new GameObject());
+    std::shared_ptr<MeshFilter> meshFilter3 = object3->AddComponent<MeshFilter>();
+    meshFilter3->mesh = mesh;
+    std::shared_ptr<MeshRenderer> renderer3 = object3->AddComponent<MeshRenderer>();
+    object3->Transform()->Scale = Vector3(0.5, 0.5, 0.5);
+    object3->Transform()->Position = Vector3(0, 1, 0);
+    //material->specularMap = std::shared_ptr<Texture>(new Texture("./Assets/Textures/container_specular.png"));
+    mesh->submeshMaterials[0] = material;
+    //renderer->materials.push_back(material);
+    rootGameObjects.push_back(object3);
+
     
     std::shared_ptr<GameObject> object2 = std::shared_ptr<GameObject>(new GameObject());
     std::shared_ptr<MeshFilter> meshFilter2 = object2->AddComponent<MeshFilter>();
@@ -87,22 +116,19 @@ void Scene::InitializeGameObjects() {
     std::shared_ptr<Mesh> mesh2 = std::make_shared<Mesh>(Mesh::Cube());
     //AssetDatabase::ImportModel("./Assets/Models/nanosuit.obj", mesh2);
     meshFilter2->mesh = mesh2;
+    mesh2->submeshMaterials[0]->GPUInstancingEnabled = true;
     std::shared_ptr<MeshRenderer> renderer2 = object2->AddComponent<MeshRenderer>();
-    object2->Transform()->Scale = Vector3(0.5, 0.5, 0.5);
+    object2->Transform()->Scale = Vector3(1, 1, 1);
     object2->Transform()->Position = Vector3(0, -2, 0);
-    //std::shared_ptr<Material> material2 = std::shared_ptr<Material>(new Material("New Material", std::shared_ptr<Shader>(new KritiaEngine::Shader("./StandardShader/TransparentShader.vs", "./StandardShader/TransparentShader.fs"))));
-    //material2->albedo = Color(1.0f, 1.f, 1.f, 1);
-    //material2->shininess = 32;
-    //material2->renderMode = Material::Transparent;
-    //material2->mainTexture = std::shared_ptr<Texture>(new Texture("./Assets/Textures/blending_transparent_window.png"));
-    //renderer2->materials.push_back(material2);
     rootGameObjects.push_back(object2);
+
 }
 
 void KritiaEngine::SceneManagement::Scene::InitializeRenderQueue() {
     for (std::list<std::shared_ptr<GameObject>>::iterator iter = rootGameObjects.begin(); iter != rootGameObjects.end(); iter++) {
         // check if one object has a transparent material, if yes, put it into transparentObjects
         if ((*iter)->GetComponent<MeshRenderer>() != nullptr) {
+            (*iter)->GetComponent<MeshRenderer>()->Initialize();
             bool opaque = true;
             for (int i = 0; i < (*iter)->GetComponent<MeshRenderer>()->materials.size(); i++) {
                 if ((*iter)->GetComponent<MeshRenderer>()->materials[i]->renderMode == Material::Transparent) {
@@ -131,6 +157,7 @@ void KritiaEngine::SceneManagement::Scene::RenderOpaque(std::shared_ptr<Camera> 
     for (std::list<std::shared_ptr<GameObject>>::iterator iter = opaqueObjects.begin(); iter != opaqueObjects.end(); iter++) {
         (*iter)->Render(camera);
     }
+    RenderManager::RenderGPUInstances(false);
 }
 
 void KritiaEngine::SceneManagement::Scene::RenderTransparent(std::shared_ptr<Camera> camera) {
@@ -142,6 +169,7 @@ void KritiaEngine::SceneManagement::Scene::RenderTransparent(std::shared_ptr<Cam
     for (std::map<float, std::shared_ptr<GameObject>>::reverse_iterator iter = sorted.rbegin(); iter != sorted.rend(); iter++) {
         iter->second->Render(camera);
     }
+    RenderManager::RenderGPUInstances(true);
 }
 
 void KritiaEngine::SceneManagement::Scene::RenderSkybox(std::shared_ptr<Camera> camera) {

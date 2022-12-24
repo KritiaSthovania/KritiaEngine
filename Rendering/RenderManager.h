@@ -4,6 +4,8 @@
 #include "../CoreModule/MathStructs.h"
 #include "Shader.h"
 #include "../CoreModule/Mesh.h"
+#include "../Component/MeshFilter.h"
+#include "../Component/Camera.h"
 
 namespace KritiaEngine {
 	static class RenderManager {	
@@ -31,17 +33,20 @@ namespace KritiaEngine {
 		/// <param name="specularMapID">specularMapID of the material</param>
 		static void ApplyMaterialShaderOnRender(const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos, std::shared_ptr<Shader> shader, unsigned int mainTextureID, unsigned int specularMapID);
 		static void SetupMesh(std::shared_ptr<Mesh> mesh);
-		static void RenderSubmesh(std::shared_ptr<Mesh> mesh, int submeshIndex);
+		static void RenderSubmesh(std::shared_ptr<MeshFilter> meshFilter, std::shared_ptr<Material> material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos);
 		/// <summary>
 		/// Update the uniform buffer "MatricesVP" in the order of view and projection
 		/// </summary>
 		/// <param name="view">the view matrix</param>
 		/// <param name="projection">the projection matrix</param>
 		static void UpdateUniformBufferMatricesVP(Matrix4x4 view, Matrix4x4 projection);
+		static void RenderGPUInstances(bool transparent);
+
 		static bool depthTestEnabled;
 		static bool blendEnabled;
 		static bool backFaceCullingEnabled;
 		static unsigned int uniformBufferIDMatricesVP;
+		friend bool operator< (const std::tuple<Mesh, Material, int>& left, const std::tuple<Mesh, Material, int>& right);
 	private:
 		static void CreateUniformBuffer(unsigned int* id, UniformBindingPoint bindingPoint);
 		static void CreateSkybox();
@@ -50,6 +55,11 @@ namespace KritiaEngine {
 		static void SetMainLightProperties(std::shared_ptr<Shader> shader);
 		static void SetPointLightProperties(const Vector3& pos, std::shared_ptr<Shader> shader);
 		static void SetSpotLightProperties(const Vector3& pos, std::shared_ptr<Shader> shader);
+		static void UpdateGPUInstancingCount(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material, int submeshIndex, Matrix4x4 model);
+		static void UpdateGPUInstancingBuffer();
+		static std::map<std::tuple<Mesh, Material, int>, unsigned int> gpuInstancingCount;
+		static std::map<std::tuple<Mesh, Material, int>, unsigned int> gpuInstancingBufferIDs;
+		static std::map<std::tuple<Mesh, Material, int>, std::vector<Matrix4x4>> gpuInstancingMatrices;
 		static float skyboxVertices[108];
 		static unsigned int skyboxVAO, skyboxVBO;
 	};

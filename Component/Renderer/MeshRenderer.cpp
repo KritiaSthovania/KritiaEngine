@@ -2,6 +2,7 @@
 #include "../../CoreModule/MathStructs.h"
 #include "../../CoreModule/GameObject.h"
 #include "../../CoreModule/SceneManager.h"
+#include "../../Rendering/RenderManager.h"
 
 using namespace KritiaEngine;
 
@@ -36,12 +37,10 @@ void MeshRenderer::Render(std::shared_ptr<KritiaEngine::Camera> camera) {
 	model *= Quaternion::RotationMatrix(Transform()->Rotation);
 	model = Mathf::Scale(model, Transform()->Scale);
 	for (int i = 0; i < meshFilter->mesh->submeshSize; i++) {
-		materials[i]->ApplyShaderOnRender(model, camera->GetPosition(), Transform()->Position);
-		meshFilter->RenderSubmesh(i);
+		RenderManager::RenderSubmesh(meshFilter, materials[i], i, model, camera->GetPosition(), Transform()->Position);
 	}
 	for (int i = this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(); i < materials.size(); i++) {
-		materials[i]->ApplyShaderOnRender(model, camera->GetPosition(), Transform()->Position);
-		meshFilter->RenderSubmesh(i - this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size());
+		RenderManager::RenderSubmesh(meshFilter, materials[i], i - this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(), model, camera->GetPosition(), Transform()->Position);
 	}
 }
 

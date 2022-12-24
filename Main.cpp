@@ -17,7 +17,6 @@ int main()
     while (!glfwWindowShouldClose(window)) 
     {
         Time::UpdateDeltaTime(glfwGetTime());
-
         //执行一些特殊的输入控制
         ProcessInput();
 
@@ -55,6 +54,9 @@ bool InitializeWindow()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    if (Settings::EnableMSAA) {
+        glfwWindowHint(GLFW_SAMPLES, 4);
+    }
 
     window = glfwCreateWindow(Settings::ScreenWidth, Settings::ScreenHeight, "Kritia Engine", NULL, NULL);
     if (window == NULL) {

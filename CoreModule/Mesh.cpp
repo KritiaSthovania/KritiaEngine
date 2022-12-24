@@ -33,6 +33,7 @@ KritiaEngine::Mesh KritiaEngine::Mesh::Cube() {
     material2->shininess = 32;
     material2->renderMode = Material::Opaque;
     material2->mainTexture = std::shared_ptr<Texture>(new Texture("./Assets/Textures/container_diffuse.png"));
+    material2->GPUInstancingEnabled = true;
     std::vector<std::shared_ptr<Material>> materials;
     materials.push_back(material2);
     return Mesh(submeshVertices, submeshIndices, materials);

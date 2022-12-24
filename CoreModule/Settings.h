@@ -9,5 +9,6 @@ namespace KritiaEngine{
 		static float FarPlaneDistant;
 		static bool UseOpenGL;
 		static bool UseGLM;
+		static bool EnableMSAA;
 	};
 }

@@ -10,7 +10,6 @@ namespace KritiaEngine {
 		MeshFilter(GameObject* gameObject);
 		std::shared_ptr<Mesh> mesh;
 	private:
-		void RenderSubmesh(int index);
 		// Should be called by MeshRenderer
 		void SetupMesh();
 	};

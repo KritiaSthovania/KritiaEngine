@@ -5,12 +5,17 @@
 #include "../CoreModule/Mathf.h"
 #include "../Component/Transform.h"
 
+using namespace KritiaEngine;
+
 bool KritiaEngine::RenderManager::depthTestEnabled = true;
 bool KritiaEngine::RenderManager::blendEnabled = true;
 bool KritiaEngine::RenderManager::backFaceCullingEnabled = true;
 unsigned int KritiaEngine::RenderManager::skyboxVAO = 1;
 unsigned int KritiaEngine::RenderManager::skyboxVBO = 1;
 unsigned int KritiaEngine::RenderManager::uniformBufferIDMatricesVP = 0;
+std::map<std::tuple<Mesh, Material, int>, unsigned int> RenderManager::gpuInstancingCount = std::map<std::tuple<Mesh, Material, int>, unsigned int>();
+std::map<std::tuple<Mesh, Material, int>, unsigned int> RenderManager::gpuInstancingBufferIDs = std::map<std::tuple<Mesh, Material, int>, unsigned int>();
+std::map<std::tuple<Mesh, Material, int>, std::vector<Matrix4x4>> RenderManager::gpuInstancingMatrices = std::map<std::tuple<Mesh, Material, int>, std::vector<Matrix4x4>>();
 
 void KritiaEngine::RenderManager::Initialize() {
 	if (Settings::UseOpenGL) {
@@ -184,10 +189,17 @@ void KritiaEngine::RenderManager::SetupMesh(std::shared_ptr<Mesh> mesh) {
 	}
 }
 
-void KritiaEngine::RenderManager::RenderSubmesh(std::shared_ptr<Mesh> mesh, int submeshIndex) {
-	glBindVertexArray(mesh->VAOs[submeshIndex]);
-	glDrawElements(GL_TRIANGLES, mesh->submeshIndices[submeshIndex].size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+void KritiaEngine::RenderManager::RenderSubmesh(std::shared_ptr<MeshFilter> meshFilter, std::shared_ptr<Material> material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos) {
+	material->ApplyShaderOnRender(model, viewPos, pos);
+	if (meshFilter->mesh != nullptr) {
+		if (material->GPUInstancingEnabled) {
+			UpdateGPUInstancingCount(meshFilter->mesh, material, submeshIndex, model);
+		} else {
+			glBindVertexArray(meshFilter->mesh->VAOs[submeshIndex]);
+			glDrawElements(GL_TRIANGLES, meshFilter->mesh->submeshIndices[submeshIndex].size(), GL_UNSIGNED_INT, 0);
+			glBindVertexArray(0);
+		}
+	}
 }
 
 void KritiaEngine::RenderManager::UpdateUniformBufferMatricesVP(Matrix4x4 view, Matrix4x4 projection) {
@@ -195,6 +207,31 @@ void KritiaEngine::RenderManager::UpdateUniformBufferMatricesVP(Matrix4x4 view, 
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr((glm::mat4)view));
 	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr((glm::mat4)projection));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void KritiaEngine::RenderManager::RenderGPUInstances(bool transparent) {
+	UpdateGPUInstancingBuffer();
+	for (std::map<std::tuple<Mesh, Material, int>, unsigned int>::iterator iter = gpuInstancingCount.begin(); iter != gpuInstancingCount.end(); iter++) {
+		std::tuple<Mesh, Material, int> key = iter->first;
+		Mesh mesh = std::get<0>(key);
+		Material material = std::get<1>(key);
+		int submeshIndex = std::get<2>(key);
+		unsigned int amount = gpuInstancingCount[key];
+		if (!transparent && material.renderMode == Material::Opaque) {
+			//materialApplyShaderOnRender(model, viewPos, pos);
+			glBindVertexArray(mesh.VAOs[submeshIndex]);
+			glDrawElementsInstanced(GL_TRIANGLES, mesh.submeshIndices[submeshIndex].size(), GL_UNSIGNED_INT, 0, amount);
+			glBindVertexArray(0);
+			gpuInstancingCount[key] = 0;
+			gpuInstancingMatrices[key].clear();
+		} else if(transparent && material.renderMode == Material::Transparent) {
+			glBindVertexArray(mesh.VAOs[submeshIndex]);
+			glDrawElementsInstanced(GL_TRIANGLES, mesh.submeshIndices[submeshIndex].size(), GL_UNSIGNED_INT, 0, amount);
+			glBindVertexArray(0);
+			gpuInstancingCount[key] = 0;
+			gpuInstancingMatrices[key].clear();
+		}
+	}
 }
 
 void KritiaEngine::RenderManager::OpenGLInitialize() {
@@ -208,6 +245,9 @@ void KritiaEngine::RenderManager::OpenGLInitialize() {
 	if (backFaceCullingEnabled) {
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
+	}
+	if (Settings::EnableMSAA) {
+		glEnable(GL_MULTISAMPLE);
 	}
 	glViewport(0, 0, Settings::ScreenWidth, Settings::ScreenHeight);
 }
@@ -230,48 +270,101 @@ void KritiaEngine::RenderManager::SetMainLightProperties(std::shared_ptr<Shader>
 
 void KritiaEngine::RenderManager::SetPointLightProperties(const Vector3& pos, std::shared_ptr<Shader> shader) {
 	std::vector<std::shared_ptr<Light>> pointLights = Lighting::LightingSystem::GetPointLightAroundPos(pos);
-	for (int i = 0; i < Lighting::LightingSystem::MaxPointLightsForOneObject; i++) {
-		std::string str = "pointLights[";
-		str += std::to_string(i);
-		str += "]";
-		if (pointLights[i] != nullptr) {
-			shader->SetVec3(str + ".color", pointLights[i]->color.RGB());
-			shader->SetVec3(str + ".position", pointLights[i]->Transform()->Position);
-			shader->SetFloat(str + ".constant", pointLights[i]->constantAttenuationFactor);
-			shader->SetFloat(str + ".linear", pointLights[i]->linearAttenuationFactor);
-			shader->SetFloat(str + ".quadratic", pointLights[i]->quadraticAttenuationFactor);
-			shader->SetFloat(str + ".ambient", pointLights[i]->ambientIntensity);
-			shader->SetFloat(str + ".diffuse", pointLights[i]->diffuseIntensity);
-			shader->SetFloat(str + ".specular", pointLights[i]->specularIntensity);
-		} else {
-			break;
+	if (pointLights.size() != 0) {
+		for (int i = 0; i < Lighting::LightingSystem::MaxPointLightsForOneObject; i++) {
+			std::string str = "pointLights[";
+			str += std::to_string(i);
+			str += "]";
+			if (pointLights[i] != nullptr) {
+				shader->SetVec3(str + ".color", pointLights[i]->color.RGB());
+				shader->SetVec3(str + ".position", pointLights[i]->Transform()->Position);
+				shader->SetFloat(str + ".constant", pointLights[i]->constantAttenuationFactor);
+				shader->SetFloat(str + ".linear", pointLights[i]->linearAttenuationFactor);
+				shader->SetFloat(str + ".quadratic", pointLights[i]->quadraticAttenuationFactor);
+				shader->SetFloat(str + ".ambient", pointLights[i]->ambientIntensity);
+				shader->SetFloat(str + ".diffuse", pointLights[i]->diffuseIntensity);
+				shader->SetFloat(str + ".specular", pointLights[i]->specularIntensity);
+			} else {
+				break;
+			}
 		}
 	}
 }
 
 void KritiaEngine::RenderManager::SetSpotLightProperties(const Vector3& pos, std::shared_ptr<Shader> shader) {
 	std::vector<std::shared_ptr<Light>> spotLights = Lighting::LightingSystem::GetSpotLightAroundPos(pos);
-	for (int i = 0; i < Lighting::LightingSystem::MaxSpotLightsForOneObject; i++) {
-		std::string str = "spotLights[";
-		str += std::to_string(i);
-		str += "]";
-		if (spotLights[i] != nullptr) {
-			shader->SetVec3(str + ".color", spotLights[i]->color.RGB());
-			shader->SetVec3(str + ".position", spotLights[i]->Transform()->Position);
-			shader->SetVec3(str + ".direction", spotLights[i]->direction);
-			shader->SetFloat(str + ".constant", spotLights[i]->constantAttenuationFactor);
-			shader->SetFloat(str + ".linear", spotLights[i]->linearAttenuationFactor);
-			shader->SetFloat(str + ".quadratic", spotLights[i]->quadraticAttenuationFactor);
-			shader->SetFloat(str + ".cutOffCosInner", Mathf::Cos(spotLights[i]->cutOffAngleInner));
-			shader->SetFloat(str + ".cutOffCosOuter", Mathf::Cos(spotLights[i]->cutOffAngleOuter));
-			shader->SetFloat(str + ".ambient", spotLights[i]->ambientIntensity);
-			shader->SetFloat(str + ".diffuse", spotLights[i]->diffuseIntensity);
-			shader->SetFloat(str + ".specular", spotLights[i]->specularIntensity);
-		} else {
-			break;
+	if (spotLights.size() != 0) {
+		for (int i = 0; i < Lighting::LightingSystem::MaxSpotLightsForOneObject; i++) {
+			std::string str = "spotLights[";
+			str += std::to_string(i);
+			str += "]";
+			if (spotLights[i] != nullptr) {
+				shader->SetVec3(str + ".color", spotLights[i]->color.RGB());
+				shader->SetVec3(str + ".position", spotLights[i]->Transform()->Position);
+				shader->SetVec3(str + ".direction", spotLights[i]->direction);
+				shader->SetFloat(str + ".constant", spotLights[i]->constantAttenuationFactor);
+				shader->SetFloat(str + ".linear", spotLights[i]->linearAttenuationFactor);
+				shader->SetFloat(str + ".quadratic", spotLights[i]->quadraticAttenuationFactor);
+				shader->SetFloat(str + ".cutOffCosInner", Mathf::Cos(spotLights[i]->cutOffAngleInner));
+				shader->SetFloat(str + ".cutOffCosOuter", Mathf::Cos(spotLights[i]->cutOffAngleOuter));
+				shader->SetFloat(str + ".ambient", spotLights[i]->ambientIntensity);
+				shader->SetFloat(str + ".diffuse", spotLights[i]->diffuseIntensity);
+				shader->SetFloat(str + ".specular", spotLights[i]->specularIntensity);
+			} else {
+				break;
+			}
 		}
 	}
 }
+
+void KritiaEngine::RenderManager::UpdateGPUInstancingCount(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material, int submeshIndex, Matrix4x4 model) {
+	std::tuple<Mesh, Material, int> key = std::tuple<Mesh, Material, int>(*mesh, *material, submeshIndex);
+	if (gpuInstancingCount.count(key) == 0) {
+		gpuInstancingCount[key] = 1;
+		gpuInstancingMatrices[key].push_back(model);
+	} else {
+		gpuInstancingCount[key]++;
+		gpuInstancingMatrices[key].push_back(model);
+	}
+}
+
+
+void KritiaEngine::RenderManager::UpdateGPUInstancingBuffer() {
+	for (std::map<std::tuple<Mesh, Material, int>, unsigned int>::iterator iter = gpuInstancingCount.begin(); iter != gpuInstancingCount.end(); iter++) {
+
+		std::tuple<Mesh, Material, int> key = iter->first;
+		Mesh mesh = std::get<0>(key);
+		Material material = std::get<1>(key);
+		int submeshIndex = std::get<2>(key);
+		unsigned int amount = iter->second;
+		if (gpuInstancingBufferIDs.count(key) == 0) {
+			//initialize the buffer
+			glGenBuffers(1, &gpuInstancingBufferIDs[key]);
+			glBindBuffer(GL_ARRAY_BUFFER, gpuInstancingBufferIDs[key]);
+			glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &gpuInstancingMatrices[key][0], GL_STATIC_DRAW);
+			unsigned int VAO = mesh.VAOs[submeshIndex];
+			glBindVertexArray(VAO);
+			// ∂•µ„ Ù–‘
+			GLsizei vec4Size = sizeof(glm::vec4);
+			glEnableVertexAttribArray(3);
+			glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
+			glEnableVertexAttribArray(4);
+			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(vec4Size));
+			glEnableVertexAttribArray(5);
+			glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+			glEnableVertexAttribArray(6);
+			glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+
+			glVertexAttribDivisor(3, 1);
+			glVertexAttribDivisor(4, 1);
+			glVertexAttribDivisor(5, 1);
+			glVertexAttribDivisor(6, 1);
+
+			glBindVertexArray(0);
+		}
+	}
+}
+
 
 float KritiaEngine::RenderManager::skyboxVertices[108] = {
 	// positions          
@@ -318,3 +411,6 @@ float KritiaEngine::RenderManager::skyboxVertices[108] = {
 	 1.0f, -1.0f,  1.0f
 };
 
+bool KritiaEngine::operator<(const std::tuple<Mesh, Material, int>& left, const std::tuple<Mesh, Material, int>& right) {
+	return std::get<0>(left).submeshVertices[0].size() < std::get<0>(right).submeshVertices[0].size();
+}

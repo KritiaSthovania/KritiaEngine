@@ -31,28 +31,35 @@ void KritiaEngine::Material::ApplyShaderOnRender(const Matrix4x4& model, const V
 }
 
 void Material::Initialize() {
-	shader->Use();
-	shader->UniformBlockBinding(shader->GetUniformBlockIndex("MatricesVP"), RenderManager::UniformBindingPoint::MatricesVP);
-	if (mainTexture != nullptr) {
-		if (renderMode == Transparent) {
-			mainTextureID = RenderManager::Load2DTexture(mainTexture, true);
+	if (!initialized) {
+		shader->Use();
+		shader->UniformBlockBinding(shader->GetUniformBlockIndex("MatricesVP"), RenderManager::UniformBindingPoint::MatricesVP);
+		if (mainTexture != nullptr) {
+			if (renderMode == Transparent) {
+				mainTextureID = RenderManager::Load2DTexture(mainTexture, true);
 
-		} else if (renderMode == Opaque) {
-			mainTextureID = RenderManager::Load2DTexture(mainTexture, false);
+			} else if (renderMode == Opaque) {
+				mainTextureID = RenderManager::Load2DTexture(mainTexture, false);
+			}
+			shader->SetInt("mainTexture", diffuseSamplerIndex);
 		}
-		shader->SetInt("mainTexture", diffuseSamplerIndex);
-	}
-	if (specularMap != nullptr) {
-		if (renderMode == Transparent) {
-			specularMapID = RenderManager::Load2DTexture(specularMap, true);
+		if (specularMap != nullptr) {
+			if (renderMode == Transparent) {
+				specularMapID = RenderManager::Load2DTexture(specularMap, true);
 
-		} else if (renderMode == Opaque) {
-			specularMapID = RenderManager::Load2DTexture(specularMap, false);
+			} else if (renderMode == Opaque) {
+				specularMapID = RenderManager::Load2DTexture(specularMap, false);
+			}
+			shader->SetInt("specularMap", specularSamplerIndex);
 		}
-		shader->SetInt("specularMap", specularSamplerIndex);
+		shader->SetFloat("shininess", shininess);
+		shader->SetVec3("albedo", albedo.RGB());
+		// Make sure the shader supports GPU instancing while using it.
+		if (GPUInstancingEnabled) {
+			shader->SetBool("instancing", GPUInstancingEnabled);
+		}
+		initialized = true;
 	}
-	shader->SetFloat("shininess", shininess);
-	shader->SetVec3("albedo", albedo.RGB());
 }
 
 
