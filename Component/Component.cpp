@@ -10,8 +10,9 @@ KritiaEngine::Component::Component(GameObject* gameObject)
 	this->gameObject = gameObject;
 	this->name = gameObject->name;
 }
-void Component::Destroy(){}
 
 std::shared_ptr<Transform> KritiaEngine::Component::Transform() {
 	return this->gameObject->Transform();
 }
+
+void KritiaEngine::Component::ComponentUpdate() {}

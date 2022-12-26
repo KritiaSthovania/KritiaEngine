@@ -2,12 +2,11 @@
 
 #include "pch.h"
 #include <typeinfo>
-#include "../Component/Component.h"
-#include "../Component/Camera.h"
 #include "Object.h"
 
 namespace KritiaEngine {
 	class Transform;
+	class Component;
 	class GameObject : public Object{
 	public:
 		GameObject();
@@ -27,7 +26,6 @@ namespace KritiaEngine {
 			components.push_back(component);
 			return component;
 		}
-		void Render(std::shared_ptr<Camera> camera);
 		void SetActive(bool isActive);
 		bool IsActive = true;
 	private:

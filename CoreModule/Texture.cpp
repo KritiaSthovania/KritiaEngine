@@ -1,11 +1,11 @@
 #include "Texture.h"
 
-KritiaEngine::Texture::Texture(std::string path)
+KritiaEngine::Texture::Texture(const std::string& path)
 {
 	this->path = path;
 }
 
-void KritiaEngine::Texture::LoadImage(std::string path)
+void KritiaEngine::Texture::LoadImage(const std::string& path)
 {
 	this->path = path;
 }

@@ -8,13 +8,13 @@
 using namespace KritiaEngine;
 
 namespace KritiaEngineEditor {
-	static class AssetDatabase {
+	class AssetDatabase {
 	public:
-		static void ImportModel(std::string path, std::shared_ptr<Mesh> mesh);
+		static void ImportModel(const std::string& path, const std::shared_ptr<Mesh>& mesh);
 	private:
-		static void ProcessNode(std::string directory, aiNode* node, const aiScene* scene, std::shared_ptr<Mesh> mesh);
-		static void ProcessMesh(std::string directory, aiMesh* mesh, const aiScene* scene, std::shared_ptr<Mesh> meshPtr);
-		static std::string loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
+		static void ProcessNode(const std::string& directory, aiNode* node, const aiScene* scene, const std::shared_ptr<Mesh>& mesh);
+		static void ProcessMesh(const std::string& directory, aiMesh* mesh, const aiScene* scene, const std::shared_ptr<Mesh>& meshPtr);
+		static std::string loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
 
 	};
 

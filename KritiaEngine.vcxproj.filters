@@ -96,10 +96,16 @@
     <ClCompile Include="Component\MeshFilter.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Editor\EditorSettings.cpp">
+    <ClCompile Include="Editor\EditorApplication.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\RenderManager.cpp">
+    <ClCompile Include="Rendering\RenderingProvider.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Manager\RendererManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Manager\BehaviourManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -108,9 +114,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Shader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\VertexData.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="includes\pch.h">
@@ -194,10 +197,16 @@
     <ClInclude Include="Component\MeshFilter.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Editor\EditorSettings.h">
+    <ClInclude Include="Editor\EditorApplication.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\RenderManager.h">
+    <ClInclude Include="Rendering\RenderingProvider.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Manager\RendererManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Manager\BehaviourManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

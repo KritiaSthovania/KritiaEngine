@@ -1,5 +1,5 @@
 #include "MeshFilter.h"
-#include "../Rendering/RenderManager.h"
+#include "../Rendering/RenderingProvider.h"
 
 KritiaEngine::MeshFilter::MeshFilter(GameObject* gameObject) {
 	this->gameObject = gameObject;
@@ -7,6 +7,6 @@ KritiaEngine::MeshFilter::MeshFilter(GameObject* gameObject) {
 
 void KritiaEngine::MeshFilter::SetupMesh() {
 	if (mesh != nullptr && !mesh->isSetup) {
-		RenderManager::SetupMesh(mesh);
+		RenderingProvider::SetupMesh(mesh);
 	}
 }

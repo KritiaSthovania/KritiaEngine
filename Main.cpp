@@ -1,9 +1,13 @@
 ﻿#include "Main.h"
 #include "CoreModule/Debug.h"
-#include "Rendering/RenderManager.h"
+#include "Rendering/RenderingProvider.h"
+#include "CoreModule/Input.h"
+#include "CoreModule/SceneManager.h"
+#include "CoreModule/Manager/RendererManager.h"
 
 using namespace KritiaEngine;
 using namespace KritiaEngine::SceneManagement;
+using namespace KritiaEngine::Manager;
 
 int main() 
 {
@@ -19,12 +23,10 @@ int main()
         Time::UpdateDeltaTime(glfwGetTime());
         //执行一些特殊的输入控制
         ProcessInput();
-
         //执行所有Update函数，处理逻辑
         Update();
         //渲染
         Render();
-
     }
 
     glfwDestroyWindow(window);
@@ -34,13 +36,16 @@ int main()
 
 //渲染循环
 void Render() {
-    RenderManager::ClearFramebuffer();
-    SceneManager::Render();
+    RenderingProvider::ClearFramebuffer();
+    RendererManager::Render();
     glfwSwapBuffers(window);
 }
 
 void Update() {
-    SceneManager::Update();
+    BehaviourManager::BehaviourUpdate();
+    if (editor) {
+        Camera::editorCamera->EditorCameraUpdate();
+    }
 }
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
@@ -91,5 +96,5 @@ void ProcessInput() {
 void InitializeCoreModules() {
     Input::Initialize(window);
     SceneManager::Initialize(editor);
-    RenderManager::Initialize();
+    RenderingProvider::Initialize();
 }

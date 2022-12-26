@@ -1,7 +1,7 @@
 #pragma once
 #include <pch.h>
 namespace KritiaEngine {
-	static class Time
+	class Time
 	{
 	public:
 		/// <summary>

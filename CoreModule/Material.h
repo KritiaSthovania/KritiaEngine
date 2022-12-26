@@ -8,7 +8,7 @@
 namespace KritiaEngine {
 	class Material : public Object
 	{
-		friend class RenderManager;
+		friend class RenderingProvider;
 		friend class MeshRenderer;
 	public:
 		enum RenderMode {
@@ -17,7 +17,7 @@ namespace KritiaEngine {
 		};
 		Material();
 		Material(const char* name);
-		Material(const char* name, std::shared_ptr<Shader> shader);
+		Material(const char* name, const std::shared_ptr<Shader>& shader);
 		Color albedo;
 		/// <summary>
 		/// Specular shininess

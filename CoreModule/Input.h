@@ -3,7 +3,7 @@
 #include "Settings.h"
 #include "Time.h"
 namespace KritiaEngine{
-	static class Input
+	class Input
 	{
 	public:
 		static void Initialize(GLFWwindow* window);

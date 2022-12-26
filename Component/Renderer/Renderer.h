@@ -5,11 +5,12 @@
 #include <stb_image.h>
 #include "../Component.h"
 #include "../Camera.h"
-
+#include "../../CoreModule/Manager/RendererManager.h"
 namespace KritiaEngine{
 	class Renderer : public Component {
-	public:
-		virtual void Render(std::shared_ptr<Camera> camera) = 0;
+		friend class KritiaEngine::Manager::RendererManager;
+	protected:
+		virtual void Render(const std::shared_ptr<Camera>& camera) = 0;
 	};
 
 }

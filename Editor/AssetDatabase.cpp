@@ -5,7 +5,7 @@
 using namespace KritiaEngineEditor;
 using namespace KritiaEngine;
 
-void KritiaEngineEditor::AssetDatabase::ImportModel(std::string path, std::shared_ptr<Mesh> mesh) {
+void KritiaEngineEditor::AssetDatabase::ImportModel(const std::string& path, const std::shared_ptr<Mesh>& mesh) {
 	Assimp::Importer importer;
 	// Change primitive to triangles, flip UV coordinates, generate normals.
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
@@ -18,7 +18,7 @@ void KritiaEngineEditor::AssetDatabase::ImportModel(std::string path, std::share
     ProcessNode(directory, scene->mRootNode, scene, mesh);
 }
 
-void KritiaEngineEditor::AssetDatabase::ProcessNode(std::string directory, aiNode* node, const aiScene* scene, std::shared_ptr<Mesh> mesh) {
+void KritiaEngineEditor::AssetDatabase::ProcessNode(const std::string& directory, aiNode* node, const aiScene* scene, const std::shared_ptr<Mesh>& mesh) {
     // 处理节点所有的网格（如果有的话）
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
         aiMesh* aiMesh = scene->mMeshes[node->mMeshes[i]];
@@ -30,7 +30,7 @@ void KritiaEngineEditor::AssetDatabase::ProcessNode(std::string directory, aiNod
     }
 }
 
-void KritiaEngineEditor::AssetDatabase::ProcessMesh(std::string directory, aiMesh* mesh, const aiScene* scene, std::shared_ptr<Mesh> meshPtr) {
+void KritiaEngineEditor::AssetDatabase::ProcessMesh(const std::string& directory, aiMesh* mesh, const aiScene* scene, const std::shared_ptr<Mesh>& meshPtr) {
     std::vector<KritiaEngine::Mesh::Vertex> vertices;
     std::vector<unsigned int> indices;
     std::string diffuseMapPath;
@@ -82,7 +82,7 @@ void KritiaEngineEditor::AssetDatabase::ProcessMesh(std::string directory, aiMes
 
 }
 
-std::string KritiaEngineEditor::AssetDatabase::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName) {
+std::string KritiaEngineEditor::AssetDatabase::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName) {
     std::string texturePath;
     for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
         aiString str;

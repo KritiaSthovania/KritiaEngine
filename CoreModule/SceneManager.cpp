@@ -27,26 +27,10 @@ std::shared_ptr<Scene> KritiaEngine::SceneManagement::SceneManager::CreateScene(
 	return std::shared_ptr<Scene>(new Scene(name));
 }
 
-void KritiaEngine::SceneManagement::SceneManager::LoadScene(std::shared_ptr<Scene> scene)
+void KritiaEngine::SceneManagement::SceneManager::LoadScene(const std::shared_ptr<Scene>& scene)
 {
 	// 目前不考虑读取文件
 	scene->Initialize();
-}
-
-void KritiaEngine::SceneManagement::SceneManager::Render() {
-	if (inEditor) {
-		activeScene->Render(Camera::editorCamera);
-	} else {
-		activeScene->Render(Camera::current);
-	}
-}
-
-void KritiaEngine::SceneManagement::SceneManager::Update()
-{
-	if (inEditor) {
-		Camera::editorCamera->EditorCameraUpdate();
-	}
-	activeScene->Update();
 }
 
 std::shared_ptr<Scene> KritiaEngine::SceneManagement::SceneManager::GetActiveScene() {

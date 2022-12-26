@@ -2,18 +2,15 @@
 #ifndef COMPONENT
 #define COMPONENT
 #include "pch.h"
-#include "../CoreModule/Object.h"
-
+#include "../CoreModule/Manager/BehaviourManager.h"
+#include "../CoreModule/GameObject.h"
 namespace KritiaEngine {
 	class Transform;
-	class GameObject;
 	class Component : public Object {
+		friend class KritiaEngine::Manager::BehaviourManager;
 	public:
 		Component();
 		Component(GameObject* gameObject);
-		~Component() {
-		}
-		virtual void Destroy();
 		/// <summary>
 		/// Get the transform of this component's gameObject
 		/// </summary>
@@ -22,6 +19,10 @@ namespace KritiaEngine {
 
 		// Ù–‘
 		GameObject* gameObject;
+	private:
+		// If this component is attached to BehaviourManager, this update function will always be called.
+		// Must manually add this component to BehaviourManager
+		virtual void ComponentUpdate();
 	};
 }
 

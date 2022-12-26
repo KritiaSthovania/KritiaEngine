@@ -4,7 +4,7 @@
 #include "../Component/Light.h"
 namespace KritiaEngine::Lighting {
 
-	static class LightingSystem {
+	class LightingSystem {
 	public:
 		static const int MaxSpotLightsForOneObject;
 		static const int MaxPointLightsForOneObject;

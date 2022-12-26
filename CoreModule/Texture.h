@@ -5,8 +5,8 @@ namespace KritiaEngine {
 	{
 	public:
 		Texture() = default;
-		Texture(std::string path);
-		void LoadImage(std::string path);
+		Texture(const std::string& path);
+		void LoadImage(const std::string& path);
 		unsigned int id;
 		std::string type;
 		std::string path;

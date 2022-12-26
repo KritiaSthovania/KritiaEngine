@@ -136,6 +136,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CoreModule\Manager\BehaviourManager.cpp" />
     <ClCompile Include="Editor\AssetDatabase.cpp" />
     <ClCompile Include="Component\Behaviour.cpp" />
     <ClCompile Include="Component\Camera.cpp" />
@@ -162,11 +163,13 @@
     <ClCompile Include="CoreModule\Utilities.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Component\MeshFilter.cpp" />
+    <ClCompile Include="CoreModule\Manager\RendererManager.cpp" />
     <ClCompile Include="Rendering\Shader.cpp" />
-    <ClCompile Include="Editor\EditorSettings.cpp" />
-    <ClCompile Include="Rendering\RenderManager.cpp" />
+    <ClCompile Include="Editor\EditorApplication.cpp" />
+    <ClCompile Include="Rendering\RenderingProvider.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CoreModule\Manager\BehaviourManager.h" />
     <ClInclude Include="Editor\AssetDatabase.h" />
     <ClInclude Include="Component\Behaviour.h" />
     <ClInclude Include="Component\Camera.h" />
@@ -195,10 +198,10 @@
     <ClInclude Include="includes\stb_image.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="Component\MeshFilter.h" />
+    <ClInclude Include="CoreModule\Manager\RendererManager.h" />
     <ClInclude Include="Rendering\Shader.h" />
-    <ClInclude Include="Rendering\VertexData.h" />
-    <ClInclude Include="Editor\EditorSettings.h" />
-    <ClInclude Include="Rendering\RenderManager.h" />
+    <ClInclude Include="Editor\EditorApplication.h" />
+    <ClInclude Include="Rendering\RenderingProvider.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

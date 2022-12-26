@@ -1,7 +1,7 @@
 #pragma once
 #include <pch.h>
 namespace KritiaEngineEditor {
-	static class EditorSettings {
+	class EditorApplication {
 		static const std::string AssetFolderRootPath;
 	};
 }

@@ -1,7 +1,7 @@
 #include "Mesh.h"
 
 
-KritiaEngine::Mesh::Mesh(std::vector<std::vector<Vertex>> vertices, std::vector<std::vector<unsigned int>> indices, std::vector<std::shared_ptr<Material>> materials) {
+KritiaEngine::Mesh::Mesh(const std::vector<std::vector<Vertex>>& vertices, const std::vector<std::vector<unsigned int>>& indices, const std::vector<std::shared_ptr<Material>>& materials) {
     this->submeshVertices = vertices;
     this->submeshIndices = indices;
     submeshMaterials = materials;
@@ -28,14 +28,13 @@ KritiaEngine::Mesh KritiaEngine::Mesh::Cube() {
     submeshVertices.push_back(vertices);
     std::vector<std::vector<unsigned int>> submeshIndices = std::vector<std::vector<unsigned int>>();
     submeshIndices.push_back(indices);
-    std::shared_ptr<Material> material2 = std::shared_ptr<Material>(new Material("New Material", std::shared_ptr<Shader>(new KritiaEngine::Shader("./StandardShader/BlingPhongShader.vs", "./StandardShader/BlingPhongShader.fs"))));
-    material2->albedo = Color(1.0f, 1.f, 1.f, 1);
-    material2->shininess = 32;
-    material2->renderMode = Material::Opaque;
-    material2->mainTexture = std::shared_ptr<Texture>(new Texture("./Assets/Textures/container_diffuse.png"));
-    material2->GPUInstancingEnabled = true;
+    std::shared_ptr<Material> material = std::shared_ptr<Material>(new Material("New Material", std::shared_ptr<Shader>(new KritiaEngine::Shader("./StandardShader/BlingPhongShader.vs", "./StandardShader/BlingPhongShader.fs"))));
+    material->albedo = Color(1.0f, 1.f, 1.f, 1);
+    material->shininess = 32;
+    material->renderMode = Material::Opaque;
+    material->mainTexture = std::shared_ptr<Texture>(new Texture("./Assets/Textures/container_diffuse.png"));
     std::vector<std::shared_ptr<Material>> materials;
-    materials.push_back(material2);
+    materials.push_back(material);
     return Mesh(submeshVertices, submeshIndices, materials);
 }
 

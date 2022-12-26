@@ -7,7 +7,7 @@
 namespace KritiaEngine {
 	class Mesh : public Object{
 		friend class MeshFilter;
-		friend class RenderManager;
+		friend class RenderingProvider;
 	public:
 		struct Vertex {
 			Vector3 Position;
@@ -15,7 +15,7 @@ namespace KritiaEngine {
 			Vector2 TexCoord;
 		};
 		Mesh() = default;
-		Mesh(std::vector<std::vector<Vertex>> vertices, std::vector<std::vector<unsigned int>> indices, std::vector<std::shared_ptr<Material>> materials);
+		Mesh(const std::vector<std::vector<Vertex>>& vertices, const std::vector<std::vector<unsigned int>>& indices, const std::vector<std::shared_ptr<Material>>& materials);
 		~Mesh() {
 		}
 		static Mesh Cube();

@@ -2,7 +2,7 @@
 #include <string>
 #include <iostream>
 namespace KritiaEngine {
-	static class Debug
+	class Debug
 	{
 	public:
 		template <typename T> static void Log(const T &message) {

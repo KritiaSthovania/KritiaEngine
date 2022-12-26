@@ -1,7 +1,7 @@
 #pragma once
 
 namespace KritiaEngine{
-	static class Settings {
+	class Settings {
 	public:
 		static int ScreenWidth;
 		static int ScreenHeight;

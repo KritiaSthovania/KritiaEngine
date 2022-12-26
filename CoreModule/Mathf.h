@@ -2,7 +2,7 @@
 #include "MathStructs.h"
 namespace KritiaEngine {
 	// common math functions
-	static class Mathf
+	class Mathf
 	{
 	public:
 		const static float PI;

@@ -42,7 +42,6 @@ namespace KritiaEngine {
 		Vector3 Forward;
 		Vector3 Target;
 		Vector3 WorldUp;
-
 	};
 
 

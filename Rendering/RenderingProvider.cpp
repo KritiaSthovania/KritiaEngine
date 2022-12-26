@@ -1,23 +1,29 @@
-#include "RenderManager.h"
-#include "../CoreModule/Settings.h"
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
+#include "RenderingProvider.h"
+#include "../CoreModule/Settings.h"
 #include "../CoreModule/Lighting.h"
 #include "../CoreModule/Mathf.h"
 #include "../Component/Transform.h"
 
 using namespace KritiaEngine;
 
-bool KritiaEngine::RenderManager::depthTestEnabled = true;
-bool KritiaEngine::RenderManager::blendEnabled = true;
-bool KritiaEngine::RenderManager::backFaceCullingEnabled = true;
-unsigned int KritiaEngine::RenderManager::skyboxVAO = 1;
-unsigned int KritiaEngine::RenderManager::skyboxVBO = 1;
-unsigned int KritiaEngine::RenderManager::uniformBufferIDMatricesVP = 0;
-std::map<std::tuple<Mesh, Material, int>, unsigned int> RenderManager::gpuInstancingCount = std::map<std::tuple<Mesh, Material, int>, unsigned int>();
-std::map<std::tuple<Mesh, Material, int>, unsigned int> RenderManager::gpuInstancingBufferIDs = std::map<std::tuple<Mesh, Material, int>, unsigned int>();
-std::map<std::tuple<Mesh, Material, int>, std::vector<Matrix4x4>> RenderManager::gpuInstancingMatrices = std::map<std::tuple<Mesh, Material, int>, std::vector<Matrix4x4>>();
+bool KritiaEngine::RenderingProvider::depthTestEnabled = true;
+bool KritiaEngine::RenderingProvider::blendEnabled = true;
+bool KritiaEngine::RenderingProvider::backFaceCullingEnabled = true;
+unsigned int KritiaEngine::RenderingProvider::skyboxVAO = 1;
+unsigned int KritiaEngine::RenderingProvider::skyboxVBO = 1;
+unsigned int KritiaEngine::RenderingProvider::uniformBufferIDMatricesVP = 0;
+unsigned int RenderingProvider::skyboxTextureID = 0;
+std::shared_ptr<Shader> RenderingProvider::skyboxShader = nullptr;
+std::vector<Texture> RenderingProvider::skyboxTextures = std::vector<Texture>();
+std::map<std::tuple<Mesh, Material, int>, unsigned int> RenderingProvider::gpuInstancingCount = std::map<std::tuple<Mesh, Material, int>, unsigned int>();
+std::map<std::tuple<Mesh, Material, int>, unsigned int> RenderingProvider::gpuInstancingBufferIDs = std::map<std::tuple<Mesh, Material, int>, unsigned int>();
+std::map<std::tuple<Mesh, Material, int>, std::vector<Matrix4x4>> RenderingProvider::gpuInstancingMatrices = std::map<std::tuple<Mesh, Material, int>, std::vector<Matrix4x4>>();
 
-void KritiaEngine::RenderManager::Initialize() {
+
+void KritiaEngine::RenderingProvider::Initialize() {
 	if (Settings::UseOpenGL) {
 		OpenGLInitialize();
 		CreateUniformBuffer(&uniformBufferIDMatricesVP, MatricesVP);
@@ -25,26 +31,26 @@ void KritiaEngine::RenderManager::Initialize() {
 	CreateSkybox();
 }
 
-void KritiaEngine::RenderManager::ClearFramebuffer() {
+void KritiaEngine::RenderingProvider::ClearFramebuffer() {
 	if (Settings::UseOpenGL) {
 		OpenGLClearFramebuffer();
 	}
 }
 
-void KritiaEngine::RenderManager::LoadCubeMap(std::vector<std::shared_ptr<Texture>> skyboxTextures, unsigned int* id) {
+void KritiaEngine::RenderingProvider::LoadCubeMap(const std::vector<Texture>& skyboxTextures, unsigned int* id) {
 	int width, height, nrChannels;
 	if (Settings::UseOpenGL) {
 		glGenTextures(1, id);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, *id);
 		for (unsigned int i = 0; i < skyboxTextures.size(); i++) {
-			unsigned char* data = stbi_load(skyboxTextures[i]->path.c_str(), &width, &height, &nrChannels, 0);
+			unsigned char* data = stbi_load(skyboxTextures[i].path.c_str(), &width, &height, &nrChannels, 0);
 			if (data) {
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
 					0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
 				);
 				stbi_image_free(data);
 			} else {
-				std::cout << "Cubemap texture failed to load at path: " << skyboxTextures[i]->path.c_str() << std::endl;
+				std::cout << "Cubemap texture failed to load at path: " << skyboxTextures[i].path.c_str() << std::endl;
 				stbi_image_free(data);
 			}
 		}
@@ -56,17 +62,25 @@ void KritiaEngine::RenderManager::LoadCubeMap(std::vector<std::shared_ptr<Textur
 	}
 }
 
-void KritiaEngine::RenderManager::CreateSkybox() {
+void KritiaEngine::RenderingProvider::CreateSkybox() {
 	glGenVertexArrays(1, &skyboxVAO);
 	glGenBuffers(1, &skyboxVBO);
 	glBindVertexArray(skyboxVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &RenderManager::skyboxVertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &RenderingProvider::skyboxVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	skyboxShader = std::shared_ptr<Shader>(new Shader("./StandardShader/SkyboxShader.vs", "./StandardShader/SkyboxShader.fs"));
+	skyboxTextures.push_back(Texture("./Assets/Textures/skybox/right.jpg"));
+	skyboxTextures.push_back(Texture("./Assets/Textures/skybox/left.jpg"));
+	skyboxTextures.push_back(Texture("./Assets/Textures/skybox/top.jpg"));
+	skyboxTextures.push_back(Texture("./Assets/Textures/skybox/bottom.jpg"));
+	skyboxTextures.push_back(Texture("./Assets/Textures/skybox/front.jpg"));
+	skyboxTextures.push_back(Texture("./Assets/Textures/skybox/back.jpg"));
+	RenderingProvider::LoadCubeMap(skyboxTextures, &skyboxTextureID);
 }
 
-unsigned int KritiaEngine::RenderManager::Load2DTexture(std::shared_ptr<Texture> texture, bool alphaChannel) {
+unsigned int KritiaEngine::RenderingProvider::Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel) {
 	unsigned int id;
 	int width, height, nrChannels;
 	glGenTextures(1, &id);
@@ -103,7 +117,7 @@ unsigned int KritiaEngine::RenderManager::Load2DTexture(std::shared_ptr<Texture>
 	return id;
 }
 
-void KritiaEngine::RenderManager::RenderSkybox(unsigned int skyboxTexutureID, Matrix4x4 projection, Matrix4x4 view, std::shared_ptr<Shader> skyboxShader) {
+void KritiaEngine::RenderingProvider::RenderSkybox(Matrix4x4 projection, Matrix4x4 view) {
 	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
 	// drop translation part
 	view = Matrix4x4((Matrix3x3)view);
@@ -113,14 +127,13 @@ void KritiaEngine::RenderManager::RenderSkybox(unsigned int skyboxTexutureID, Ma
 	skyboxShader->SetMat4("projection", projection);
 	glBindVertexArray(skyboxVAO);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexutureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTextureID);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 	glDepthFunc(GL_LESS); // set depth function back to default
 }
 
-void KritiaEngine::RenderManager::ApplyMaterialShaderOnRender(const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos,
-	                                                          std::shared_ptr<Shader> shader, unsigned int mainTextureID, unsigned int specularMapID) {
+void KritiaEngine::RenderingProvider::ApplyMaterialShaderOnRender(const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos, const std::shared_ptr<Shader>& shader, unsigned int mainTextureID, unsigned int specularMapID) {
 	if (Settings::UseOpenGL) {
 		shader->Use();
 		// main light source should always be a directional light, and there should always be one such light source.
@@ -144,7 +157,7 @@ void KritiaEngine::RenderManager::ApplyMaterialShaderOnRender(const Matrix4x4& m
 	}
 }
 
-void KritiaEngine::RenderManager::CreateUniformBuffer(unsigned int* id, UniformBindingPoint bindingPoint) {
+void KritiaEngine::RenderingProvider::CreateUniformBuffer(unsigned int* id, UniformBindingPoint bindingPoint) {
 	if (bindingPoint == MatricesVP) {
 		glGenBuffers(1, id);
 		glBindBuffer(GL_UNIFORM_BUFFER, *id);
@@ -154,7 +167,7 @@ void KritiaEngine::RenderManager::CreateUniformBuffer(unsigned int* id, UniformB
 	}
 }
 
-void KritiaEngine::RenderManager::SetupMesh(std::shared_ptr<Mesh> mesh) {
+void KritiaEngine::RenderingProvider::SetupMesh(const std::shared_ptr<Mesh>& mesh) {
 	if (Settings::UseOpenGL) {
 		mesh->isSetup = true;
 		mesh->submeshSize = mesh->submeshIndices.size();
@@ -189,7 +202,7 @@ void KritiaEngine::RenderManager::SetupMesh(std::shared_ptr<Mesh> mesh) {
 	}
 }
 
-void KritiaEngine::RenderManager::RenderSubmesh(std::shared_ptr<MeshFilter> meshFilter, std::shared_ptr<Material> material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos) {
+void KritiaEngine::RenderingProvider::RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos) {
 	material->ApplyShaderOnRender(model, viewPos, pos);
 	if (meshFilter->mesh != nullptr) {
 		if (material->GPUInstancingEnabled) {
@@ -202,14 +215,14 @@ void KritiaEngine::RenderManager::RenderSubmesh(std::shared_ptr<MeshFilter> mesh
 	}
 }
 
-void KritiaEngine::RenderManager::UpdateUniformBufferMatricesVP(Matrix4x4 view, Matrix4x4 projection) {
+void KritiaEngine::RenderingProvider::UpdateUniformBufferMatricesVP(Matrix4x4 view, Matrix4x4 projection) {
 	glBindBuffer(GL_UNIFORM_BUFFER, uniformBufferIDMatricesVP);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr((glm::mat4)view));
 	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr((glm::mat4)projection));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void KritiaEngine::RenderManager::RenderGPUInstances(bool transparent) {
+void KritiaEngine::RenderingProvider::RenderGPUInstances(bool transparent) {
 	UpdateGPUInstancingBuffer();
 	for (std::map<std::tuple<Mesh, Material, int>, unsigned int>::iterator iter = gpuInstancingCount.begin(); iter != gpuInstancingCount.end(); iter++) {
 		std::tuple<Mesh, Material, int> key = iter->first;
@@ -234,7 +247,7 @@ void KritiaEngine::RenderManager::RenderGPUInstances(bool transparent) {
 	}
 }
 
-void KritiaEngine::RenderManager::OpenGLInitialize() {
+void KritiaEngine::RenderingProvider::OpenGLInitialize() {
 	if (depthTestEnabled) {
 		glEnable(GL_DEPTH_TEST);
 	}
@@ -252,13 +265,13 @@ void KritiaEngine::RenderManager::OpenGLInitialize() {
 	glViewport(0, 0, Settings::ScreenWidth, Settings::ScreenHeight);
 }
 
-void KritiaEngine::RenderManager::OpenGLClearFramebuffer() {
+void KritiaEngine::RenderingProvider::OpenGLClearFramebuffer() {
 	//Çå³ýÑÕÉ«
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void KritiaEngine::RenderManager::SetMainLightProperties(std::shared_ptr<Shader> shader) {
+void KritiaEngine::RenderingProvider::SetMainLightProperties(const std::shared_ptr<Shader>& shader) {
 	// main light source should always be a directional light, and there should always be one such light source.
 	shader->SetVec3("mainLightDirection", Lighting::LightingSystem::MainLightSource->direction);
 	shader->SetFloat("ambientIntensity", Lighting::LightingSystem::MainLightSource->ambientIntensity);
@@ -268,7 +281,7 @@ void KritiaEngine::RenderManager::SetMainLightProperties(std::shared_ptr<Shader>
 
 }
 
-void KritiaEngine::RenderManager::SetPointLightProperties(const Vector3& pos, std::shared_ptr<Shader> shader) {
+void KritiaEngine::RenderingProvider::SetPointLightProperties(const Vector3& pos, const std::shared_ptr<Shader>& shader) {
 	std::vector<std::shared_ptr<Light>> pointLights = Lighting::LightingSystem::GetPointLightAroundPos(pos);
 	if (pointLights.size() != 0) {
 		for (int i = 0; i < Lighting::LightingSystem::MaxPointLightsForOneObject; i++) {
@@ -291,7 +304,7 @@ void KritiaEngine::RenderManager::SetPointLightProperties(const Vector3& pos, st
 	}
 }
 
-void KritiaEngine::RenderManager::SetSpotLightProperties(const Vector3& pos, std::shared_ptr<Shader> shader) {
+void KritiaEngine::RenderingProvider::SetSpotLightProperties(const Vector3& pos, const std::shared_ptr<Shader>& shader) {
 	std::vector<std::shared_ptr<Light>> spotLights = Lighting::LightingSystem::GetSpotLightAroundPos(pos);
 	if (spotLights.size() != 0) {
 		for (int i = 0; i < Lighting::LightingSystem::MaxSpotLightsForOneObject; i++) {
@@ -317,7 +330,7 @@ void KritiaEngine::RenderManager::SetSpotLightProperties(const Vector3& pos, std
 	}
 }
 
-void KritiaEngine::RenderManager::UpdateGPUInstancingCount(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material, int submeshIndex, Matrix4x4 model) {
+void KritiaEngine::RenderingProvider::UpdateGPUInstancingCount(const std::shared_ptr<Mesh>& mesh, const std::shared_ptr<Material>& material, int submeshIndex, Matrix4x4 model) {
 	std::tuple<Mesh, Material, int> key = std::tuple<Mesh, Material, int>(*mesh, *material, submeshIndex);
 	if (gpuInstancingCount.count(key) == 0) {
 		gpuInstancingCount[key] = 1;
@@ -329,7 +342,7 @@ void KritiaEngine::RenderManager::UpdateGPUInstancingCount(std::shared_ptr<Mesh>
 }
 
 
-void KritiaEngine::RenderManager::UpdateGPUInstancingBuffer() {
+void KritiaEngine::RenderingProvider::UpdateGPUInstancingBuffer() {
 	for (std::map<std::tuple<Mesh, Material, int>, unsigned int>::iterator iter = gpuInstancingCount.begin(); iter != gpuInstancingCount.end(); iter++) {
 
 		std::tuple<Mesh, Material, int> key = iter->first;
@@ -366,7 +379,7 @@ void KritiaEngine::RenderManager::UpdateGPUInstancingBuffer() {
 }
 
 
-float KritiaEngine::RenderManager::skyboxVertices[108] = {
+float KritiaEngine::RenderingProvider::skyboxVertices[108] = {
 	// positions          
 	-1.0f,  1.0f, -1.0f,
 	-1.0f, -1.0f, -1.0f,
