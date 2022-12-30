@@ -56,7 +56,7 @@ void Scene::InitializeGameObjects() {
     //std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(new Mesh());
     //AssetDatabase::ImportModel("./Assets/Models/rock/rock.obj", mesh);
     ////mesh->submeshMaterials[0]->GPUInstancingEnabled = true;
-    //for (int i = 0; i < 10000; i++) {
+    //for (int i = 0; i < 5000; i++) {
     //    std::shared_ptr<GameObject> object = std::shared_ptr<GameObject>(new GameObject());
     //    std::shared_ptr<MeshFilter> meshFilter = object->AddComponent<MeshFilter>();
     //    meshFilter->mesh = mesh;
@@ -83,8 +83,6 @@ void Scene::InitializeGameObjects() {
     std::shared_ptr<MeshRenderer> renderer = object->AddComponent<MeshRenderer>();
     object->Transform()->Scale = Vector3(0.5, 0.5, 0.5);
     object->Transform()->Position = Vector3(0, 0, 0);
-    //material->specularMap = std::shared_ptr<Texture>(new Texture("./Assets/Textures/container_specular.png"));
-    //renderer->materials.push_back(material);
     rootGameObjects.push_back(object);
 
     std::shared_ptr<GameObject> object2 = std::shared_ptr<GameObject>(new GameObject());

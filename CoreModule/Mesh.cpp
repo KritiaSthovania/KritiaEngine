@@ -28,7 +28,7 @@ KritiaEngine::Mesh KritiaEngine::Mesh::Cube() {
     submeshVertices.push_back(vertices);
     std::vector<std::vector<unsigned int>> submeshIndices = std::vector<std::vector<unsigned int>>();
     submeshIndices.push_back(indices);
-    std::shared_ptr<Material> material = std::shared_ptr<Material>(new Material("New Material", std::shared_ptr<Shader>(new KritiaEngine::Shader("./StandardShader/BlingPhongShader.vs", "./StandardShader/BlingPhongShader.fs"))));
+    std::shared_ptr<Material> material = std::shared_ptr<Material>(new Material("New Material", std::shared_ptr<Shader>(new KritiaEngine::Shader("./StandardShader/BlinnPhongShader.vs", "./StandardShader/BlinnPhongShader.fs"))));
     material->albedo = Color(1.0f, 1.f, 1.f, 1);
     material->shininess = 32;
     material->renderMode = Material::Opaque;

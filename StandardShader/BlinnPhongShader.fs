@@ -67,8 +67,8 @@ void main()
     float diffuseFactor = max(dot(norm, lightDir), 0.0);
     vec3 diffuseComp = diffuseFactor * diffuseIntensity * mainLightColor * albedo * vec3(texture(mainTexture, TexCoord));
     vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 reflectDir = reflect(-lightDir, norm);
-    float specularFactor = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float specularFactor = pow(max(dot(norm, halfwayDir), 0.0), shininess);
     vec3 specularComp = specularFactor * specularIntensity * mainLightColor * vec3(texture(specularMap, TexCoord)); 
     vec4 finalColor = vec4((ambientComp + diffuseComp + specularComp), 1.0);  
     for(int i = 0; i<NR_POINT_LIGHTS; i++){
@@ -87,8 +87,8 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, v
     if(light.color != vec3(0,0,0)){
         vec3 lightDir = normalize(light.position - fragPos);
         float diff = max(dot(normal, lightDir), 0.0);
-        vec3 reflectDir = reflect(-lightDir, normal);
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+        vec3 halfwayDir = normalize(lightDir + viewDir);
+        float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
         float distance    = length(light.position - fragPos);
         float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
         vec3 ambient  = light.ambient * light.color * vec3(texture(mainTexture, TexCoord)) * albedo;
@@ -114,9 +114,8 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec
         float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));   
 
         float diff = max(dot(normal, lightDir), 0.0);
-        vec3 reflectDir = reflect(-lightDir, normal);
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-
+        vec3 halfwayDir = normalize(lightDir + viewDir);
+        float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
       
         vec3 ambient  = light.ambient * light.color * vec3(texture(mainTexture, TexCoord)) * albedo;
         vec3 diffuse  = light.diffuse * light.color * diff * vec3(texture(mainTexture, TexCoord)) * albedo;
