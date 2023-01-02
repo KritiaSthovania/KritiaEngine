@@ -93,3 +93,6 @@ std::vector<float> KritiaEngine::Mesh::GetDefaultCubeVertices() {
     return result;
 }
 
+bool KritiaEngine::operator<(const std::tuple<Mesh, Material, int>& left, const std::tuple<Mesh, Material, int>& right) {
+    return std::get<0>(left).submeshVertices[0].size() < std::get<0>(right).submeshVertices[0].size();
+}

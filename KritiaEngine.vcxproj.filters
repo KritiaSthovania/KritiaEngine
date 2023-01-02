@@ -108,6 +108,9 @@
     <ClCompile Include="CoreModule\Manager\BehaviourManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Rendering\OpenGLRendering.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h">
@@ -207,6 +210,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CoreModule\Manager\BehaviourManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\OpenGLRendering.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

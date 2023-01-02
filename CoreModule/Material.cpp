@@ -6,17 +6,18 @@
 #include "../Rendering/RenderingProvider.h"
 
 using namespace KritiaEngine;
+using namespace KritiaEngine::Rendering;
 
 KritiaEngine::Material::Material()
 {
 	name = "New Material";
-	shader = std::shared_ptr<Shader>(new KritiaEngine::Shader("./StandardShader/BlingPhongShader.vs", "./StandardShader/BlingPhongShader.fs"));
+	shader = std::shared_ptr<Shader>(new KritiaEngine::Shader("./StandardShader/BlinnPhongShader.vs", "./StandardShader/BlinnPhongShader.fs"));
 }
 
 KritiaEngine::Material::Material(const char* name)
 {
 	this->name = name;
-	shader = std::shared_ptr<Shader>(new KritiaEngine::Shader("./StandardShader/BlingPhongShader.vs", "./StandardShader/BlingPhongShader.fs"));
+	shader = std::shared_ptr<Shader>(new KritiaEngine::Shader("./StandardShader/BlinnPhongShader.vs", "./StandardShader/BlinnPhongShader.fs"));
 }
 
 KritiaEngine::Material::Material(const char* name, const std::shared_ptr<Shader>& shader)
@@ -25,15 +26,10 @@ KritiaEngine::Material::Material(const char* name, const std::shared_ptr<Shader>
 	this->shader = shader;
 }
 
-void KritiaEngine::Material::ApplyShaderOnRender(const Matrix4x4& model, const Vector3 &viewPos, const Vector3 &pos)
-{
-	RenderingProvider::ApplyMaterialShaderOnRender(model, viewPos, pos, shader, mainTextureID, specularMapID);
-}
-
 void Material::Initialize() {
 	if (!initialized) {
 		shader->Use();
-		shader->UniformBlockBinding(shader->GetUniformBlockIndex("MatricesVP"), RenderingProvider::UniformBindingPoint::MatricesVP);
+		shader->UniformBlockBinding(shader->GetUniformBlockIndex("MatricesVP"), static_cast<unsigned int>(RenderingProvider::UniformBindingPoint::MatricesVP));
 		if (mainTexture != nullptr) {
 			if (renderMode == Transparent) {
 				mainTextureID = RenderingProvider::Load2DTexture(mainTexture, true);

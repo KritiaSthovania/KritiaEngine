@@ -8,6 +8,7 @@
 using namespace KritiaEngine;
 using namespace KritiaEngine::SceneManagement;
 using namespace KritiaEngine::Manager;
+using namespace KritiaEngine::Rendering;
 
 int main() 
 {
@@ -59,7 +60,7 @@ bool InitializeWindow()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    if (Settings::EnableMSAA) {
+    if (RenderingProvider::msaaEnabled) {
         glfwWindowHint(GLFW_SAMPLES, 4);
     }
 

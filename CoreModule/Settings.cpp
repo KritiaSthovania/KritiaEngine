@@ -7,4 +7,3 @@ float Settings::NearPlaneDistant = 0.1f;
 float Settings::FarPlaneDistant = 100.f;
 bool Settings::UseOpenGL = true;
 bool Settings::UseGLM = true;
-bool Settings::EnableMSAA = true;

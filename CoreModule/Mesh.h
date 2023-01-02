@@ -7,7 +7,8 @@
 namespace KritiaEngine {
 	class Mesh : public Object{
 		friend class MeshFilter;
-		friend class RenderingProvider;
+		friend class KritiaEngine::Rendering::RenderingProvider;
+		friend class KritiaEngine::Rendering::OpenGLRendering;
 	public:
 		struct Vertex {
 			Vector3 Position;
@@ -23,6 +24,7 @@ namespace KritiaEngine {
 		std::vector<std::vector<unsigned int>> submeshIndices;
 		std::vector<std::shared_ptr<Material>> submeshMaterials;
 		int submeshSize;
+		friend bool operator< (const std::tuple<Mesh, Material, int>& left, const std::tuple<Mesh, Material, int>& right);
 	private:
 		std::vector<unsigned int> VAOs, VBOs, EBOs;
 		bool isSetup = false;

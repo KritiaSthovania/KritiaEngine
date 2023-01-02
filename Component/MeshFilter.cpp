@@ -1,5 +1,6 @@
 #include "MeshFilter.h"
 #include "../Rendering/RenderingProvider.h"
+using namespace KritiaEngine::Rendering;
 
 KritiaEngine::MeshFilter::MeshFilter(GameObject* gameObject) {
 	this->gameObject = gameObject;

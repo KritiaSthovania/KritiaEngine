@@ -5,10 +5,16 @@
 #include "../CoreModule/MathStructs.h"
 #include "Texture.h"
 
+namespace KritiaEngine::Rendering {
+	class RenderingProvider;
+	class OpenGLRendering;
+}
+
 namespace KritiaEngine {
 	class Material : public Object
 	{
-		friend class RenderingProvider;
+		friend class KritiaEngine::Rendering::RenderingProvider;
+		friend class KritiaEngine::Rendering::OpenGLRendering;
 		friend class MeshRenderer;
 	public:
 		enum RenderMode {
@@ -36,7 +42,6 @@ namespace KritiaEngine {
         /// Compile Shader, Load Texture
         /// </summary>
 		void Initialize();
-		void ApplyShaderOnRender(const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos);
 		int diffuseSamplerIndex = 0, specularSamplerIndex = 1;
 		unsigned int mainTextureID, specularMapID;
 		unsigned int matricesVPID;

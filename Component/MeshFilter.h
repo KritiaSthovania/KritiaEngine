@@ -1,7 +1,6 @@
 #pragma once
 #include "Component.h"
 #include "../CoreModule/Mesh.h"
-#include "../CoreModule/Material.h"
 
 namespace KritiaEngine {
 	class MeshFilter : public Component {

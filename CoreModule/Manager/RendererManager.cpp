@@ -5,6 +5,7 @@
 
 using namespace KritiaEngine::Manager;
 using namespace KritiaEngine;
+using namespace KritiaEngine::Rendering;
 std::list<Renderer*> RendererManager::opaqueRenderQueue = std::list<Renderer*>();
 std::list<Renderer*> RendererManager::transparentRenderQueue = std::list<Renderer*>();
 

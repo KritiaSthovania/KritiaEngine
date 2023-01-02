@@ -6,6 +6,7 @@
 
 using namespace KritiaEngine;
 using namespace KritiaEngine::Manager;
+using namespace KritiaEngine::Rendering;
 
 MeshRenderer::MeshRenderer(GameObject* gameObject) {
 	this->gameObject = gameObject;

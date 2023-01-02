@@ -164,6 +164,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Component\MeshFilter.cpp" />
     <ClCompile Include="CoreModule\Manager\RendererManager.cpp" />
+    <ClCompile Include="Rendering\OpenGLRendering.cpp" />
     <ClCompile Include="Rendering\Shader.cpp" />
     <ClCompile Include="Editor\EditorApplication.cpp" />
     <ClCompile Include="Rendering\RenderingProvider.cpp" />
@@ -199,6 +200,7 @@
     <ClInclude Include="Main.h" />
     <ClInclude Include="Component\MeshFilter.h" />
     <ClInclude Include="CoreModule\Manager\RendererManager.h" />
+    <ClInclude Include="Rendering\OpenGLRendering.h" />
     <ClInclude Include="Rendering\Shader.h" />
     <ClInclude Include="Editor\EditorApplication.h" />
     <ClInclude Include="Rendering\RenderingProvider.h" />

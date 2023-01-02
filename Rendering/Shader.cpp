@@ -31,6 +31,7 @@ void KritiaEngine::Shader::LoadShaderFile(const char* vertexPath, const char* fr
         fragmentCode = fShaderStream.str();
     } catch (std::ifstream::failure& e) {
         std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: " << e.what() << std::endl;
+        std::cout << "Path: " << vertexPath << std::endl;
     }
     const char* vShaderCode = vertexCode.c_str();
     const char* fShaderCode = fragmentCode.c_str();
