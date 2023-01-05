@@ -97,6 +97,13 @@ void Scene::InitializeGameObjects() {
     object2->Transform()->Position = Vector3(0, -2, 0);
     rootGameObjects.push_back(object2);
 
+    std::shared_ptr<GameObject> obj3 = std::shared_ptr<GameObject>(new GameObject());
+    std::shared_ptr<MeshFilter> meshFilter3 = obj3->AddComponent<MeshFilter>();
+    meshFilter3->mesh = mesh2;
+    std::shared_ptr<MeshRenderer> renderer3 = obj3->AddComponent<MeshRenderer>();
+    obj3->Transform()->Scale = Vector3(100, 0.1, 100);
+    obj3->Transform()->Position = Vector3(0, -2.57, 0);
+    rootGameObjects.push_back(obj3);
 }
 
 

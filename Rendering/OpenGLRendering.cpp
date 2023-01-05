@@ -11,6 +11,14 @@ using namespace KritiaEngine;
 std::map<std::tuple<Mesh, Material, int>, unsigned int> OpenGLRendering::gpuInstancingCount = std::map<std::tuple<Mesh, Material, int>, unsigned int>();
 std::map<std::tuple<Mesh, Material, int>, unsigned int> OpenGLRendering::gpuInstancingBufferIDs = std::map<std::tuple<Mesh, Material, int>, unsigned int>();
 std::map<std::tuple<Mesh, Material, int>, std::vector<Matrix4x4>> OpenGLRendering::gpuInstancingMatrices = std::map<std::tuple<Mesh, Material, int>, std::vector<Matrix4x4>>();
+unsigned int OpenGLRendering::skyboxVAO = 1;
+unsigned int OpenGLRendering::skyboxVBO = 1;
+unsigned int OpenGLRendering::uniformBufferIDMatricesVP = 0;
+unsigned int OpenGLRendering::skyboxTextureID = 0;
+std::shared_ptr<Shader> OpenGLRendering::skyboxShader = nullptr;
+unsigned int OpenGLRendering::shadowMapID = 0;
+unsigned int OpenGLRendering::shadowMapFBO = 0;
+std::shared_ptr<Shader> OpenGLRendering::shadowMapShader = nullptr;
 
 void OpenGLRendering::Initialize() {
 	if (RenderingProvider::depthTestEnabled) {
@@ -33,12 +41,29 @@ void OpenGLRendering::Initialize() {
 	glViewport(0, 0, Settings::ScreenWidth, Settings::ScreenHeight);
 }
 
+void KritiaEngine::Rendering::OpenGLRendering::CreateShadowMap() {
+	shadowMapShader = std::make_shared<Shader>(Shader("./StandardShader/ShadowMapShader.vs", "./StandardShader/ShadowMapShader.fs"));
+	glGenFramebuffers(1, &shadowMapFBO);
+	glGenTextures(1, &shadowMapID);
+	glBindTexture(GL_TEXTURE_2D, shadowMapID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, Settings::ShadowWidth, Settings::shadowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMapID, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void OpenGLRendering::ClearFramebuffer() {
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
-
-
 
 
 void KritiaEngine::Rendering::OpenGLRendering::UpdateGPUInstancingBuffer() {
@@ -84,9 +109,7 @@ void OpenGLRendering::LoadCubeMap(const std::vector<Texture>& cubeTextures, unsi
 		for (unsigned int i = 0; i < cubeTextures.size(); i++) {
 			unsigned char* data = stbi_load(cubeTextures[i].path.c_str(), &width, &height, &nrChannels, 0);
 			if (data) {
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-					0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
-				);
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_SRGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 				stbi_image_free(data);
 			} else {
 				std::cout << "Cubemap texture failed to load at path: " << cubeTextures[i].path.c_str() << std::endl;
@@ -115,7 +138,7 @@ unsigned int OpenGLRendering::Load2DTexture(const std::shared_ptr<Texture>& text
 	if (alphaChannel) {
 		data = stbi_load(texture->path.c_str(), &width, &height, &nrChannels, 4);
 		if (data) {
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 		} else {
 			{
@@ -126,7 +149,7 @@ unsigned int OpenGLRendering::Load2DTexture(const std::shared_ptr<Texture>& text
 	} else {
 		data = stbi_load(texture->path.c_str(), &width, &height, &nrChannels, 3);
 		if (data) {
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 		} else {
 			{
@@ -180,25 +203,27 @@ void OpenGLRendering::ApplyMaterialShaderOnRender(const Matrix4x4& model, const 
 										 mat4.GetEntry(0, 2), mat4.GetEntry(1, 2), mat4.GetEntry(2, 2) }).Inverse().Transpose();
 	shader->SetMat3("normalMatrix", normalMatrix);
 	shader->SetVec3("viewPos", viewPos);
-
+	shader->SetMat4("lightSpaceMatrix", Lighting::LightingSystem::MainLightSource->GetLightMatrixVP());
 	// bind maps
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, mainTextureID);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, specularMapID);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, shadowMapID);
 }
 
 void OpenGLRendering::RenderSkybox(Matrix4x4 projection, Matrix4x4 view) {
 	// drop translation part
 	view = Matrix4x4((Matrix3x3)view);
-	RenderingProvider::skyboxShader->Use();
-	RenderingProvider::skyboxShader->SetInt("skybox", 0);
-	RenderingProvider::skyboxShader->SetMat4("view", view);
-	RenderingProvider::skyboxShader->SetMat4("projection", projection);
+	skyboxShader->Use();
+	skyboxShader->SetInt("skybox", 0);
+	skyboxShader->SetMat4("view", view);
+	skyboxShader->SetMat4("projection", projection);
 	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-	glBindVertexArray(RenderingProvider::skyboxVAO);
+	glBindVertexArray(skyboxVAO);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, RenderingProvider::skyboxTextureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTextureID);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 	glDepthFunc(GL_LESS); // set depth function back to default
@@ -217,6 +242,31 @@ void OpenGLRendering::RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFilte
 	}
 }
 
+void KritiaEngine::Rendering::OpenGLRendering::RenderShadowMap(const std::shared_ptr<MeshFilter>& meshFilter, int submeshIndex, const Matrix4x4& model, const std::shared_ptr<Light>& light) {
+	//glCullFace(GL_FRONT);
+	shadowMapShader->Use();
+	shadowMapShader->SetMat4("lightSpaceMatrix", light->GetLightMatrixVP());
+	shadowMapShader->SetMat4("model", model);
+	
+	glBindVertexArray(meshFilter->mesh->VAOs[submeshIndex]);
+	//glBindTexture(GL_TEXTURE0, meshFilter->mesh->submeshMaterials[submeshIndex]->mainTextureID);
+	glDrawElements(GL_TRIANGLES, meshFilter->mesh->submeshIndices[submeshIndex].size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
+void KritiaEngine::Rendering::OpenGLRendering::SetupRenderShadowMap() {
+	glCullFace(GL_FRONT);
+	glViewport(0, 0, Settings::ShadowWidth, Settings::shadowHeight);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+	glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void KritiaEngine::Rendering::OpenGLRendering::SetupRenderSubmesh() {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glCullFace(GL_BACK);
+	glViewport(0, 0, Settings::ScreenWidth, Settings::ScreenHeight);
+}
+
 void KritiaEngine::Rendering::OpenGLRendering::UpdateGPUInstancingCount(const std::shared_ptr<Mesh>& mesh, const std::shared_ptr<Material>& material, int submeshIndex, Matrix4x4 model) {
 	std::tuple<Mesh, Material, int> key = std::tuple<Mesh, Material, int>(*mesh, *material, submeshIndex);
 	if (gpuInstancingCount.count(key) == 0) {
@@ -229,7 +279,7 @@ void KritiaEngine::Rendering::OpenGLRendering::UpdateGPUInstancingCount(const st
 }
 
 void OpenGLRendering::UpdateUniformBufferMatricesVP(const Matrix4x4& view, const Matrix4x4& projection) {
-	glBindBuffer(GL_UNIFORM_BUFFER, RenderingProvider::uniformBufferIDMatricesVP);
+	glBindBuffer(GL_UNIFORM_BUFFER, uniformBufferIDMatricesVP);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr((glm::mat4)view));
 	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr((glm::mat4)projection));
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -260,21 +310,23 @@ void OpenGLRendering::RenderGPUInstances(bool transparent) {
 	}
 }
 
-void KritiaEngine::Rendering::OpenGLRendering::CreateUniformBuffer(unsigned int* id, unsigned int bindingPoint) {
+void KritiaEngine::Rendering::OpenGLRendering::CreateUniformBuffer(unsigned int bindingPoint) {
 	if (bindingPoint == static_cast<unsigned int>(RenderingProvider::UniformBindingPoint::MatricesVP)) {
-		glGenBuffers(1, id);
-		glBindBuffer(GL_UNIFORM_BUFFER, *id);
+		glGenBuffers(1, &uniformBufferIDMatricesVP);
+		glBindBuffer(GL_UNIFORM_BUFFER, uniformBufferIDMatricesVP);
 		glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-		glBindBufferRange(GL_UNIFORM_BUFFER, bindingPoint, *id, 0, 2 * sizeof(glm::mat4));
+		glBindBufferRange(GL_UNIFORM_BUFFER, bindingPoint, uniformBufferIDMatricesVP, 0, 2 * sizeof(glm::mat4));
 	}
 }
 
-void KritiaEngine::Rendering::OpenGLRendering::CreateSkybox(unsigned int* skyboxVAO, unsigned int* skyboxVBO, unsigned int verticesSize, float* verticesPos) {
-	glGenVertexArrays(1, skyboxVAO);
-	glGenBuffers(1, skyboxVBO);
-	glBindVertexArray(*skyboxVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, *skyboxVBO);
+void KritiaEngine::Rendering::OpenGLRendering::CreateSkybox(const std::vector<Texture>& skyboxTextures, unsigned int verticesSize, float* verticesPos) {
+	LoadCubeMap(skyboxTextures, &skyboxTextureID);
+	skyboxShader = std::shared_ptr<Shader>(new Shader("./StandardShader/SkyboxShader.vs", "./StandardShader/SkyboxShader.fs"));
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
 	glBufferData(GL_ARRAY_BUFFER, verticesSize, verticesPos, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);

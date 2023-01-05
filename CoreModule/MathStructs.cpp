@@ -443,6 +443,12 @@ Matrix4x4 KritiaEngine::Matrix4x4::Perspective(float fovy, float aspect, float n
 	}
 }
 
+Matrix4x4 KritiaEngine::Matrix4x4::Ortho(float left, float right, float bottom, float top, float near, float far) {
+	if (Settings::UseGLM) {
+		return glm::ortho(left, right, bottom, top, near, far);
+	}
+}
+
 KritiaEngine::Matrix3x3::Matrix3x3() : entries{0}
 {
 

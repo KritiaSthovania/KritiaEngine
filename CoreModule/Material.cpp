@@ -48,6 +48,7 @@ void Material::Initialize() {
 			}
 			shader->SetInt("specularMap", specularSamplerIndex);
 		}
+		shader->SetInt("shadowMap", shadowSamplerIndex);
 		shader->SetFloat("shininess", shininess);
 		shader->SetVec3("albedo", albedo.RGB());
 		// Make sure the shader supports GPU instancing while using it.

@@ -42,7 +42,7 @@ namespace KritiaEngine {
         /// Compile Shader, Load Texture
         /// </summary>
 		void Initialize();
-		int diffuseSamplerIndex = 0, specularSamplerIndex = 1;
+		int diffuseSamplerIndex = 0, specularSamplerIndex = 1, shadowSamplerIndex = 2;
 		unsigned int mainTextureID, specularMapID;
 		unsigned int matricesVPID;
 		bool initialized = false;

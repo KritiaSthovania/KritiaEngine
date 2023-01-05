@@ -7,14 +7,14 @@
 #include "../Component/MeshFilter.h"
 #include "../Component/Camera.h"
 #include "../CoreModule/Material.h"
-
-
+#include "../CoreModule/Lighting.h"
 
 namespace KritiaEngine::Rendering {
 	class OpenGLRendering {
 		friend class RenderingProvider;
 	private:
 		static void Initialize();
+		static void CreateShadowMap();
 		static void ClearFramebuffer();
 		static void LoadCubeMap(const std::vector<Texture>& cubeTextures, unsigned int* id);
 		static unsigned int Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel);
@@ -31,10 +31,16 @@ namespace KritiaEngine::Rendering {
 		/// <param name="specularMapID">specularMapID of the material</param>
 		static void ApplyMaterialShaderOnRender(const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos, const std::shared_ptr<Shader>& shader, unsigned int mainTextureID, unsigned int specularMapID);
 		static void RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos);
+		static void RenderShadowMap(const std::shared_ptr<MeshFilter>& meshFilter, int submeshIndex, const Matrix4x4& model, const std::shared_ptr<Light>& light);
+		static void SetupRenderShadowMap();
+		static void SetupRenderSubmesh();
 		static void UpdateUniformBufferMatricesVP(const Matrix4x4& view, const Matrix4x4& projection);
 		static void RenderGPUInstances(bool transparent);
-		static void CreateUniformBuffer(unsigned int* id, unsigned int bindingPoint);
-		static void CreateSkybox(unsigned int* skyboxVAO, unsigned int* skyboxVBO, unsigned int verticesSize, float* verticesPos);
+		/// <summary>
+		/// Only consider the main light source.
+		/// </summary>
+		static void CreateUniformBuffer(unsigned int bindingPoint);
+		static void CreateSkybox(const std::vector<Texture>& skyboxTextures, unsigned int verticesSize, float* verticesPos);
 		static void SetMainLightProperties(const std::shared_ptr<Shader>& shader);
 		static void SetPointLightProperties(const Vector3& pos, const std::shared_ptr<Shader>& shader);
 		static void SetSpotLightProperties(const Vector3& pos, const std::shared_ptr<Shader>& shader);
@@ -43,6 +49,11 @@ namespace KritiaEngine::Rendering {
 		static std::map<std::tuple<Mesh, Material, int>, unsigned int> gpuInstancingCount;
 		static std::map<std::tuple<Mesh, Material, int>, unsigned int> gpuInstancingBufferIDs;
 		static std::map<std::tuple<Mesh, Material, int>, std::vector<Matrix4x4>> gpuInstancingMatrices;
+		static unsigned int skyboxVAO, skyboxVBO;
+		static unsigned int skyboxTextureID;
+		static std::shared_ptr<Shader> skyboxShader, shadowMapShader;
+		static unsigned int uniformBufferIDMatricesVP;
+		static unsigned int shadowMapID, shadowMapFBO;
 	};
 }
 

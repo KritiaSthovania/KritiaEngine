@@ -109,6 +109,9 @@ namespace KritiaEngine {
 		/// <param name="">far plane distance</param>
 		/// <returns></returns>
 		static Matrix4x4 Perspective(float fovy, float aspect, float near, float far);
+
+		static Matrix4x4 Ortho(float left, float right, float bottom, float top, float near, float far);
+
 		/// <summary>
 		/// Get the view matrix
 		/// </summary>

@@ -7,10 +7,12 @@
 #include "../Camera.h"
 #include "../../CoreModule/Manager/RendererManager.h"
 namespace KritiaEngine{
+	class Light;
 	class Renderer : public Component {
 		friend class KritiaEngine::Manager::RendererManager;
 	protected:
 		virtual void Render(const std::shared_ptr<Camera>& camera) = 0;
+		virtual void RenderShadowMap(const std::shared_ptr<Light>& light) = 0;
 	};
 
 }

@@ -6,6 +6,7 @@ layout (location = 3) in mat4 instanceModelMatrix;
 
 out vec3 Normal;
 out vec3 FragPos;
+out vec4 FragPosLightSpace;
 out vec2 TexCoord;
 
 layout (std140) uniform matricesVP{
@@ -16,6 +17,7 @@ layout (std140) uniform matricesVP{
 uniform mat4 model;
 uniform mat3 normalMatrix;
 uniform bool instancing;
+uniform mat4 lightSpaceMatrix;
 
 void main()
 {
@@ -28,4 +30,5 @@ void main()
     FragPos = vec3(model * vec4(aPos, 1.0));
     Normal = normalMatrix * aNormal;
     TexCoord = aTexCoord;
+    FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0);
 }

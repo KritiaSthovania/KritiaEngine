@@ -16,6 +16,7 @@ namespace KritiaEngine {
 	{
 	public:
 		Light(GameObject *gameObject);
+		Matrix4x4 GetLightMatrixVP();
 		LightType type;
 		Color color;
 		/// <summary>
@@ -32,6 +33,7 @@ namespace KritiaEngine {
 		// for spotlight
 		float cutOffAngleInner = 15;
 		float cutOffAngleOuter = 20;
+		Matrix4x4 lightSpaceMatrixVP;
 	};
 }
 

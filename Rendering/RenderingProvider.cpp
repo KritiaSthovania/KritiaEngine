@@ -16,18 +16,15 @@ bool KritiaEngine::Rendering::RenderingProvider::blendEnabled = true;
 bool KritiaEngine::Rendering::RenderingProvider::backFaceCullingEnabled = true;
 bool RenderingProvider::msaaEnabled = true;
 bool RenderingProvider::gammaCorrectionEnabled = true;
-unsigned int KritiaEngine::Rendering::RenderingProvider::skyboxVAO = 1;
-unsigned int KritiaEngine::Rendering::RenderingProvider::skyboxVBO = 1;
-unsigned int KritiaEngine::Rendering::RenderingProvider::uniformBufferIDMatricesVP = 0;
-unsigned int RenderingProvider::skyboxTextureID = 0;
-std::shared_ptr<Shader> RenderingProvider::skyboxShader = nullptr;
+bool RenderingProvider::shadowEnabled = true;
 std::vector<Texture> RenderingProvider::skyboxTextures = std::vector<Texture>();
 
 void KritiaEngine::Rendering::RenderingProvider::Initialize() {
 	if (Settings::UseOpenGL) {
 		OpenGLRendering::Initialize();
-		OpenGLRendering::CreateUniformBuffer(&uniformBufferIDMatricesVP, static_cast<unsigned int>(UniformBindingPoint::MatricesVP));
+		OpenGLRendering::CreateUniformBuffer(static_cast<unsigned int>(UniformBindingPoint::MatricesVP));
 	}
+	CreateShadowMap();
 	CreateSkybox();
 }
 
@@ -43,8 +40,13 @@ void KritiaEngine::Rendering::RenderingProvider::LoadCubeMap(const std::vector<T
 	}
 }
 
+void KritiaEngine::Rendering::RenderingProvider::CreateShadowMap() {
+	if (Settings::UseOpenGL) {
+		OpenGLRendering::CreateShadowMap();
+	}
+}
+
 void KritiaEngine::Rendering::RenderingProvider::CreateSkybox() {
-	skyboxShader = std::shared_ptr<Shader>(new Shader("./StandardShader/SkyboxShader.vs", "./StandardShader/SkyboxShader.fs"));
 	skyboxTextures.push_back(Texture("./Assets/Textures/skybox/right.jpg"));
 	skyboxTextures.push_back(Texture("./Assets/Textures/skybox/left.jpg"));
 	skyboxTextures.push_back(Texture("./Assets/Textures/skybox/top.jpg"));
@@ -52,8 +54,7 @@ void KritiaEngine::Rendering::RenderingProvider::CreateSkybox() {
 	skyboxTextures.push_back(Texture("./Assets/Textures/skybox/front.jpg"));
 	skyboxTextures.push_back(Texture("./Assets/Textures/skybox/back.jpg"));
 	if (Settings::UseOpenGL) {
-		RenderingProvider::LoadCubeMap(skyboxTextures, &skyboxTextureID);
-		OpenGLRendering::CreateSkybox(&skyboxVAO, &skyboxVBO, sizeof(skyboxVertices), &skyboxVertices[0]);
+		OpenGLRendering::CreateSkybox(skyboxTextures, sizeof(skyboxVertices), &skyboxVertices[0]);
 	}
 }
 
@@ -69,7 +70,6 @@ void KritiaEngine::Rendering::RenderingProvider::RenderSkybox(Matrix4x4 projecti
 	if (Settings::UseOpenGL) {	
 		OpenGLRendering::RenderSkybox(projection, view);
 	}
-
 }
 
 void KritiaEngine::Rendering::RenderingProvider::SetupMesh(const std::shared_ptr<Mesh>& mesh) {
@@ -89,6 +89,12 @@ void KritiaEngine::Rendering::RenderingProvider::RenderSubmesh(const std::shared
 	}
 }
 
+void KritiaEngine::Rendering::RenderingProvider::RenderShadowMap(const std::shared_ptr<MeshFilter>& meshFilter, int submeshIndex, const Matrix4x4& model, const std::shared_ptr<Light>& light) {
+	if (Settings::UseOpenGL) {
+		OpenGLRendering::RenderShadowMap(meshFilter, submeshIndex, model, light);
+	}
+}
+
 void KritiaEngine::Rendering::RenderingProvider::UpdateUniformBufferMatricesVP(const Matrix4x4& view, const Matrix4x4& projection) {
 	if (Settings::UseOpenGL) {
 		OpenGLRendering::UpdateUniformBufferMatricesVP(view, projection);
@@ -98,6 +104,26 @@ void KritiaEngine::Rendering::RenderingProvider::UpdateUniformBufferMatricesVP(c
 void KritiaEngine::Rendering::RenderingProvider::RenderGPUInstances(bool transparent) {
 	if (Settings::UseOpenGL) {
 		OpenGLRendering::RenderGPUInstances(transparent);
+	}
+}
+
+void KritiaEngine::Rendering::RenderingProvider::SetupRenderShadowMap() {
+	if (Settings::UseOpenGL) {
+		OpenGLRendering::SetupRenderShadowMap();
+	}
+}
+
+void KritiaEngine::Rendering::RenderingProvider::SetupRenderSubmesh() {
+	if (Settings::UseOpenGL) {
+		OpenGLRendering::SetupRenderSubmesh();
+	}
+}
+
+unsigned int KritiaEngine::Rendering::RenderingProvider::GetShadowMapID() {
+	if (Settings::UseOpenGL) {
+		return OpenGLRendering::shadowMapID;
+	} else {
+		return 0;
 	}
 }
 

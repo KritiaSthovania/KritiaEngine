@@ -105,3 +105,22 @@ void MeshRenderer::Render(const std::shared_ptr<KritiaEngine::Camera>& camera) {
 	}
 }
 
+
+void KritiaEngine::MeshRenderer::RenderShadowMap(const std::shared_ptr<Light>& light) {
+	if (!initialized) {
+		Initialize();
+	}
+	// materials have changed
+	if (materialSize != materials.size()) {
+		UpdateMaterial();
+	}
+	Matrix4x4 model = Matrix4x4::Identity();
+	model = Mathf::Translate(model, Transform()->Position);
+	model *= Quaternion::RotationMatrix(Transform()->Rotation);
+	model = Mathf::Scale(model, Transform()->Scale);
+	for (int i = 0; i < meshFilter->mesh->submeshSize; i++) {
+		RenderingProvider::RenderShadowMap(meshFilter, i, model, light);
+	}
+}
+
+

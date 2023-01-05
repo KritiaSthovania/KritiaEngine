@@ -35,7 +35,13 @@ void KritiaEngine::Manager::RendererManager::Render() {
 	Matrix4x4 projection = Matrix4x4::Perspective(Camera::current->Zoom, (float)Settings::ScreenWidth / Settings::ScreenHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistant);
 	RenderingProvider::UpdateUniformBufferMatricesVP(Camera::current->GetViewMatrix(), projection);
 	opaqueRenderQueue.sort(CompareRenderer);
+	// Render shadow map only for opaque objects
+	RenderingProvider::SetupRenderShadowMap();
+	for (auto renderer : opaqueRenderQueue) {
+		renderer->RenderShadowMap(Lighting::LightingSystem::MainLightSource);
+	}
 	// Render opaque objects from near to far
+	RenderingProvider::SetupRenderSubmesh();
 	for (auto renderer : opaqueRenderQueue) {
 		renderer->Render(Camera::current);
 	}
