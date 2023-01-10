@@ -24,7 +24,6 @@ void KritiaEngine::Rendering::RenderingProvider::Initialize() {
 		OpenGLRendering::Initialize();
 		OpenGLRendering::CreateUniformBuffer(static_cast<unsigned int>(UniformBindingPoint::MatricesVP));
 	}
-	CreateShadowMap();
 	CreateSkybox();
 }
 
@@ -34,15 +33,17 @@ void KritiaEngine::Rendering::RenderingProvider::ClearFramebuffer() {
 	}
 }
 
-void KritiaEngine::Rendering::RenderingProvider::LoadCubeMap(const std::vector<Texture>& cubeTextures, unsigned int* id) {
+unsigned int KritiaEngine::Rendering::RenderingProvider::LoadCubeMap(const std::vector<Texture>& cubeTextures) {
 	if (Settings::UseOpenGL) {
-		OpenGLRendering::LoadCubeMap(cubeTextures, id);
+		return OpenGLRendering::LoadCubeMap(cubeTextures);
+	} else {
+		return 0;
 	}
 }
 
-void KritiaEngine::Rendering::RenderingProvider::CreateShadowMap() {
+void KritiaEngine::Rendering::RenderingProvider::CreateShadowMap(Light* light) {
 	if (Settings::UseOpenGL) {
-		OpenGLRendering::CreateShadowMap();
+		OpenGLRendering::CreateShadowMap(light);
 	}
 }
 
@@ -89,7 +90,7 @@ void KritiaEngine::Rendering::RenderingProvider::RenderSubmesh(const std::shared
 	}
 }
 
-void KritiaEngine::Rendering::RenderingProvider::RenderShadowMap(const std::shared_ptr<MeshFilter>& meshFilter, int submeshIndex, const Matrix4x4& model, const std::shared_ptr<Light>& light) {
+void KritiaEngine::Rendering::RenderingProvider::RenderShadowMap(const std::shared_ptr<MeshFilter>& meshFilter, int submeshIndex, const Matrix4x4& model, Light* light) {
 	if (Settings::UseOpenGL) {
 		OpenGLRendering::RenderShadowMap(meshFilter, submeshIndex, model, light);
 	}
@@ -107,23 +108,15 @@ void KritiaEngine::Rendering::RenderingProvider::RenderGPUInstances(bool transpa
 	}
 }
 
-void KritiaEngine::Rendering::RenderingProvider::SetupRenderShadowMap() {
+void KritiaEngine::Rendering::RenderingProvider::SetupRenderShadowMap(Light* light) {
 	if (Settings::UseOpenGL) {
-		OpenGLRendering::SetupRenderShadowMap();
+		OpenGLRendering::SetupRenderShadowMap(light);
 	}
 }
 
 void KritiaEngine::Rendering::RenderingProvider::SetupRenderSubmesh() {
 	if (Settings::UseOpenGL) {
 		OpenGLRendering::SetupRenderSubmesh();
-	}
-}
-
-unsigned int KritiaEngine::Rendering::RenderingProvider::GetShadowMapID() {
-	if (Settings::UseOpenGL) {
-		return OpenGLRendering::shadowMapID;
-	} else {
-		return 0;
 	}
 }
 

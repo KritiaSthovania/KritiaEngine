@@ -10,6 +10,7 @@ namespace KritiaEngine {
 		static float Sin(float degrees);
 		static float Tan(float degrees);
 		static float Radians(float degrees);
+		static float Sqrt(float number);
 
 		/// <summary>
 		/// Translate a matrix by a given vector

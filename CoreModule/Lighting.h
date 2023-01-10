@@ -12,11 +12,11 @@ namespace KritiaEngine::Lighting {
 		/// The main light source of the current scene.Intended for rendering purposes.
 		/// </summary>		
 		static std::shared_ptr<Light> MainLightSource;
-		static std::list<std::shared_ptr<Light>> SpotLights;
-		static std::list<std::shared_ptr<Light>> PointLights;
-
-		static std::vector<std::shared_ptr<Light>> GetSpotLightAroundPos(const Vector3& pos);
-		static std::vector<std::shared_ptr<Light>> GetPointLightAroundPos(const Vector3& pos);
+		static std::list<Light*> Lights;
+		static void AddLight(Light* light);
+		static void RemoveLight(Light* light);
+		static std::vector<Light*> GetSpotLightAroundPos(const Vector3& pos);
+		static std::vector<Light*> GetPointLightAroundPos(const Vector3& pos);
 	};
 }
 

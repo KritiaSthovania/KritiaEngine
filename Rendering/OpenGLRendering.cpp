@@ -16,9 +16,8 @@ unsigned int OpenGLRendering::skyboxVBO = 1;
 unsigned int OpenGLRendering::uniformBufferIDMatricesVP = 0;
 unsigned int OpenGLRendering::skyboxTextureID = 0;
 std::shared_ptr<Shader> OpenGLRendering::skyboxShader = nullptr;
-unsigned int OpenGLRendering::shadowMapID = 0;
-unsigned int OpenGLRendering::shadowMapFBO = 0;
 std::shared_ptr<Shader> OpenGLRendering::shadowMapShader = nullptr;
+std::shared_ptr<Shader> OpenGLRendering::shadowMapShaderPoint = nullptr;
 
 void OpenGLRendering::Initialize() {
 	if (RenderingProvider::depthTestEnabled) {
@@ -39,25 +38,47 @@ void OpenGLRendering::Initialize() {
 		glEnable(GL_FRAMEBUFFER_SRGB);
 	}
 	glViewport(0, 0, Settings::ScreenWidth, Settings::ScreenHeight);
+	shadowMapShader = std::make_shared<Shader>(Shader("./StandardShader/ShadowMapShader.vs", "./StandardShader/ShadowMapShader.fs"));
+	shadowMapShaderPoint = std::make_shared<Shader>(Shader("./StandardShader/ShadowMapPointShader.vs", "./StandardShader/ShadowMapPointShader.fs", "./StandardShader/ShadowMapPointShader.gs"));
 }
 
-void KritiaEngine::Rendering::OpenGLRendering::CreateShadowMap() {
-	shadowMapShader = std::make_shared<Shader>(Shader("./StandardShader/ShadowMapShader.vs", "./StandardShader/ShadowMapShader.fs"));
-	glGenFramebuffers(1, &shadowMapFBO);
-	glGenTextures(1, &shadowMapID);
-	glBindTexture(GL_TEXTURE_2D, shadowMapID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, Settings::ShadowWidth, Settings::shadowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+void KritiaEngine::Rendering::OpenGLRendering::CreateShadowMap(Light* light) {
+	// directional and spot light
+	glGenFramebuffers(1, &light->shadowMapFBO);
+	glGenTextures(1, &light->shadowMapID);
+	glBindTexture(GL_TEXTURE_2D, light->shadowMapID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, Settings::ShadowWidth, Settings::ShadowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMapID, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, light->shadowMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, light->shadowMapID, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	// point light
+	glGenFramebuffers(1, &light->shadowMapPointFBO);
+	glGenTextures(1, &light->shadowMapPointID);
+	for (int i = 0; i < 6; i++) {
+		glBindTexture(GL_TEXTURE_CUBE_MAP, light->shadowMapPointID);
+		for (GLuint i = 0; i < 6; ++i) {
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, Settings::ShadowWidth, Settings::ShadowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		}
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glBindFramebuffer(GL_FRAMEBUFFER, light->shadowMapPointFBO);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, light->shadowMapPointID, 0);
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	}
 }
 
 void OpenGLRendering::ClearFramebuffer() {
@@ -101,11 +122,12 @@ void KritiaEngine::Rendering::OpenGLRendering::UpdateGPUInstancingBuffer() {
 	}
 }
 
-void OpenGLRendering::LoadCubeMap(const std::vector<Texture>& cubeTextures, unsigned int* id) {
+unsigned int OpenGLRendering::LoadCubeMap(const std::vector<Texture>& cubeTextures) {
+	unsigned int id;
 	int width, height, nrChannels;
 	if (Settings::UseOpenGL) {
-		glGenTextures(1, id);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, *id);
+		glGenTextures(1, &id);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, id);
 		for (unsigned int i = 0; i < cubeTextures.size(); i++) {
 			unsigned char* data = stbi_load(cubeTextures[i].path.c_str(), &width, &height, &nrChannels, 0);
 			if (data) {
@@ -121,7 +143,9 @@ void OpenGLRendering::LoadCubeMap(const std::vector<Texture>& cubeTextures, unsi
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
+	return id;
 }
 
 unsigned int OpenGLRendering::Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel) {
@@ -195,6 +219,7 @@ void OpenGLRendering::ApplyMaterialShaderOnRender(const Matrix4x4& model, const 
 	SetMainLightProperties(shader);
 	SetPointLightProperties(pos, shader);
 	SetSpotLightProperties(pos, shader);
+
 	// model matrix
 	shader->SetMat4("model", model);
 	Matrix4x4 mat4 = model;
@@ -203,14 +228,14 @@ void OpenGLRendering::ApplyMaterialShaderOnRender(const Matrix4x4& model, const 
 										 mat4.GetEntry(0, 2), mat4.GetEntry(1, 2), mat4.GetEntry(2, 2) }).Inverse().Transpose();
 	shader->SetMat3("normalMatrix", normalMatrix);
 	shader->SetVec3("viewPos", viewPos);
-	shader->SetMat4("lightSpaceMatrix", Lighting::LightingSystem::MainLightSource->GetLightMatrixVP());
+	shader->SetMat4("lightSpaceMatrix", Lighting::LightingSystem::MainLightSource->GetLightMatrixVP(0));
 	// bind maps
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, mainTextureID);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, specularMapID);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, shadowMapID);
+	glBindTexture(GL_TEXTURE_2D, Lighting::LightingSystem::MainLightSource->shadowMapID);
 }
 
 void OpenGLRendering::RenderSkybox(Matrix4x4 projection, Matrix4x4 view) {
@@ -221,12 +246,13 @@ void OpenGLRendering::RenderSkybox(Matrix4x4 projection, Matrix4x4 view) {
 	skyboxShader->SetMat4("view", view);
 	skyboxShader->SetMat4("projection", projection);
 	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-	glBindVertexArray(skyboxVAO);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTextureID);
+	glBindVertexArray(skyboxVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 	glDepthFunc(GL_LESS); // set depth function back to default
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
 void OpenGLRendering::RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos) {
@@ -242,29 +268,49 @@ void OpenGLRendering::RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFilte
 	}
 }
 
-void KritiaEngine::Rendering::OpenGLRendering::RenderShadowMap(const std::shared_ptr<MeshFilter>& meshFilter, int submeshIndex, const Matrix4x4& model, const std::shared_ptr<Light>& light) {
-	//glCullFace(GL_FRONT);
-	shadowMapShader->Use();
-	shadowMapShader->SetMat4("lightSpaceMatrix", light->GetLightMatrixVP());
-	shadowMapShader->SetMat4("model", model);
+void KritiaEngine::Rendering::OpenGLRendering::RenderShadowMap(const std::shared_ptr<MeshFilter>& meshFilter, int submeshIndex, const Matrix4x4& model, Light* light) {
+	if (light->type == LightType::Directional || light->type == LightType::Spot) {
+		//glCullFace(GL_FRONT);
+		shadowMapShader->Use();
+		shadowMapShader->SetMat4("lightSpaceMatrix", light->GetLightMatrixVP(0));
+		shadowMapShader->SetMat4("model", model);
+		glBindVertexArray(meshFilter->mesh->VAOs[submeshIndex]);
+		glDrawElements(GL_TRIANGLES, meshFilter->mesh->submeshIndices[submeshIndex].size(), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+	} else {
+		shadowMapShaderPoint->Use();
+		shadowMapShaderPoint->SetMat4("shadowMatrices[0]", light->GetLightMatrixVP(0));
+		shadowMapShaderPoint->SetMat4("shadowMatrices[1]", light->GetLightMatrixVP(1));
+		shadowMapShaderPoint->SetMat4("shadowMatrices[2]", light->GetLightMatrixVP(2));
+		shadowMapShaderPoint->SetMat4("shadowMatrices[3]", light->GetLightMatrixVP(3));
+		shadowMapShaderPoint->SetMat4("shadowMatrices[4]", light->GetLightMatrixVP(4));
+		shadowMapShaderPoint->SetMat4("shadowMatrices[5]", light->GetLightMatrixVP(5));
+		shadowMapShaderPoint->SetMat4("model", model);
+		shadowMapShaderPoint->SetFloat("far_plane", Settings::FarPlaneDistance);
+		shadowMapShaderPoint->SetVec3("lightPos", light->Transform()->position);
+		glBindVertexArray(meshFilter->mesh->VAOs[submeshIndex]);
+		glDrawElements(GL_TRIANGLES, meshFilter->mesh->submeshIndices[submeshIndex].size(), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+	}
 	
-	glBindVertexArray(meshFilter->mesh->VAOs[submeshIndex]);
-	//glBindTexture(GL_TEXTURE0, meshFilter->mesh->submeshMaterials[submeshIndex]->mainTextureID);
-	glDrawElements(GL_TRIANGLES, meshFilter->mesh->submeshIndices[submeshIndex].size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
 }
 
-void KritiaEngine::Rendering::OpenGLRendering::SetupRenderShadowMap() {
+void KritiaEngine::Rendering::OpenGLRendering::SetupRenderShadowMap(Light* light) {
 	glCullFace(GL_FRONT);
-	glViewport(0, 0, Settings::ShadowWidth, Settings::shadowHeight);
-	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+	glViewport(0, 0, Settings::ShadowWidth, Settings::ShadowHeight);
+	if (light->type == LightType::Directional || light->type == LightType::Spot) {
+		glBindFramebuffer(GL_FRAMEBUFFER, light->shadowMapFBO);
+	} else {
+		glBindFramebuffer(GL_FRAMEBUFFER, light->shadowMapPointFBO);
+	}
 	glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void KritiaEngine::Rendering::OpenGLRendering::SetupRenderSubmesh() {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glCullFace(GL_BACK);
 	glViewport(0, 0, Settings::ScreenWidth, Settings::ScreenHeight);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glCullFace(GL_BACK);
 }
 
 void KritiaEngine::Rendering::OpenGLRendering::UpdateGPUInstancingCount(const std::shared_ptr<Mesh>& mesh, const std::shared_ptr<Material>& material, int submeshIndex, Matrix4x4 model) {
@@ -321,7 +367,7 @@ void KritiaEngine::Rendering::OpenGLRendering::CreateUniformBuffer(unsigned int 
 }
 
 void KritiaEngine::Rendering::OpenGLRendering::CreateSkybox(const std::vector<Texture>& skyboxTextures, unsigned int verticesSize, float* verticesPos) {
-	LoadCubeMap(skyboxTextures, &skyboxTextureID);
+	skyboxTextureID = LoadCubeMap(skyboxTextures);
 	skyboxShader = std::shared_ptr<Shader>(new Shader("./StandardShader/SkyboxShader.vs", "./StandardShader/SkyboxShader.fs"));
 	glGenVertexArrays(1, &skyboxVAO);
 	glGenBuffers(1, &skyboxVBO);
@@ -336,7 +382,7 @@ void KritiaEngine::Rendering::OpenGLRendering::CreateSkybox(const std::vector<Te
 
 void KritiaEngine::Rendering::OpenGLRendering::SetMainLightProperties(const std::shared_ptr<Shader>& shader) {
 	// main light source should always be a directional light, and there should always be one such light source.
-	shader->SetVec3("mainLightDirection", Lighting::LightingSystem::MainLightSource->direction);
+	shader->SetVec3("mainLightDirection", Lighting::LightingSystem::MainLightSource->Transform()->forward);
 	shader->SetFloat("ambientIntensity", Lighting::LightingSystem::MainLightSource->ambientIntensity);
 	shader->SetFloat("diffuseIntensity", Lighting::LightingSystem::MainLightSource->diffuseIntensity);
 	shader->SetFloat("specularIntensity", Lighting::LightingSystem::MainLightSource->specularIntensity);
@@ -344,50 +390,49 @@ void KritiaEngine::Rendering::OpenGLRendering::SetMainLightProperties(const std:
 }
 
 void KritiaEngine::Rendering::OpenGLRendering::SetPointLightProperties(const Vector3& pos, const std::shared_ptr<Shader>& shader) {
-	std::vector<std::shared_ptr<Light>> pointLights = Lighting::LightingSystem::GetPointLightAroundPos(pos);
-	if (pointLights.size() != 0) {
-		for (int i = 0; i < Lighting::LightingSystem::MaxPointLightsForOneObject; i++) {
-			std::string str = "pointLights[";
-			str += std::to_string(i);
-			str += "]";
-			if (pointLights[i] != nullptr) {
-				shader->SetVec3(str + ".color", pointLights[i]->color.RGB());
-				shader->SetVec3(str + ".position", pointLights[i]->Transform()->Position);
-				shader->SetFloat(str + ".constant", pointLights[i]->constantAttenuationFactor);
-				shader->SetFloat(str + ".linear", pointLights[i]->linearAttenuationFactor);
-				shader->SetFloat(str + ".quadratic", pointLights[i]->quadraticAttenuationFactor);
-				shader->SetFloat(str + ".ambient", pointLights[i]->ambientIntensity);
-				shader->SetFloat(str + ".diffuse", pointLights[i]->diffuseIntensity);
-				shader->SetFloat(str + ".specular", pointLights[i]->specularIntensity);
-			} else {
-				break;
-			}
-		}
+	std::vector<Light*> pointLights = Lighting::LightingSystem::GetPointLightAroundPos(pos);
+	int numberOfLights = pointLights.size() < Lighting::LightingSystem::MaxPointLightsForOneObject ? pointLights.size() : Lighting::LightingSystem::MaxPointLightsForOneObject;
+	for (int i = 0; i < numberOfLights; i++) {
+		std::string str = "pointLights[" + std::to_string(i) + "]";
+		if (pointLights[i] != nullptr) {
+			shader->SetVec3(str + ".color", pointLights[i]->color.RGB());
+			shader->SetVec3(str + ".position", pointLights[i]->Transform()->position);
+			shader->SetFloat(str + ".constant", pointLights[i]->constantAttenuationFactor);
+			shader->SetFloat(str + ".linear", pointLights[i]->linearAttenuationFactor);
+			shader->SetFloat(str + ".quadratic", pointLights[i]->quadraticAttenuationFactor);
+			shader->SetFloat(str + ".ambient", pointLights[i]->ambientIntensity);
+			shader->SetFloat(str + ".diffuse", pointLights[i]->diffuseIntensity);
+			shader->SetFloat(str + ".specular", pointLights[i]->specularIntensity);
+			glActiveTexture(GL_TEXTURE3 + i);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, pointLights[i]->shadowMapPointID);
+		} else {
+			break;
+		}	
 	}
 }
 
 void KritiaEngine::Rendering::OpenGLRendering::SetSpotLightProperties(const Vector3& pos, const std::shared_ptr<Shader>& shader) {
-	std::vector<std::shared_ptr<Light>> spotLights = Lighting::LightingSystem::GetSpotLightAroundPos(pos);
-	if (spotLights.size() != 0) {
-		for (int i = 0; i < Lighting::LightingSystem::MaxSpotLightsForOneObject; i++) {
-			std::string str = "spotLights[";
-			str += std::to_string(i);
-			str += "]";
-			if (spotLights[i] != nullptr) {
-				shader->SetVec3(str + ".color", spotLights[i]->color.RGB());
-				shader->SetVec3(str + ".position", spotLights[i]->Transform()->Position);
-				shader->SetVec3(str + ".direction", spotLights[i]->direction);
-				shader->SetFloat(str + ".constant", spotLights[i]->constantAttenuationFactor);
-				shader->SetFloat(str + ".linear", spotLights[i]->linearAttenuationFactor);
-				shader->SetFloat(str + ".quadratic", spotLights[i]->quadraticAttenuationFactor);
-				shader->SetFloat(str + ".cutOffCosInner", Mathf::Cos(spotLights[i]->cutOffAngleInner));
-				shader->SetFloat(str + ".cutOffCosOuter", Mathf::Cos(spotLights[i]->cutOffAngleOuter));
-				shader->SetFloat(str + ".ambient", spotLights[i]->ambientIntensity);
-				shader->SetFloat(str + ".diffuse", spotLights[i]->diffuseIntensity);
-				shader->SetFloat(str + ".specular", spotLights[i]->specularIntensity);
-			} else {
-				break;
-			}
+	std::vector<Light*> spotLights = Lighting::LightingSystem::GetSpotLightAroundPos(pos);
+	int numberOfLights = spotLights.size() < Lighting::LightingSystem::MaxSpotLightsForOneObject ? spotLights.size() : Lighting::LightingSystem::MaxSpotLightsForOneObject;
+	for (int i = 0; i < numberOfLights; i++) {
+		std::string str = "spotLights[" + std::to_string(i) + "]";
+		if (spotLights[i] != nullptr) {
+			shader->SetVec3(str + ".color", spotLights[i]->color.RGB());
+			shader->SetVec3(str + ".position", spotLights[i]->Transform()->position);
+			shader->SetVec3(str + ".direction", spotLights[i]->Transform()->forward);
+			shader->SetFloat(str + ".constant", spotLights[i]->constantAttenuationFactor);
+			shader->SetFloat(str + ".linear", spotLights[i]->linearAttenuationFactor);
+			shader->SetFloat(str + ".quadratic", spotLights[i]->quadraticAttenuationFactor);
+			shader->SetFloat(str + ".cutOffCosInner", Mathf::Cos(spotLights[i]->cutOffAngleInner));
+			shader->SetFloat(str + ".cutOffCosOuter", Mathf::Cos(spotLights[i]->cutOffAngleOuter));
+			shader->SetFloat(str + ".ambient", spotLights[i]->ambientIntensity);
+			shader->SetFloat(str + ".diffuse", spotLights[i]->diffuseIntensity);
+			shader->SetFloat(str + ".specular", spotLights[i]->specularIntensity);
+			shader->SetMat4(str + ".spotLightMatrix", spotLights[i]->GetLightMatrixVP(0));
+			glActiveTexture(GL_TEXTURE3 + Lighting::LightingSystem::MaxPointLightsForOneObject + i);
+			glBindTexture(GL_TEXTURE_2D, spotLights[i]->shadowMapID);
+		} else {
+			break;
 		}
 	}
 }

@@ -71,6 +71,10 @@ Vector3 KritiaEngine::Vector3::Cross(const Vector3 &vec1, const Vector3 &vec2)
 	}
 }
 
+float KritiaEngine::Vector3::Dot(const Vector3& vec1, const Vector3& vec2) {
+	return glm::dot((glm::vec3)vec1, (glm::vec3)vec2);
+}
+
 float KritiaEngine::Vector3::Magnitude(const Vector3& vec) {
 	return glm::sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
 }
@@ -130,6 +134,10 @@ void KritiaEngine::Vector3::operator/=(float a)
 
 bool KritiaEngine::Vector3::operator==(const Vector3& vec) {
 	return x == vec.x && y == vec.y && z == vec.z;
+}
+
+bool KritiaEngine::Vector3::operator!=(const Vector3& vec) {
+	return x != vec.x || y != vec.y || z != vec.z;
 }
 
 KritiaEngine::Vector3::operator glm::vec3() const
@@ -242,6 +250,10 @@ bool KritiaEngine::Vector4::operator==(const Vector4& vec) {
 	return x == vec.x && y == vec.y && z == vec.z && w == vec.w;
 }
 
+bool KritiaEngine::Vector4::operator!=(const Vector4& vec) {
+	return x != vec.x || y != vec.y || z != vec.z || w != vec.w;
+}
+
 KritiaEngine::Vector4::operator glm::vec4() const
 {
 	return glm::vec4(x, y, z, w);
@@ -279,6 +291,10 @@ Matrix4x4 KritiaEngine::Matrix4x4::operator*(const Matrix4x4 &mat)
 	if (Settings::UseGLM) {
 		return Matrix4x4(ToGlmMat4(*this) * ToGlmMat4(mat));
 	}
+}
+
+Vector4 KritiaEngine::Matrix4x4::operator*(const Vector4& vec4) {
+	return (glm::mat4)(*this) * (glm::vec4)(vec4);
 }
 
 void KritiaEngine::Matrix4x4::operator*=(const Matrix4x4& mat) {
@@ -511,6 +527,10 @@ KritiaEngine::Matrix3x3::operator glm::mat3() const
 	return glm::mat3(column0, column1, column2);
 }
 
+Vector3 KritiaEngine::Matrix3x3::operator*(const Vector3& vec3) {
+	return (glm::mat3)*this * (glm::vec3)vec3;
+}
+
 KritiaEngine::Quaternion::Quaternion() {
 	x = y = z = 0;
 	w = 1;
@@ -530,6 +550,21 @@ KritiaEngine::Quaternion::Quaternion(const glm::quat& quat) {
 	w = quat.w;
 }
 
+KritiaEngine::Quaternion::Quaternion(const Matrix4x4& mat) {
+	Quaternion quat = FromRoationMatrix(mat);
+	this->x = quat.x;
+	this->y = quat.y;
+	this->z = quat.z;
+	this->w = quat.w;
+}
+
+KritiaEngine::Quaternion::Quaternion(const Vector3& vec1, const Vector3& vec2) {
+	Quaternion quat = FromTwoVectors(vec1, vec2);
+	this->x = quat.x;
+	this->y = quat.y;
+	this->z = quat.z;
+	this->w = quat.w;
+}
 
 Vector3 KritiaEngine::Quaternion::ToEuler(const Quaternion& quat) {
 	Vector3 vec = glm::eulerAngles((glm::quat)quat);
@@ -555,7 +590,7 @@ Quaternion KritiaEngine::Quaternion::Identity() {
 	return Quaternion(0, 0, 0, 1);
 }
 
-Matrix4x4 KritiaEngine::Quaternion::RotationMatrix(const Quaternion& quat) {
+Matrix4x4 KritiaEngine::Quaternion::ToRotationMatrix(const Quaternion& quat) {
 	float entries[4][4] = {1 - 2 * (quat.y * quat.y + quat.z * quat.z), 2 * (quat.x * quat.y + quat.z * quat.w), 2 * (quat.z * quat.x - quat.y * quat.w), 0,
 						   2 * (quat.x * quat.y - quat.z * quat.w), 1 - 2 * (quat.z * quat.z + quat.x * quat.x), 2 * (quat.y * quat.z + quat.x * quat.w), 0,
 						   2 * (quat.z * quat.x + quat.y * quat.w), 2 * (quat.y * quat.z - quat.x * quat.w), 1 - 2 * (quat.x * quat.x + quat.y * quat.y), 0,
@@ -563,11 +598,29 @@ Matrix4x4 KritiaEngine::Quaternion::RotationMatrix(const Quaternion& quat) {
 	return Matrix4x4(entries);
 }
 
-Quaternion KritiaEngine::Quaternion::Euler(float x, float y, float z) {
+Quaternion KritiaEngine::Quaternion::FromEuler(float x, float y, float z) {
 	Quaternion quatx = Quaternion(Mathf::Sin(x / 2), 0, 0, Mathf::Cos(x / 2));
 	Quaternion quaty = Quaternion(0, Mathf::Sin(y / 2), 0, Mathf::Cos(y / 2));
 	Quaternion quatz = Quaternion(0, 0, Mathf::Sin(z / 2), Mathf::Cos(z / 2));
 	return quaty * quatx * quatz;
+}
+
+Quaternion KritiaEngine::Quaternion::FromTwoVectors(const Vector3& vec1, const Vector3& vec2) {
+	if (Vector3::Dot(vec1, vec2) == 1 || Vector3::Dot(vec1, vec2) == -1) {
+		return Quaternion::Identity();
+	} else {
+		Vector3 vec3 = Vector3::Cross(vec1, vec2);
+		Quaternion quat = Quaternion();
+		quat.x = vec3.x;
+		quat.y = vec3.y;
+		quat.z = vec3.z;
+		quat.w = Mathf::Sqrt((Vector3::Magnitude(vec1) * Vector3::Magnitude(vec1)) * (Vector3::Magnitude(vec2) * Vector3::Magnitude(vec2))) + Vector3::Dot(vec1, vec2);
+		return Normalize(quat);
+	}
+}
+
+Quaternion KritiaEngine::Quaternion::FromRoationMatrix(const Matrix4x4& mat) {
+	return glm::quat((glm::mat4)mat);
 }
 
 Quaternion KritiaEngine::Quaternion::operator*(const Quaternion& quat) {
@@ -590,6 +643,10 @@ KritiaEngine::Quaternion::operator glm::quat() const {
 
 bool KritiaEngine::Quaternion::operator==(const Quaternion& quat) {
 	return x == quat.x && y == quat.y && z == quat.z && w == quat.w;
+}
+
+bool KritiaEngine::Quaternion::operator!=(const Quaternion& quat) {
+	return x != quat.x || y != quat.y || z != quat.z || w != quat.w;
 }
 
 

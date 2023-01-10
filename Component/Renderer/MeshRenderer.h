@@ -15,7 +15,7 @@ namespace KritiaEngine {
 		std::vector<std::shared_ptr<Material>> materials;
 	protected:
 		void Render(const std::shared_ptr<KritiaEngine::Camera>& camera);
-		void RenderShadowMap(const std::shared_ptr<Light>& light);
+		void RenderShadowMap(Light* light);
 		void OnObjectDestroy();
 	private:
 		void Initialize();

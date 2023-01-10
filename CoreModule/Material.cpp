@@ -37,7 +37,6 @@ void Material::Initialize() {
 			} else if (renderMode == Opaque) {
 				mainTextureID = RenderingProvider::Load2DTexture(mainTexture, false);
 			}
-			shader->SetInt("mainTexture", diffuseSamplerIndex);
 		}
 		if (specularMap != nullptr) {
 			if (renderMode == Transparent) {
@@ -46,11 +45,21 @@ void Material::Initialize() {
 			} else if (renderMode == Opaque) {
 				specularMapID = RenderingProvider::Load2DTexture(specularMap, false);
 			}
-			shader->SetInt("specularMap", specularSamplerIndex);
 		}
+		shader->SetInt("mainTexture", diffuseSamplerIndex);
+		shader->SetInt("specularMap", specularSamplerIndex);
 		shader->SetInt("shadowMap", shadowSamplerIndex);
 		shader->SetFloat("shininess", shininess);
 		shader->SetVec3("albedo", albedo.RGB());
+		for (int i = 0; i < Lighting::LightingSystem::MaxPointLightsForOneObject; i++) {
+			std::string str = "pointLights[" + std::to_string(i) + "]" + ".shadowMapCube";
+			shader->SetInt(str, shadowSamplerIndex + 1 + i);
+		}
+		for (int i = 0; i < Lighting::LightingSystem::MaxSpotLightsForOneObject; i++) {
+			std::string str = "spotLights[" + std::to_string(i) + "]" + ".shadowMapSpot";
+			shader->SetInt(str, shadowSamplerIndex + 1 + Lighting::LightingSystem::MaxPointLightsForOneObject + i);
+		}
+		shader->SetFloat("farPlaneDistance", Settings::FarPlaneDistance);
 		// Make sure the shader supports GPU instancing while using it.
 		if (GPUInstancingEnabled) {
 			shader->SetBool("instancing", GPUInstancingEnabled);

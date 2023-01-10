@@ -32,13 +32,17 @@ void KritiaEngine::Manager::RendererManager::MoveMeshRendererToTransparentQueue(
 }
 
 void KritiaEngine::Manager::RendererManager::Render() {
-	Matrix4x4 projection = Matrix4x4::Perspective(Camera::current->Zoom, (float)Settings::ScreenWidth / Settings::ScreenHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistant);
+	Matrix4x4 projection = Matrix4x4::Perspective(Camera::current->Fovy, (float)Settings::ScreenWidth / Settings::ScreenHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistance);
 	RenderingProvider::UpdateUniformBufferMatricesVP(Camera::current->GetViewMatrix(), projection);
 	opaqueRenderQueue.sort(CompareRenderer);
 	// Render shadow map only for opaque objects
-	RenderingProvider::SetupRenderShadowMap();
-	for (auto renderer : opaqueRenderQueue) {
-		renderer->RenderShadowMap(Lighting::LightingSystem::MainLightSource);
+	for (auto light : Lighting::LightingSystem::Lights) {
+		if (light->castingShadow) {
+			RenderingProvider::SetupRenderShadowMap(light);
+			for (auto renderer : opaqueRenderQueue) {
+				renderer->RenderShadowMap(light);
+			}	
+		}
 	}
 	// Render opaque objects from near to far
 	RenderingProvider::SetupRenderSubmesh();
@@ -56,11 +60,11 @@ void KritiaEngine::Manager::RendererManager::Render() {
 }
 
 bool KritiaEngine::Manager::RendererManager::CompareRenderer(Renderer * left, Renderer * right) {
-	return Vector3::Magnitude(left->Transform()->Position - Camera::current->GetPosition()) < Vector3::Magnitude(right->Transform()->Position - Camera::current->GetPosition());
+	return Vector3::Magnitude(left->Transform()->position - Camera::current->GetPosition()) < Vector3::Magnitude(right->Transform()->position - Camera::current->GetPosition());
 }
 
 void KritiaEngine::Manager::RendererManager::RenderSkybox() {
-	Matrix4x4 projection = Matrix4x4::Perspective(Camera::current->Zoom, (float)Settings::ScreenWidth / Settings::ScreenHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistant);
+	Matrix4x4 projection = Matrix4x4::Perspective(Camera::current->Fovy, (float)Settings::ScreenWidth / Settings::ScreenHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistance);
 	Matrix4x4 view = Camera::current->GetViewMatrix();
 	RenderingProvider::RenderSkybox(projection, view);
 }

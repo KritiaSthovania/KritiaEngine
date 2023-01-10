@@ -4,9 +4,14 @@
 #include "../CoreModule/Utilities.h"
 #include "../Component/Behaviour.h"
 #include "../CoreModule/MathStructs.h"
+
+namespace KritiaEngine::Rendering {
+	class OpenGLRendering;
+}
+
 namespace KritiaEngine {
 
-	enum LightType {
+	enum class LightType {
 		Directional,
 		Spot,
 		Point
@@ -14,15 +19,16 @@ namespace KritiaEngine {
 
 	class Light : public Behaviour
 	{
+		friend class KritiaEngine::Rendering::OpenGLRendering;
 	public:
 		Light(GameObject *gameObject);
-		Matrix4x4 GetLightMatrixVP();
+		/// <summary>
+		/// Get a light space matrix. For point light, also need a direction.
+		/// </summary>
+		/// <param name="direction">0: right; 1: left; 2: top; 3: bottom; 4: near; 5: far</param>
+		Matrix4x4 GetLightMatrixVP(int direction);
 		LightType type;
 		Color color;
-		/// <summary>
-		/// Important for directional light and spot light
-		/// </summary>
-		Vector3 direction = Vector3::Normalize(Vector3(1, 1, 1));
 		float ambientIntensity = 0.1f;
 		float diffuseIntensity = 0.5f;
 		float specularIntensity = 1;
@@ -33,7 +39,18 @@ namespace KritiaEngine {
 		// for spotlight
 		float cutOffAngleInner = 15;
 		float cutOffAngleOuter = 20;
-		Matrix4x4 lightSpaceMatrixVP;
+		bool castingShadow = true;
+	protected:
+		void OnObjectDestroy();
+	private:
+		unsigned int shadowMapID = 0;
+		unsigned int shadowMapFBO = 0;
+		unsigned int shadowMapPointID = 0;
+		unsigned int shadowMapPointFBO = 0;
+		Matrix4x4 directionalLightMatrix, spotLightMatrix, pointLightMatrixRight, pointLightMatrixLeft, pointLightMatrixTop, pointLightMatrixBottom, pointLightMatrixNear, pointLightMatrixFar;
+		Vector3 cachedPosition;
+		Quaternion cachedRotation;
+		void UpdateLightMatrices();
 	};
 }
 

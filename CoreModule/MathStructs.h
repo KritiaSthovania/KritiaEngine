@@ -8,7 +8,7 @@ namespace KritiaEngine {
 		Vector2(float x, float y);
 		Vector2(const glm::vec2& vec);
 		Vector2();
-		float x, y, z;
+		float x, y;
 		static Vector2 Zero();
 		operator glm::vec2() const;
 	};
@@ -22,6 +22,7 @@ namespace KritiaEngine {
 		static Vector3 Zero();
 		static Vector3 Normalize(const Vector3 &vec);
 		static Vector3 Cross(const Vector3 &vec1, const Vector3 &vec2);
+		static float Dot(const Vector3& vec1, const Vector3& vec2);
 		static float Magnitude(const Vector3& vec);
 		static glm::vec3 ToGlmVec3(const Vector3 &vec);
 		float x;
@@ -38,6 +39,7 @@ namespace KritiaEngine {
 		void operator*= (float a);
 		void operator/= (float a);
 		bool operator == (const Vector3& vec);
+		bool operator!= (const Vector3& vec);
 		operator glm::vec3() const;
 	private:
 
@@ -65,6 +67,7 @@ namespace KritiaEngine {
 		void operator*= (float a);
 		void operator/= (float a);
 		bool operator== (const Vector4& vec);
+		bool operator!= (const Vector4& vec);
 		operator glm::vec4() const;
 	private:
 
@@ -82,6 +85,7 @@ namespace KritiaEngine {
 		static glm::mat3 ToGlmMat3(const Matrix3x3 &mat);
 		// operator
 		operator glm::mat3() const;
+		Vector3 operator* (const Vector3& vec3);
 	private:
 		float entries[3][3];
 	};
@@ -103,7 +107,7 @@ namespace KritiaEngine {
 		/// <summary>
 		/// Get the perspective matrix
 		/// </summary>
-		/// <param name="fovy"> field of view on y direction</param>
+		/// <param name="fovy"> field of view on y direction in degree</param>
 		/// <param name="aspect">aspect ratio</param>
 		/// <param name="">near plane distance</param>
 		/// <param name="">far plane distance</param>
@@ -156,6 +160,7 @@ namespace KritiaEngine {
 
 		// operators
 		Matrix4x4 operator* (const Matrix4x4& mat);
+		Vector4 operator* (const Vector4& vec4);
 		void operator *= (const Matrix4x4& mat);
 		operator glm::mat4() const;
 		/// <summary>
@@ -177,6 +182,14 @@ namespace KritiaEngine {
 		Quaternion();
 		Quaternion(float x, float y, float z, float w);
 		Quaternion(const glm::quat& quat);
+		/// <summary>
+		/// Same as FromRotationMatrix
+		/// </summary>
+		Quaternion(const Matrix4x4& mat);
+		/// <summary>
+		/// Same as FromTwoVectors
+		/// </summary>
+		Quaternion(const Vector3& vec1, const Vector3& vec2);
 		float w, x, y, z;
 		static Vector3 ToEuler(const Quaternion& quat);
 		static Quaternion Normalize(const Quaternion& quat);
@@ -186,16 +199,22 @@ namespace KritiaEngine {
 		/// <summary>
 		/// Convert a quaternion to a 4x4 rotation matrix
 		/// </summary>
-		static Matrix4x4 RotationMatrix(const Quaternion& quat);
+		static Matrix4x4 ToRotationMatrix(const Quaternion& quat);
 		/// <summary>
 		/// Returns a rotation that rotates z degrees around the z axis, x degrees around the x axis, and y degrees around the y axis; applied in that order.
 		/// </summary>
-		static Quaternion Euler(float x, float y, float z);
+		static Quaternion FromEuler(float x, float y, float z);
+		/// <summary>
+		/// The quaternion of the rotation from vec1 to vec2
+		/// </summary>
+		static Quaternion FromTwoVectors(const Vector3& vec1, const Vector3& vec2);
+		static Quaternion FromRoationMatrix(const Matrix4x4& mat);
 
 		Quaternion operator* (const Quaternion& quat);
 		void operator*= (const Quaternion& quat);
 		operator glm::quat() const;
 		bool operator== (const Quaternion& quat);
+		bool operator!= (const Quaternion& quat);
 	};
 }
 

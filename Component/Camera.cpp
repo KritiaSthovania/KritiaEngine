@@ -3,6 +3,7 @@
 #include "../CoreModule/Time.h"
 #include "../CoreModule/Debug.h"
 #include "../CoreModule/Mathf.h"
+#include "Transform.h"
 using namespace KritiaEngine;
 using namespace glm;
 
@@ -14,10 +15,10 @@ void Camera::EditorCameraUpdate() {
     //控制视角和移动
     GLFWwindow* window = Input::GetWindow();
     float deltaTime = Time::deltaTime;
-    ProcessMouseScroll(Input::GetMouseScrollOffset());
-    Move();
+    EditorProcessMouseScroll(Input::GetMouseScrollOffset());
+    EditorMove();
     if (Input::GetMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
-        ProcessMouseMovement(Input::GetMouseXOffset(), Input::GetMouseYOffset(), true);
+        EditorProcessMouseMovement(Input::GetMouseXOffset(), Input::GetMouseYOffset(), true);
     }
 }
 
@@ -35,8 +36,8 @@ KritiaEngine::Camera::Camera()
     Yaw = -90;
     Pitch = 0;
     MouseSensitivity = 0.1f;
-    Zoom = 45.f;
-    UpdateCameraVectors();
+    Fovy = 45.f;
+    EditorUpdateCameraVectors();
 }
 
 KritiaEngine::Camera::Camera(GameObject* gameObject)
@@ -54,23 +55,30 @@ KritiaEngine::Camera::Camera(GameObject* gameObject)
     Yaw = -90;
     Pitch = 0;
     MouseSensitivity = 0.1f;
-    Zoom = 45.f;
-    UpdateCameraVectors();
+    Fovy = 45.f;
+    EditorUpdateCameraVectors();
 }
 
 Matrix4x4 Camera::GetViewMatrix() {
-	return Matrix4x4::LookAt(Position, Position + Forward, Up);
+    if (editorCamera != nullptr) {
+        return Matrix4x4::LookAt(Position, Position + Forward, Up);
+    } else {
+        return Matrix4x4::LookAt(Transform()->position, Transform()->forward, Transform()->up);
+    }
+
 }
 
 Vector3 KritiaEngine::Camera::GetPosition()
 {
     if (editorCamera != nullptr) {
         return Position;
+    } else {
+        return Transform()->position;
     }
 }
 
 //only in editor
-void Camera::Move() {
+void Camera::EditorMove() {
     float velocity = Speed * Time::deltaTime;
     if (Input::GetKeyDown(GLFW_KEY_W)) {
         Position += Forward * velocity;
@@ -87,7 +95,7 @@ void Camera::Move() {
 }
 
 //only in editor
-void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true) {
+void Camera::EditorProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true) {
     xoffset *= MouseSensitivity;
     yoffset *= MouseSensitivity;
 
@@ -105,21 +113,21 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constr
     }
 
     // update Forward, Right and Up Vectors using the updated Euler angles
-    UpdateCameraVectors();
+    EditorUpdateCameraVectors();
 }
 
 // processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis, only in editor
-void Camera::ProcessMouseScroll(float yoffset) {
-    Zoom -= (float)yoffset;
-    if (Zoom < 1.0f) {
-        Zoom = 1.0f;
+void Camera::EditorProcessMouseScroll(float yoffset) {
+    Fovy -= (float)yoffset;
+    if (Fovy < 1.0f) {
+        Fovy = 1.0f;
     }
-    if (Zoom > 45.0f) {
-        Zoom = 45.0f;
+    if (Fovy > 45.0f) {
+        Fovy = 45.0f;
     }
 }
 
-void Camera::UpdateCameraVectors() {
+void Camera::EditorUpdateCameraVectors() {
     // calculate the new Forward vector
     Vector3 forward;
     forward.x = Mathf::Cos(Yaw) * Mathf::Cos(Pitch);

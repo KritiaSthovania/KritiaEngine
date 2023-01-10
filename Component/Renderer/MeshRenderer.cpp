@@ -94,32 +94,34 @@ void MeshRenderer::Render(const std::shared_ptr<KritiaEngine::Camera>& camera) {
 		UpdateMaterial();
 	}
 	Matrix4x4 model = Matrix4x4::Identity();
-	model = Mathf::Translate(model, Transform()->Position);
-	model *= Quaternion::RotationMatrix(Transform()->Rotation);
-	model = Mathf::Scale(model, Transform()->Scale);
+	model = Mathf::Translate(model, Transform()->position);
+	model *= Quaternion::ToRotationMatrix(Transform()->rotation);
+	model = Mathf::Scale(model, Transform()->scale);
 	for (int i = 0; i < meshFilter->mesh->submeshSize; i++) {
-		RenderingProvider::RenderSubmesh(meshFilter, materials[i], i, model, camera->GetPosition(), Transform()->Position);
+		RenderingProvider::RenderSubmesh(meshFilter, materials[i], i, model, camera->GetPosition(), Transform()->position);
 	}
 	for (int i = this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(); i < materials.size(); i++) {
-		RenderingProvider::RenderSubmesh(meshFilter, materials[i], i - this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(), model, camera->GetPosition(), Transform()->Position);
+		RenderingProvider::RenderSubmesh(meshFilter, materials[i], i - this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(), model, camera->GetPosition(), Transform()->position);
 	}
 }
 
 
-void KritiaEngine::MeshRenderer::RenderShadowMap(const std::shared_ptr<Light>& light) {
-	if (!initialized) {
-		Initialize();
-	}
-	// materials have changed
-	if (materialSize != materials.size()) {
-		UpdateMaterial();
-	}
-	Matrix4x4 model = Matrix4x4::Identity();
-	model = Mathf::Translate(model, Transform()->Position);
-	model *= Quaternion::RotationMatrix(Transform()->Rotation);
-	model = Mathf::Scale(model, Transform()->Scale);
-	for (int i = 0; i < meshFilter->mesh->submeshSize; i++) {
-		RenderingProvider::RenderShadowMap(meshFilter, i, model, light);
+void KritiaEngine::MeshRenderer::RenderShadowMap(Light* light) {
+	if (light->castingShadow) {
+		if (!initialized) {
+			Initialize();
+		}
+		// materials have changed
+		if (materialSize != materials.size()) {
+			UpdateMaterial();
+		}
+		Matrix4x4 model = Matrix4x4::Identity();
+		model = Mathf::Translate(model, Transform()->position);
+		model *= Quaternion::ToRotationMatrix(Transform()->rotation);
+		model = Mathf::Scale(model, Transform()->scale);
+		for (int i = 0; i < meshFilter->mesh->submeshSize; i++) {
+			RenderingProvider::RenderShadowMap(meshFilter, i, model, light);
+		}
 	}
 }
 

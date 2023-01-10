@@ -6,9 +6,9 @@ namespace KritiaEngine{
 		static int ScreenWidth;
 		static int ScreenHeight;
 		static float NearPlaneDistant;
-		static float FarPlaneDistant;
+		static float FarPlaneDistance;
 		static bool UseOpenGL;
 		static bool UseGLM;
-		static int ShadowWidth, shadowHeight;
+		static int ShadowWidth, ShadowHeight;
 	};
 }

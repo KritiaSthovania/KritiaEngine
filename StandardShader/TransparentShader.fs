@@ -30,9 +30,9 @@ struct PointLight{
     float linear;
     float quadratic;
 
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
+    float ambient;
+    float diffuse;
+    float specular;
 };
 
 uniform PointLight pointLights[NR_POINT_LIGHTS];
@@ -46,9 +46,9 @@ struct SpotLight{
     float quadratic;
     float cutOffCosInner;
     float cutOffCosOuter;
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
+    float ambient;
+    float diffuse;
+    float specular;
 };
 // spot light
 

@@ -24,6 +24,10 @@ float KritiaEngine::Mathf::Radians(float degrees)
 	return glm::radians(degrees);
 }
 
+float KritiaEngine::Mathf::Sqrt(float number) {
+	return glm::sqrt(number);
+}
+
 Matrix4x4 KritiaEngine::Mathf::Translate(const Matrix4x4& mat4, const Vector3& vec3)
 {
 	if (Settings::UseGLM) {

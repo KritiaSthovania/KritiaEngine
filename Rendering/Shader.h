@@ -18,7 +18,9 @@ namespace KritiaEngine {
         // constructor generates the shader on the fly
         // ------------------------------------------------------------------------
         Shader(const char* vertexPath, const char* fragmentPath);
+        Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
         void LoadShaderFile(const char* vertexPath, const char* fragmentPath);
+        void LoadShaderFile(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
         // activate the shader
         // ------------------------------------------------------------------------
         void Use();

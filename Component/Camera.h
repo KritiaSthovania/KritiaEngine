@@ -9,11 +9,10 @@ namespace KritiaEngine {
 		Camera(GameObject* gameObject);
 		Matrix4x4 GetViewMatrix();
 		Vector3 GetPosition();
-		float Speed;
-		float MouseSensitivity;
-		float Zoom;
-		float Yaw;
-		float Pitch;
+		/// <summary>
+		/// fov in y direction in degree
+		/// </summary>
+		float Fovy;
 		// Current Rendering Camera
 		static std::shared_ptr<Camera> current;
 		static std::shared_ptr<Camera> editorCamera;
@@ -31,11 +30,16 @@ namespace KritiaEngine {
 
 	private:
 		// Editor-Only funcions
-		void Move();
-		void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch);
-		void ProcessMouseScroll(float yoffset);
+		float Speed;
+		float MouseSensitivity;
+
+		float Yaw;
+		float Pitch;
+		void EditorMove();
+		void EditorProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch);
+		void EditorProcessMouseScroll(float yoffset);
 		// calculates the front vector from the Camera's (updated) Euler Angles
-		void UpdateCameraVectors();
+		void EditorUpdateCameraVectors();
 		Vector3 Position;
 		Vector3 Up;
 		Vector3 Right;

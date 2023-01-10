@@ -16,7 +16,13 @@ namespace KritiaEngine::Rendering{
 		};
 		static void Initialize();
 		static void ClearFramebuffer();
-		static void LoadCubeMap(const std::vector<Texture>& cubeTextures, unsigned int* id);
+		/// <summary>
+		/// Load a cube map
+		/// </summary>
+		/// <param name="cubeTextures">six textures</param>
+		/// <param name="id"></param>
+		/// <returns>the texture ID</returns>
+		static unsigned int LoadCubeMap(const std::vector<Texture>& cubeTextures);
 		/// <summary>
 		/// Load a 2D texture and return the id, call LoadCubeMap if you want to load a cube map.
 		/// </summary>
@@ -25,7 +31,7 @@ namespace KritiaEngine::Rendering{
 		static void RenderSkybox(Matrix4x4 projection, Matrix4x4 view);
 		static void SetupMesh(const std::shared_ptr<Mesh>& mesh);
 		static void RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos);
-		static void RenderShadowMap(const std::shared_ptr<MeshFilter>& meshFilter, int submeshIndex, const Matrix4x4& model, const std::shared_ptr<Light>& light);
+		static void RenderShadowMap(const std::shared_ptr<MeshFilter>& meshFilter, int submeshIndex, const Matrix4x4& model, Light* light);
 		/// <summary>
 		/// Update the uniform buffer "MatricesVP" in the order of view and projection
 		/// </summary>
@@ -33,9 +39,9 @@ namespace KritiaEngine::Rendering{
 		/// <param name="projection">the projection matrix</param>
 		static void UpdateUniformBufferMatricesVP(const Matrix4x4& view, const Matrix4x4& projection);
 		static void RenderGPUInstances(bool transparent);
-		static void SetupRenderShadowMap();
+		static void SetupRenderShadowMap(Light* light);
 		static void SetupRenderSubmesh();
-		static unsigned int GetShadowMapID();
+		static void CreateShadowMap(Light* light);
 		static bool depthTestEnabled;
 		static bool blendEnabled;
 		static bool backFaceCullingEnabled;
@@ -43,7 +49,6 @@ namespace KritiaEngine::Rendering{
 		static bool gammaCorrectionEnabled;
 		static bool shadowEnabled;
 	private:
-		static void CreateShadowMap();
 		static void CreateSkybox();
 		static float skyboxVertices[108];
 		static std::vector<Texture> skyboxTextures;

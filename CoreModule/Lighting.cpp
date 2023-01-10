@@ -7,37 +7,56 @@ using namespace KritiaEngine;
 std::shared_ptr<KritiaEngine::Light> LightingSystem::MainLightSource = nullptr;
 const int LightingSystem::MaxSpotLightsForOneObject = 1;
 const int LightingSystem::MaxPointLightsForOneObject = 4;
-std::list<std::shared_ptr<Light>> LightingSystem::SpotLights = std::list<std::shared_ptr<Light>>();
-std::list<std::shared_ptr<Light>> LightingSystem::PointLights = std::list<std::shared_ptr<Light>>();
+std::list<Light*> LightingSystem::Lights = std::list<Light*>();
 
-std::vector<std::shared_ptr<Light>> LightingSystem::GetSpotLightAroundPos(const Vector3& pos) {
-    std::vector<std::shared_ptr<Light>> result = std::vector<std::shared_ptr<Light>>(MaxSpotLightsForOneObject);
+void KritiaEngine::Lighting::LightingSystem::AddLight(Light* light) {
+    Lights.push_back(light);
+}
+
+void KritiaEngine::Lighting::LightingSystem::RemoveLight(Light* light) {
+    Lights.remove(light);
+}
+
+std::vector<Light*> LightingSystem::GetSpotLightAroundPos(const Vector3& pos) {
+    std::vector<Light*> result = std::vector<Light*>();
+    std::list<Light*> tmp(Lights);
     for (int i = 0; i < MaxSpotLightsForOneObject; i++) {
         float distance = FLT_MAX;
-        std::shared_ptr<Light> closest;
-        for (std::list<std::shared_ptr<Light>>::iterator iter = SpotLights.begin(); iter != SpotLights.end(); iter++) {
-            float dist = Vector3::Magnitude((*iter)->Transform()->Position - pos);
-            if (dist < distance) {
-                closest = *iter;
+        Light* closest = nullptr;
+        for (std::list<Light*>::iterator iter = Lights.begin(); iter != Lights.end(); iter++) {
+            if ((*iter)->type == LightType::Spot) {
+                float dist = Vector3::Magnitude((*iter)->Transform()->position - pos);
+                if (dist < distance) {
+                    closest = *iter;
+                }
             }
         }
-        result.push_back(closest);
+        if (closest != nullptr) {
+            result.push_back(closest);
+            tmp.remove(closest);
+        }
     }
     return result;
 }
 
-std::vector<std::shared_ptr<Light>> KritiaEngine::Lighting::LightingSystem::GetPointLightAroundPos(const Vector3& pos) {
-    std::vector<std::shared_ptr<Light>> result = std::vector<std::shared_ptr<Light>>(MaxPointLightsForOneObject);
+std::vector<Light*> KritiaEngine::Lighting::LightingSystem::GetPointLightAroundPos(const Vector3& pos) {
+    std::vector<Light*> result = std::vector<Light*>();
+    std::list<Light*> tmp(Lights);
     for (int i = 0; i < MaxPointLightsForOneObject; i++) {
         float distance = FLT_MAX;
-        std::shared_ptr<Light> closest;
-        for (std::list<std::shared_ptr<Light>>::iterator iter = PointLights.begin(); iter != PointLights.end(); iter++) {
-            float dist = Vector3::Magnitude((*iter)->Transform()->Position - pos);
-            if (dist < distance) {
-                closest = *iter;
+        Light* closest = nullptr;
+        for (std::list<Light*>::iterator iter = tmp.begin(); iter != tmp.end(); iter++) {
+            if ((*iter)->type == LightType::Point) {
+                float dist = Vector3::Magnitude((*iter)->Transform()->position - pos);
+                if (dist < distance) {
+                    closest = *iter;
+                }
             }
         }
-        result.push_back(closest);
+        if (closest != nullptr) {
+            result.push_back(closest);
+            tmp.remove(closest);
+        }
     }
     return result;
 }

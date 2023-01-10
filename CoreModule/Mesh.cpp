@@ -33,6 +33,7 @@ KritiaEngine::Mesh KritiaEngine::Mesh::Cube() {
     material->shininess = 32;
     material->renderMode = Material::Opaque;
     material->mainTexture = std::shared_ptr<Texture>(new Texture("./Assets/Textures/container_diffuse.png"));
+    material->specularMap = std::shared_ptr<Texture>(new Texture("./Assets/Textures/container_specular.png"));
     std::vector<std::shared_ptr<Material>> materials;
     materials.push_back(material);
     return Mesh(submeshVertices, submeshIndices, materials);

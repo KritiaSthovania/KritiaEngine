@@ -20,7 +20,6 @@ namespace KritiaEngine::SceneManagement {
 		Scene(const std::string &name);
 		// All initialize functions don't load resources for now.
 		void Initialize();
-		void InitializeSkybox();
 		void InitializeCamera();
 		void InitializeLighting();
 		void InitializeGameObjects();
