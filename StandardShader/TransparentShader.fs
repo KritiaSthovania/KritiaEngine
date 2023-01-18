@@ -6,6 +6,7 @@ out vec4 FragColor;
 in vec3 Normal;
 in vec3 FragPos;
 in vec2 TexCoord;
+in mat3 TBN;
 
 // material
 uniform vec3 albedo;
@@ -13,6 +14,8 @@ uniform vec3 albedo;
 uniform float shininess;
 uniform sampler2D mainTexture;
 uniform sampler2D specularMap;
+uniform sampler2D normalMap;
+uniform bool hasNormalMap;
 
 // main light source (directional)
 uniform vec3 mainLightColor;
@@ -61,7 +64,14 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec
 
 void main()
 {
-    vec3 norm = normalize(Normal);
+    vec3 norm;
+    if(hasNormalMap){
+        norm = texture(normalMap, TexCoord).rgb;
+        norm = normalize(norm * 2.0 - 1.0);  
+        norm = normalize(TBN * norm);
+    }else{
+        norm = normalize(Normal);
+    }
     vec3 lightDir = -normalize(mainLightDirection);
     vec3 ambientComp = ambientIntensity * mainLightColor * albedo * vec3(texture(mainTexture, TexCoord));
     float diffuseFactor = max(dot(norm, lightDir), 0.0);

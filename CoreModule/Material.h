@@ -35,6 +35,7 @@ namespace KritiaEngine {
 		/// </summary>
 		std::shared_ptr<Texture> mainTexture;
 		std::shared_ptr<Texture> specularMap;
+		std::shared_ptr<Texture> normalMap;
 		std::shared_ptr<Shader> shader;
 		bool GPUInstancingEnabled = false;
 	private:
@@ -42,8 +43,8 @@ namespace KritiaEngine {
         /// Compile Shader, Load Texture
         /// </summary>
 		void Initialize();
-		int diffuseSamplerIndex = 0, specularSamplerIndex = 1, shadowSamplerIndex = 2;
-		unsigned int mainTextureID, specularMapID;
+		int diffuseSamplerIndex = 0, specularSamplerIndex = 1, normalSamplerIndex = 2, shadowSamplerIndex = 3;
+		unsigned int mainTextureID, specularMapID, normalMapID;
 		unsigned int matricesVPID;
 		bool initialized = false;
 	};

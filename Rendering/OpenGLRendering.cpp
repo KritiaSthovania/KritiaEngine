@@ -103,19 +103,19 @@ void KritiaEngine::Rendering::OpenGLRendering::UpdateGPUInstancingBuffer() {
 			glBindVertexArray(VAO);
 			// 顶点属性
 			GLsizei vec4Size = sizeof(glm::vec4);
-			glEnableVertexAttribArray(3);
-			glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
 			glEnableVertexAttribArray(4);
-			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(vec4Size));
+			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
 			glEnableVertexAttribArray(5);
-			glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+			glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(vec4Size));
 			glEnableVertexAttribArray(6);
-			glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+			glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+			glEnableVertexAttribArray(7);
+			glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
 
-			glVertexAttribDivisor(3, 1);
 			glVertexAttribDivisor(4, 1);
 			glVertexAttribDivisor(5, 1);
 			glVertexAttribDivisor(6, 1);
+			glVertexAttribDivisor(7, 1);
 
 			glBindVertexArray(0);
 		}
@@ -205,15 +205,18 @@ void KritiaEngine::Rendering::OpenGLRendering::SetupMesh(const std::shared_ptr<M
 		// 顶点法线
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, Normal));
-		// 顶点纹理坐标
+		// 顶点切线
 		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, TexCoord));
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, Tangent));
+		// 顶点纹理坐标
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, TexCoord));
 
 		glBindVertexArray(0);
 	}
 }
 
-void OpenGLRendering::ApplyMaterialShaderOnRender(const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos, const std::shared_ptr<Shader>& shader, unsigned int mainTextureID, unsigned int specularMapID) {
+void OpenGLRendering::ApplyMaterialShaderOnRender(const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos, const std::shared_ptr<Shader>& shader, const std::shared_ptr<Material>& material) {
 	shader->Use();
 	// main light source should always be a directional light, and there should always be one such light source.
 	SetMainLightProperties(shader);
@@ -228,14 +231,16 @@ void OpenGLRendering::ApplyMaterialShaderOnRender(const Matrix4x4& model, const 
 										 mat4.GetEntry(0, 2), mat4.GetEntry(1, 2), mat4.GetEntry(2, 2) }).Inverse().Transpose();
 	shader->SetMat3("normalMatrix", normalMatrix);
 	shader->SetVec3("viewPos", viewPos);
-	shader->SetMat4("lightSpaceMatrix", Lighting::LightingSystem::MainLightSource->GetLightMatrixVP(0));
+	shader->SetMat4("lightSpaceMatrix", Lighting::LightingSystem::GetMainLightSource()->GetLightMatrixVP(0));
 	// bind maps
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mainTextureID);
+	glBindTexture(GL_TEXTURE_2D, material->mainTextureID);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, specularMapID);
+	glBindTexture(GL_TEXTURE_2D, material->specularMapID);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, Lighting::LightingSystem::MainLightSource->shadowMapID);
+	glBindTexture(GL_TEXTURE_2D, material->normalMapID);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, Lighting::LightingSystem::GetMainLightSource()->shadowMapID);
 }
 
 void OpenGLRendering::RenderSkybox(Matrix4x4 projection, Matrix4x4 view) {
@@ -256,7 +261,7 @@ void OpenGLRendering::RenderSkybox(Matrix4x4 projection, Matrix4x4 view) {
 }
 
 void OpenGLRendering::RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos) {
-	ApplyMaterialShaderOnRender(model, viewPos, pos, material->shader, material->mainTextureID, material->specularMapID);
+	ApplyMaterialShaderOnRender(model, viewPos, pos, material->shader, material);
 	if (meshFilter->mesh != nullptr) {
 		if (material->GPUInstancingEnabled) {
 			OpenGLRendering::UpdateGPUInstancingCount(meshFilter->mesh, material, submeshIndex, model);
@@ -382,11 +387,12 @@ void KritiaEngine::Rendering::OpenGLRendering::CreateSkybox(const std::vector<Te
 
 void KritiaEngine::Rendering::OpenGLRendering::SetMainLightProperties(const std::shared_ptr<Shader>& shader) {
 	// main light source should always be a directional light, and there should always be one such light source.
-	shader->SetVec3("mainLightDirection", Lighting::LightingSystem::MainLightSource->Transform()->forward);
-	shader->SetFloat("ambientIntensity", Lighting::LightingSystem::MainLightSource->ambientIntensity);
-	shader->SetFloat("diffuseIntensity", Lighting::LightingSystem::MainLightSource->diffuseIntensity);
-	shader->SetFloat("specularIntensity", Lighting::LightingSystem::MainLightSource->specularIntensity);
-	shader->SetVec3("mainLightColor", Lighting::LightingSystem::MainLightSource->color.RGB());
+	std::shared_ptr<Light> mainlight = Lighting::LightingSystem::GetMainLightSource();
+	shader->SetVec3("mainLightDirection", mainlight->Transform()->forward);
+	shader->SetFloat("ambientIntensity", mainlight->ambientIntensity);
+	shader->SetFloat("diffuseIntensity", mainlight->diffuseIntensity);
+	shader->SetFloat("specularIntensity", mainlight->specularIntensity);
+	shader->SetVec3("mainLightColor", mainlight->color.RGB());
 }
 
 void KritiaEngine::Rendering::OpenGLRendering::SetPointLightProperties(const Vector3& pos, const std::shared_ptr<Shader>& shader) {

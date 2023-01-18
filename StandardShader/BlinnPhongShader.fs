@@ -7,6 +7,7 @@ in vec3 Normal;
 in vec3 FragPos;
 in vec2 TexCoord;
 in vec4 FragPosLightSpace;
+in mat3 TBN;
 
 // material
 uniform vec3 albedo;
@@ -14,7 +15,10 @@ uniform vec3 albedo;
 uniform float shininess;
 uniform sampler2D mainTexture;
 uniform sampler2D specularMap;
+uniform sampler2D normalMap;
+uniform bool hasNormalMap;
 uniform sampler2D shadowMap;
+
 
 uniform float farPlaneDistance;
 // main light source (directional)
@@ -80,7 +84,14 @@ float CalcSpotShadow(SpotLight light);
 
 void main()
 {
-    vec3 norm = normalize(Normal);
+    vec3 norm;
+    if(hasNormalMap){
+        norm = texture(normalMap, TexCoord).rgb;
+        norm = normalize(norm * 2.0 - 1.0);  
+        norm = normalize(TBN * norm);
+    }else{
+        norm = normalize(Normal);
+    }
     vec3 lightDir = -normalize(mainLightDirection);
     vec3 ambientComp = ambientIntensity * mainLightColor * albedo * vec3(texture(mainTexture, TexCoord));
     float diffuseFactor = max(dot(norm, lightDir), 0.0);

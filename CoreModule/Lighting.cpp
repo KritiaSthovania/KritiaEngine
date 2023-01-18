@@ -60,3 +60,22 @@ std::vector<Light*> KritiaEngine::Lighting::LightingSystem::GetPointLightAroundP
     }
     return result;
 }
+
+std::shared_ptr<Light> KritiaEngine::Lighting::LightingSystem::GetMainLightSource() {
+    if (MainLightSource != nullptr) {
+        return MainLightSource;
+    } else {
+        for (Light* light : Lights) {
+            if (light->type == LightType::Directional) {
+                MainLightSource = std::make_shared<Light>(*light);
+            }
+        }
+    }
+    return MainLightSource;
+}
+
+void KritiaEngine::Lighting::LightingSystem::SetMainLightSource(std::shared_ptr<Light> light) {
+    if (light->type == LightType::Directional) {
+        MainLightSource = light;
+    }
+}

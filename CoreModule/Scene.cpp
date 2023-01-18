@@ -41,7 +41,7 @@ void KritiaEngine::SceneManagement::Scene::InitializeCamera()
 }
 
 void Scene::InitializeLighting() {
-    LightingSystem::MainLightSource = this->mainLightSource->GetComponent<Light>();
+    LightingSystem::GetMainLightSource() = this->mainLightSource->GetComponent<Light>();
 }
 
 void Scene::InitializeGameObjects() {
@@ -55,10 +55,10 @@ void Scene::InitializeGameObjects() {
     //    std::shared_ptr<MeshFilter> meshFilter = object->AddComponent<MeshFilter>();
     //    meshFilter->mesh = mesh;
     //    std::shared_ptr<MeshRenderer> renderer = object->AddComponent<MeshRenderer>();
-    //    object->Transform()->Scale = Vector3(1, 1, 1);
+    //    object->Transform()->scale = Vector3(1, 1, 1);
     //    float randomx = rand() / (double)(RAND_MAX) * 10 - 5;
     //    float randomz = rand() / (double)(RAND_MAX) * 10 - 5;
-    //    object->Transform()->Position = Vector3(randomx, -5, randomz);
+    //    object->Transform()->position = Vector3(randomx, -5, randomz);
     //    rootGameObjects.push_back(object);
     //}
 

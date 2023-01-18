@@ -8,7 +8,7 @@ using namespace KritiaEngine;
 void KritiaEngineEditor::AssetDatabase::ImportModel(const std::string& path, const std::shared_ptr<Mesh>& mesh) {
 	Assimp::Importer importer;
 	// Change primitive to triangles, flip UV coordinates, generate normals.
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
+	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals |  aiProcess_CalcTangentSpace);
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
         return;
@@ -35,6 +35,7 @@ void KritiaEngineEditor::AssetDatabase::ProcessMesh(const std::string& directory
     std::vector<unsigned int> indices;
     std::string diffuseMapPath;
     std::string specularMapPath;
+    std::string normalMapPath;
     //std::vector<KritiaEngine::Texture> textures;
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
@@ -42,6 +43,7 @@ void KritiaEngineEditor::AssetDatabase::ProcessMesh(const std::string& directory
         vertex.Position = Vector3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
         // 处理顶点位置、法线和纹理坐标
         vertex.Normal = Vector3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+        vertex.Tangent = Vector3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
         // if there are texcoords
         if (mesh->mTextureCoords[0])
         {
@@ -64,6 +66,7 @@ void KritiaEngineEditor::AssetDatabase::ProcessMesh(const std::string& directory
         aiMaterial = scene->mMaterials[mesh->mMaterialIndex];
         diffuseMapPath = loadMaterialTextures(aiMaterial, aiTextureType_DIFFUSE, "texture_diffuse");
         specularMapPath = loadMaterialTextures(aiMaterial, aiTextureType_SPECULAR, "texture_specular");
+        normalMapPath = loadMaterialTextures(aiMaterial, aiTextureType_HEIGHT, "texture_normal");
     }
     meshPtr->submeshVertices.push_back(vertices);
     meshPtr->submeshIndices.push_back(indices);
@@ -76,6 +79,9 @@ void KritiaEngineEditor::AssetDatabase::ProcessMesh(const std::string& directory
         }
         if (specularMapPath != "") {
             material->specularMap = std::shared_ptr<Texture>(new Texture(directory + "/" + specularMapPath));
+        }
+        if (normalMapPath != "") {
+            material->normalMap = std::shared_ptr<Texture>(new Texture(directory + "/" + normalMapPath));
         }
         meshPtr->submeshMaterials.push_back(material);
     }

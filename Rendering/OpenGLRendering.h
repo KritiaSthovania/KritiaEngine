@@ -41,7 +41,7 @@ namespace KritiaEngine::Rendering {
 		/// <param name="shader">shader program of the object</param>
 		/// <param name="mainTextureID">mainTextureID of the material</param>
 		/// <param name="specularMapID">specularMapID of the material</param>
-		static void ApplyMaterialShaderOnRender(const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos, const std::shared_ptr<Shader>& shader, unsigned int mainTextureID, unsigned int specularMapID);
+		static void ApplyMaterialShaderOnRender(const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos, const std::shared_ptr<Shader>& shader, const std::shared_ptr<Material>& material);
 		static void RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos);
 		static void RenderShadowMap(const std::shared_ptr<MeshFilter>& meshFilter, int submeshIndex, const Matrix4x4& model, Light* light);
 		static void SetupRenderShadowMap(Light* light);

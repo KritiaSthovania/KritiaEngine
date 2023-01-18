@@ -13,6 +13,7 @@ namespace KritiaEngine {
 		struct Vertex {
 			Vector3 Position;
 			Vector3 Normal;
+			Vector3 Tangent;
 			Vector2 TexCoord;
 		};
 		Mesh() = default;

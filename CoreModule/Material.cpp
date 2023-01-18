@@ -46,8 +46,15 @@ void Material::Initialize() {
 				specularMapID = RenderingProvider::Load2DTexture(specularMap, false);
 			}
 		}
+		if (normalMap != nullptr) {
+			normalMapID = RenderingProvider::Load2DTexture(normalMap, false);
+			shader->SetBool("hasNormalMap", true);
+		} else {
+			shader->SetBool("hasNormalMap", false);
+		}
 		shader->SetInt("mainTexture", diffuseSamplerIndex);
 		shader->SetInt("specularMap", specularSamplerIndex);
+		shader->SetInt("normalMap", normalSamplerIndex);
 		shader->SetInt("shadowMap", shadowSamplerIndex);
 		shader->SetFloat("shininess", shininess);
 		shader->SetVec3("albedo", albedo.RGB());
