@@ -52,9 +52,18 @@ void Material::Initialize() {
 		} else {
 			shader->SetBool("hasNormalMap", false);
 		}
+		if (parallaxMap != nullptr) {
+			parallaxMapID = RenderingProvider::Load2DTexture(parallaxMap, false);
+			shader->SetBool("hasParallaxMap", true);
+			shader->SetFloat("heightScale", 0.1f);
+			shader->SetInt("depthLayers", 10);
+		} else {
+			shader->SetBool("hasParallaxMap", false);
+		}
 		shader->SetInt("mainTexture", diffuseSamplerIndex);
 		shader->SetInt("specularMap", specularSamplerIndex);
 		shader->SetInt("normalMap", normalSamplerIndex);
+		shader->SetInt("parallaxMap", parallaxSamplerIndex);
 		shader->SetInt("shadowMap", shadowSamplerIndex);
 		shader->SetFloat("shininess", shininess);
 		shader->SetVec3("albedo", albedo.RGB());

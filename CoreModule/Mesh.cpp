@@ -37,7 +37,8 @@ KritiaEngine::Mesh KritiaEngine::Mesh::Cube() {
     material->renderMode = Material::Opaque;
     material->mainTexture = std::shared_ptr<Texture>(new Texture("./Assets/Textures/container_diffuse.png"));
     material->specularMap = std::shared_ptr<Texture>(new Texture("./Assets/Textures/container_specular.png"));
-    //material->normalMap = std::shared_ptr<Texture>(new Texture("./Assets/Textures/wall/brickwall_normal.jpg"));
+    //material->normalMap = std::shared_ptr<Texture>(new Texture("./Assets/Textures/wall/bricks2_normal.jpg"));
+    //material->parallaxMap = std::shared_ptr<Texture>(new Texture("./Assets/Textures/wall/bricks2_disp.jpg"));
     std::vector<std::shared_ptr<Material>> materials;
     materials.push_back(material);
     return Mesh(submeshVertices, submeshIndices, materials);

@@ -166,7 +166,7 @@ unsigned int OpenGLRendering::Load2DTexture(const std::shared_ptr<Texture>& text
 			glGenerateMipmap(GL_TEXTURE_2D);
 		} else {
 			{
-				std::cout << "Failed to load texture" << std::endl;
+				std::cout << "Failed to load texture at " << texture->path << std::endl;
 			}
 		}
 
@@ -177,7 +177,7 @@ unsigned int OpenGLRendering::Load2DTexture(const std::shared_ptr<Texture>& text
 			glGenerateMipmap(GL_TEXTURE_2D);
 		} else {
 			{
-				std::cout << "Failed to load texture" << std::endl;
+				std::cout << "Failed to load texture at" << texture->path << std::endl;
 			}
 		}
 	}
@@ -240,6 +240,8 @@ void OpenGLRendering::ApplyMaterialShaderOnRender(const Matrix4x4& model, const 
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, material->normalMapID);
 	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, material->parallaxMapID);
+	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, Lighting::LightingSystem::GetMainLightSource()->shadowMapID);
 }
 
@@ -409,7 +411,7 @@ void KritiaEngine::Rendering::OpenGLRendering::SetPointLightProperties(const Vec
 			shader->SetFloat(str + ".ambient", pointLights[i]->ambientIntensity);
 			shader->SetFloat(str + ".diffuse", pointLights[i]->diffuseIntensity);
 			shader->SetFloat(str + ".specular", pointLights[i]->specularIntensity);
-			glActiveTexture(GL_TEXTURE3 + i);
+			glActiveTexture(GL_TEXTURE5 + i);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, pointLights[i]->shadowMapPointID);
 		} else {
 			break;
@@ -435,7 +437,7 @@ void KritiaEngine::Rendering::OpenGLRendering::SetSpotLightProperties(const Vect
 			shader->SetFloat(str + ".diffuse", spotLights[i]->diffuseIntensity);
 			shader->SetFloat(str + ".specular", spotLights[i]->specularIntensity);
 			shader->SetMat4(str + ".spotLightMatrix", spotLights[i]->GetLightMatrixVP(0));
-			glActiveTexture(GL_TEXTURE3 + Lighting::LightingSystem::MaxPointLightsForOneObject + i);
+			glActiveTexture(GL_TEXTURE5 + Lighting::LightingSystem::MaxPointLightsForOneObject + i);
 			glBindTexture(GL_TEXTURE_2D, spotLights[i]->shadowMapID);
 		} else {
 			break;
