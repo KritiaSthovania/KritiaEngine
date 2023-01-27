@@ -7,7 +7,9 @@ in vec3 Normal;
 in vec3 FragPos;
 in vec2 TexCoord;
 in vec4 FragPosLightSpace;
-in mat3 TBN;
+in vec3 T;
+in vec3 B;
+in vec3 N;
 
 // material
 uniform vec3 albedo;
@@ -89,6 +91,7 @@ float CalcSpotShadow(SpotLight light);
 
 void main()
 {
+    mat3 TBN = mat3(normalize(T), normalize(B), normalize(N));
     vec3 norm;
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 lightDir = -normalize(mainLightDirection);

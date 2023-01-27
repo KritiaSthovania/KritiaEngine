@@ -6,7 +6,9 @@ out vec4 FragColor;
 in vec3 Normal;
 in vec3 FragPos;
 in vec2 TexCoord;
-in mat3 TBN;
+in vec3 T;
+in vec3 B;
+in vec3 N;
 
 // material
 uniform vec3 albedo;
@@ -70,6 +72,7 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec
 
 void main()
 {
+    mat3 TBN = mat3(normalize(T), normalize(B), normalize(N));
     vec3 norm;
     vec2 texCoord;
     vec3 viewDir = normalize(viewPos - FragPos);

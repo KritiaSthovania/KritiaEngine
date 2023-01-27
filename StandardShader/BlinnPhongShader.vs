@@ -9,7 +9,9 @@ out vec3 Normal;
 out vec3 FragPos;
 out vec4 FragPosLightSpace;
 out vec2 TexCoord;
-out mat3 TBN;
+out vec3 T;
+out vec3 B;
+out vec3 N;
 
 layout (std140) uniform matricesVP{
     mat4 view;
@@ -33,11 +35,11 @@ void main()
     TexCoord = aTexCoord;
     FragPosLightSpace = lightSpaceMatrix * vec4(FragPos, 1.0);
     // Gram-Schmidt Process
-    vec3 T = normalize(vec3(model * vec4(aTangent, 0.0)));
-    vec3 N = normalize(vec3(model * vec4(aNormal, 0.0)));
+    T = normalize(vec3(model * vec4(aTangent, 0.0)));
+    N = normalize(vec3(model * vec4(aNormal, 0.0)));
     // re-orthogonalize T with respect to N
     T = normalize(T - dot(T, N) * N);
     // then retrieve perpendicular vector B with the cross product of T and N
-    vec3 B = cross(T, N);
-    TBN = mat3(T, B, N);
+    B = cross(T, N);
+    
 }
