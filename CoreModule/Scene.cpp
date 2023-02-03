@@ -79,7 +79,7 @@ void Scene::InitializeGameObjects() {
     //object->Transform()->position = Vector3(0, 0, 0);
     //rootGameObjects.push_back(object);
 
-    std::shared_ptr<GameObject> object2 = std::shared_ptr<GameObject>(new GameObject());
+    std::shared_ptr<GameObject> object2 = std::shared_ptr<GameObject>(new GameObject("Cube"));
     std::shared_ptr<MeshFilter> meshFilter2 = object2->AddComponent<MeshFilter>();
     //mesh->Vertices = vertices_map;
     //mesh->VerticesSize = sizeof(vertices_map);
@@ -91,7 +91,7 @@ void Scene::InitializeGameObjects() {
     object2->Transform()->position = Vector3(0, -2, 0);
     rootGameObjects.push_back(object2);
 
-    std::shared_ptr<GameObject> obj3 = std::shared_ptr<GameObject>(new GameObject());
+    std::shared_ptr<GameObject> obj3 = std::shared_ptr<GameObject>(new GameObject("Floor"));
     std::shared_ptr<MeshFilter> meshFilter3 = obj3->AddComponent<MeshFilter>();
     meshFilter3->mesh = mesh2;
     std::shared_ptr<MeshRenderer> renderer3 = obj3->AddComponent<MeshRenderer>();

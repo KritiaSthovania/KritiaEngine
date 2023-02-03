@@ -137,6 +137,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CoreModule\Manager\BehaviourManager.cpp" />
+    <ClCompile Include="Editor\EditorWindow.cpp" />
     <ClCompile Include="Editor\AssetDatabase.cpp" />
     <ClCompile Include="Component\Behaviour.cpp" />
     <ClCompile Include="Component\Camera.cpp" />
@@ -161,6 +162,8 @@
     <ClCompile Include="CoreModule\Texture.cpp" />
     <ClCompile Include="CoreModule\Time.cpp" />
     <ClCompile Include="CoreModule\Utilities.cpp" />
+    <ClCompile Include="Editor\ImguiManager.cpp" />
+    <ClCompile Include="Editor\EditorWindows\HierachyWindow.cpp" />
     <ClCompile Include="includes\imgui\backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="includes\imgui\backends\imgui_impl_opengl3.cpp" />
     <ClCompile Include="includes\imgui\imgui.cpp" />
@@ -178,6 +181,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreModule\Manager\BehaviourManager.h" />
+    <ClInclude Include="Editor\EditorWindow.h" />
     <ClInclude Include="Editor\AssetDatabase.h" />
     <ClInclude Include="Component\Behaviour.h" />
     <ClInclude Include="Component\Camera.h" />
@@ -202,6 +206,8 @@
     <ClInclude Include="CoreModule\Texture.h" />
     <ClInclude Include="CoreModule\Time.h" />
     <ClInclude Include="CoreModule\Utilities.h" />
+    <ClInclude Include="Editor\ImguiManager.h" />
+    <ClInclude Include="Editor\EditorWindows\HierachyWindow.h" />
     <ClInclude Include="includes\imgui\backends\imgui_impl_glfw.h" />
     <ClInclude Include="includes\imgui\backends\imgui_impl_opengl3.h" />
     <ClInclude Include="includes\imgui\backends\imgui_impl_opengl3_loader.h" />

@@ -4,18 +4,20 @@
 #include "CoreModule/Input.h"
 #include "CoreModule/SceneManager.h"
 #include "CoreModule/Manager/RendererManager.h"
+#include "Editor/ImguiManager.h"
 
 using namespace KritiaEngine;
 using namespace KritiaEngine::SceneManagement;
 using namespace KritiaEngine::Manager;
 using namespace KritiaEngine::Rendering;
+using namespace KritiaEngine::Editor::GUI;
 
 int main() 
 {
     if (!InitializeWindow()) {
         return -1;
     }
-
+    InitializeGUI();
     InitializeCoreModules();
 
     // 游戏循环, Tick
@@ -39,6 +41,7 @@ int main()
 void Render() {
     RenderingProvider::ClearFramebuffer();
     RendererManager::Render();
+    ImguiManager::RenderGUI();
     glfwSwapBuffers(window);
 }
 
@@ -83,6 +86,10 @@ bool InitializeWindow()
     return true;
 }
 
+void InitializeGUI() {
+    ImguiManager::Initialize(window, editor);
+}
+
 void ProcessInput() {
     if (Input::GetKeyDown(GLFW_KEY_ESCAPE)) {
         glfwSetWindowShouldClose(window, true);
@@ -99,3 +106,4 @@ void InitializeCoreModules() {
     SceneManager::Initialize(editor);
     RenderingProvider::Initialize();
 }
+
