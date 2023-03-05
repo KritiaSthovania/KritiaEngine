@@ -11,6 +11,7 @@ namespace KritiaEngine {
 	class Component : public Object {
 		friend class KritiaEngine::Manager::BehaviourManager;
 		friend class KritiaEngine::Editor::GUI::InspectorWindow;
+		friend class GameObject;
 	public:
 		Component();
 		Component(GameObject* gameObject);
@@ -27,7 +28,12 @@ namespace KritiaEngine {
 		// Must manually add this component to BehaviourManager
 		virtual void ComponentUpdate();
 		virtual void OnInspector();
-		virtual void Serialize();
+		/// <summary>
+		/// Serialize the information of a component to a GameObject
+		/// </summary>
+		/// <param name="json">json of the GameObject</param>
+		/// <param name="componentIndex">index of the component, start from 0</param>
+		virtual void ComponentSerialize(nlohmann::json& json, int componentIndex);
 	};
 }
 

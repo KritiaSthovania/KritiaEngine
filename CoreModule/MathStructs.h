@@ -174,7 +174,6 @@ namespace KritiaEngine {
 
 	struct Quaternion {
 		friend std::ostream& operator<<(std::ostream& cout, Quaternion& quat);
-
 	public:
 		/// <summary>
 		/// The identity. Better use Quaternion::Identity()

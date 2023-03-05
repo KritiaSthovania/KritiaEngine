@@ -14,7 +14,6 @@ KritiaEngine::GameObject::GameObject() {
 KritiaEngine::GameObject::GameObject(const char* name) {
 	components.push_back(std::shared_ptr<KritiaEngine::Transform>(new KritiaEngine::Transform(this)));
 	this->name = name;
-	Serialize();
 }
 
 std::shared_ptr<KritiaEngine::Transform> KritiaEngine::GameObject::Transform()
@@ -31,9 +30,13 @@ void KritiaEngine::GameObject::Serialize() {
 	json json;
 	json["Type"] = "GameObject";
 	json["Name"] = this->name;
+	json["Number Of Components"] = this->components.size();
+	int componentIndex = 0;
 	for (std::shared_ptr<Component> comp : components) {
-		comp->Serialize();
+		comp->ComponentSerialize(json, componentIndex);
+		componentIndex++;
 	}
+	std::cout << json << std::endl;
 }
 
 

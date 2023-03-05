@@ -22,9 +22,11 @@ namespace KritiaEngine{
 		Vector3 cachedRight;
 		Quaternion cachedRotation;
 		Vector3 rotationEuler;
+		Vector3 cachedRotationEuler;
 		void ComponentUpdate();
 		void OnInspector();
 		std::list<std::shared_ptr<Transform>> children;
+		virtual void ComponentSerialize(nlohmann::json& json, int componentIndex);
 	};
 }
 

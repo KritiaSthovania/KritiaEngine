@@ -19,4 +19,7 @@ void KritiaEngine::Component::ComponentUpdate() {}
 
 void KritiaEngine::Component::OnInspector() {}
 
-void KritiaEngine::Component::Serialize() {}
+void KritiaEngine::Component::ComponentSerialize(nlohmann::json& json, int componentIndex) {
+
+}
+

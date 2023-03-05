@@ -4,6 +4,8 @@
 #include "Mathf.h"
 using namespace KritiaEngine;
 
+constexpr float epsilon = 1e-6;
+
 KritiaEngine::Vector2::Vector2(float x, float y) {
 	this->x = x;
 	this->y = y;
@@ -26,7 +28,10 @@ KritiaEngine::Vector2::operator glm::vec2() const {
 	return glm::vec2(x, y);
 }
 
-
+std::ostream& KritiaEngine::operator<<(std::ostream& cout, Vector2& vec) {
+	cout << "(" << vec.x << ", " << vec.y << ")";
+	return cout;
+}
 
 
 //----------Vector3------------------------
@@ -133,21 +138,16 @@ void KritiaEngine::Vector3::operator/=(float a)
 }
 
 bool KritiaEngine::Vector3::operator==(const Vector3& vec) {
-	return x == vec.x && y == vec.y && z == vec.z;
+	return abs(x - vec.x) < epsilon && abs(y - vec.y) < epsilon && abs(z - vec.z) < epsilon;
 }
 
 bool KritiaEngine::Vector3::operator!=(const Vector3& vec) {
-	return x != vec.x || y != vec.y || z != vec.z;
+	return !(*this==vec);
 }
 
 KritiaEngine::Vector3::operator glm::vec3() const
 {
 	return glm::vec3(x, y, z);
-}
-
-std::ostream& KritiaEngine::operator<<(std::ostream& cout, Vector2& vec) {
-	cout << "(" << vec.x << ", " << vec.y << ")";
-	return cout;
 }
 
 std::ostream& KritiaEngine::operator<<(std::ostream& cout, Vector3& vec) {
@@ -247,11 +247,11 @@ void KritiaEngine::Vector4::operator/=(float a)
 }
 
 bool KritiaEngine::Vector4::operator==(const Vector4& vec) {
-	return x == vec.x && y == vec.y && z == vec.z && w == vec.w;
+	return abs(x - vec.x) < epsilon && abs(y - vec.y) < epsilon && abs(z - vec.z) < epsilon && abs(w - vec.w) < epsilon;
 }
 
 bool KritiaEngine::Vector4::operator!=(const Vector4& vec) {
-	return x != vec.x || y != vec.y || z != vec.z || w != vec.w;
+	return !(*this == vec);
 }
 
 KritiaEngine::Vector4::operator glm::vec4() const
@@ -268,12 +268,6 @@ Vector4 KritiaEngine::operator*(float a, const Vector4& vec)
 {
 	return Vector4(a * vec.x, a * vec.y, a * vec.z, a * vec.w);
 }
-
-std::ostream& KritiaEngine::operator<<(std::ostream& cout, Quaternion& quat) {
-	cout << "(" << quat.x << ", " << quat.y << ", " << quat.z << ", " << quat.w << ")";
-	return cout;
-}
-
 
 //---------Matrix4x4--------------
 
@@ -568,9 +562,9 @@ KritiaEngine::Quaternion::Quaternion(const Vector3& vec1, const Vector3& vec2) {
 
 Vector3 KritiaEngine::Quaternion::ToEuler(const Quaternion& quat) {
 	Vector3 vec = glm::eulerAngles((glm::quat)quat);
-	vec.x = vec.x * (180 / Mathf::PI);
-	vec.y = vec.y * (180 / Mathf::PI);
-	vec.z = vec.z * (180 / Mathf::PI);
+	vec.x = glm::degrees(vec.x);
+	vec.y = glm::degrees(vec.y);
+	vec.z = glm::degrees(vec.z);
 	return vec;
 }
 
@@ -602,7 +596,7 @@ Quaternion KritiaEngine::Quaternion::FromEuler(float x, float y, float z) {
 	Quaternion quatx = Quaternion(Mathf::Sin(x / 2), 0, 0, Mathf::Cos(x / 2));
 	Quaternion quaty = Quaternion(0, Mathf::Sin(y / 2), 0, Mathf::Cos(y / 2));
 	Quaternion quatz = Quaternion(0, 0, Mathf::Sin(z / 2), Mathf::Cos(z / 2));
-	return quaty * quatx * quatz;
+	return quatz * quaty * quatx;
 }
 
 Quaternion KritiaEngine::Quaternion::FromTwoVectors(const Vector3& vec1, const Vector3& vec2) {
@@ -642,11 +636,16 @@ KritiaEngine::Quaternion::operator glm::quat() const {
 }
 
 bool KritiaEngine::Quaternion::operator==(const Quaternion& quat) {
-	return x == quat.x && y == quat.y && z == quat.z && w == quat.w;
+	return abs(x - quat.x) < epsilon && abs(y - quat.y) < epsilon && abs(z - quat.z) < epsilon && abs(w - quat.w) < epsilon;
 }
 
 bool KritiaEngine::Quaternion::operator!=(const Quaternion& quat) {
-	return x != quat.x || y != quat.y || z != quat.z || w != quat.w;
+	return !(*this == quat);
+}
+
+std::ostream& KritiaEngine::operator<<(std::ostream& cout, Quaternion& quat) {
+	cout << "(" << quat.x << ", " << quat.y << ", " << quat.z << ", " << quat.w << ")";
+	return cout;
 }
 
 

@@ -21,12 +21,16 @@ KritiaEngine::SceneManagement::Scene::Scene(const std::string &name)
 {
     this->name = name;
     // Create a camera and a light source
-    currentCamera = std::shared_ptr<GameObject>(new GameObject("Main Camera"));
+    std::shared_ptr<GameObject> mainCamera = std::shared_ptr<GameObject>(new GameObject("Main Camera"));
+    currentCamera = mainCamera;
     currentCamera->AddComponent<Camera>();
-    this->mainLightSource = std::shared_ptr<GameObject>(new GameObject("Main Light Source"));
+    rootGameObjects.push_back(mainCamera);
+    std::shared_ptr<GameObject> mainLightSource = std::shared_ptr<GameObject>(new GameObject("Main Light Source"));
+    this->mainLightSource = mainLightSource;
     std::shared_ptr<Light> light = this->mainLightSource->AddComponent<Light>();
     light->color = Color(1, 1, 1, 1);
     light->Transform()->forward = Vector3::Normalize(Vector3(-1, -1, 1));
+    rootGameObjects.push_back(mainLightSource);
 }
 
 void KritiaEngine::SceneManagement::Scene::Initialize() {
@@ -89,6 +93,7 @@ void Scene::InitializeGameObjects() {
     std::shared_ptr<MeshRenderer> renderer2 = object2->AddComponent<MeshRenderer>();
     object2->Transform()->scale = Vector3(1, 1, 1);
     object2->Transform()->position = Vector3(0, -2, 0);
+    object2->Transform()->rotation = Quaternion::FromEuler(0, 0, 0);
     rootGameObjects.push_back(object2);
 
     std::shared_ptr<GameObject> obj3 = std::shared_ptr<GameObject>(new GameObject("Floor"));
