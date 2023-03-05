@@ -9,6 +9,7 @@ Transform::Transform(GameObject* gameObject) {
 	forward = Vector3(0, 0, 1);
 	right = Vector3(1, 0, 0);
 	up = Vector3(0, 1, 0);
+	rotationEuler = Quaternion::ToEuler(rotation);
 	cachedRotation = rotation;
 	cachedForward = forward;
 	cachedRight = right;
@@ -18,7 +19,8 @@ Transform::Transform(GameObject* gameObject) {
 
 void KritiaEngine::Transform::ComponentUpdate() {
 	// Update the rotation and three direction vectors
-	if (cachedRotation != rotation) {
+	if (cachedRotation != rotation || rotationEuler != Quaternion::ToEuler(rotation)) {
+		rotation = Quaternion::FromEuler(rotationEuler.x, rotationEuler.y, rotationEuler.z);
 		cachedRotation = rotation;
 		Matrix3x3 rotationMatrix = (Matrix3x3)Quaternion::ToRotationMatrix(rotation);
 		up = rotationMatrix * up;
@@ -30,6 +32,7 @@ void KritiaEngine::Transform::ComponentUpdate() {
 	} else if (cachedUp != up) {
 		rotation = Quaternion::FromTwoVectors(cachedUp, up);
 		cachedRotation = rotation;
+		rotationEuler = Quaternion::ToEuler(rotation);
 		up = Vector3::Normalize(up);
 		cachedUp = up;
 		Matrix3x3 rotationMatrix = (Matrix3x3)Quaternion::ToRotationMatrix(rotation);
@@ -40,6 +43,7 @@ void KritiaEngine::Transform::ComponentUpdate() {
 	} else if (cachedForward != forward) {
 		rotation = Quaternion::FromTwoVectors(cachedForward, forward);
 		cachedRotation = rotation;
+		rotationEuler = Quaternion::ToEuler(rotation);
 		forward = Vector3::Normalize(forward);
 		cachedForward = forward;
 		Matrix3x3 rotationMatrix = (Matrix3x3)Quaternion::ToRotationMatrix(rotation);
@@ -50,6 +54,7 @@ void KritiaEngine::Transform::ComponentUpdate() {
 	} else if (cachedRight != right) {
 		rotation = Quaternion::FromTwoVectors(cachedRight, right);
 		cachedRotation = rotation;
+		rotationEuler = Quaternion::ToEuler(rotation);
 		right = Vector3::Normalize(right);
 		cachedRight = right;
 		Matrix3x3 rotationMatrix = (Matrix3x3)Quaternion::ToRotationMatrix(rotation);
@@ -58,4 +63,20 @@ void KritiaEngine::Transform::ComponentUpdate() {
 		forward = rotationMatrix * forward;
 		cachedForward = forward;
 	}
+}
+
+void KritiaEngine::Transform::OnInspector() {
+	if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Text("Position");
+		ImGui::SameLine();
+		ImGui::InputFloat3("##Position", &position.x);
+		ImGui::Text("Rotation");
+		ImGui::SameLine();
+		ImGui::InputFloat3("##Rotation", &rotationEuler.x);
+		ImGui::Text("Scale   ");
+		ImGui::SameLine();
+		ImGui::InputFloat3("##Scale", &scale.x);
+		ImGui::TreePop();
+	} 
+
 }

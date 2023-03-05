@@ -7,7 +7,7 @@
 ## 第三方库
 ###
 - 已包含：
-[stb_image.h](https://github.com/nothings/stb/blob/master/stb_image.h), [imgui](https://github.com/ocornut/imgui)
+[stb_image.h](https://github.com/nothings/stb/blob/master/stb_image.h), [imgui](https://github.com/ocornut/imgui), [nlohmann json](https://github.com/nlohmann/json)
 - 未包含：
 [glfw](https://www.glfw.org/), [glm](https://github.com/g-truc/glm), [glad](https://glad.dav1d.de/), [assimp](https://github.com/assimp/assimp)
 - 未包含的第三方库推荐直接使用[vcpkg](git@github.com:microsoft/vcpkg.git)安装。

@@ -16,3 +16,7 @@ std::shared_ptr<Transform> KritiaEngine::Component::Transform() {
 }
 
 void KritiaEngine::Component::ComponentUpdate() {}
+
+void KritiaEngine::Component::OnInspector() {}
+
+void KritiaEngine::Component::Serialize() {}

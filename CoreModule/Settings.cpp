@@ -1,8 +1,8 @@
 #include "Settings.h"
 using namespace KritiaEngine;
 
-int Settings::ScreenWidth = 1920;
-int Settings::ScreenHeight = 1080;
+int Settings::ScreenWidth = 3840;
+int Settings::ScreenHeight = 2160;
 float Settings::NearPlaneDistant = 0.1f;
 float Settings::FarPlaneDistance = 100.f;
 bool Settings::UseOpenGL = true;

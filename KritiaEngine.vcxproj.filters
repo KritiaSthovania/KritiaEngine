@@ -141,6 +141,9 @@
     <ClCompile Include="Editor\EditorWindows\HierachyWindow.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Editor\EditorWindows\InspectorWindow.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h">
@@ -279,6 +282,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Editor\EditorWindows\HierachyWindow.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorWindows\InspectorWindow.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

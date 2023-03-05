@@ -3,6 +3,8 @@ using namespace KritiaEngine::Editor::GUI;
 
 void KritiaEngine::Editor::EditorWindow::OnGUI() {}
 
+void KritiaEngine::Editor::EditorWindow::Config() {}
+
 void KritiaEngine::Editor::EditorWindow::OnObjectDestroy() {
 	
 }

@@ -21,7 +21,9 @@ namespace KritiaEngine{
 		Vector3 cachedUp;
 		Vector3 cachedRight;
 		Quaternion cachedRotation;
+		Vector3 rotationEuler;
 		void ComponentUpdate();
+		void OnInspector();
 		std::list<std::shared_ptr<Transform>> children;
 	};
 }

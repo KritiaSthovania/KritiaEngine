@@ -1,13 +1,16 @@
 #pragma once
 #ifndef COMPONENT
 #define COMPONENT
+#include <imgui/imgui.h>
 #include "pch.h"
 #include "../CoreModule/Manager/BehaviourManager.h"
 #include "../CoreModule/GameObject.h"
+
 namespace KritiaEngine {
 	class Transform;
 	class Component : public Object {
 		friend class KritiaEngine::Manager::BehaviourManager;
+		friend class KritiaEngine::Editor::GUI::InspectorWindow;
 	public:
 		Component();
 		Component(GameObject* gameObject);
@@ -23,6 +26,8 @@ namespace KritiaEngine {
 		// If this component is attached to BehaviourManager, this update function will always be called.
 		// Must manually add this component to BehaviourManager
 		virtual void ComponentUpdate();
+		virtual void OnInspector();
+		virtual void Serialize();
 	};
 }
 

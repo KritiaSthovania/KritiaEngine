@@ -2,9 +2,9 @@
 #include "../EditorWindow.h"
 
 namespace KritiaEngine::Editor::GUI {
-	class HierachyWindow : public KritiaEngine::Editor::EditorWindow {
+	class InspectorWindow : public KritiaEngine::Editor::EditorWindow {
 	public:
-		HierachyWindow();
+
 	protected:
 		void OnGUI();
 		void Config();
