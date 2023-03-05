@@ -4,7 +4,8 @@
 #include "GameObject.h"
 #include "Texture.h"
 #include "../Rendering/Shader.h"
-
+#include <json/json.hpp>
+#include "../Editor/EditorApplication.h"
 
 namespace KritiaEngine::SceneManagement {
 	class Scene
@@ -16,13 +17,19 @@ namespace KritiaEngine::SceneManagement {
 		/// Returns a vector of all root game objects in the scene.
 		/// </summary>
 		std::list<std::shared_ptr<GameObject>> GetRootGameObjects();
+		std::string path;
 	private:
-		Scene(const std::string &name);
+		Scene(const std::string& name, const std::string& path = KritiaEngine::Editor::EditorApplication::AssetFolderRootPath);
 		// All initialize functions don't load resources for now.
 		void Initialize();
 		void InitializeCamera();
 		void InitializeLighting();
 		void InitializeGameObjects();
+		/// <summary>
+		/// Save the serialized json data to file.
+		/// </summary>
+		void SerializeToFile();
+		void DeserializeFromFile(std::ifstream& instream);
 		/// <summary>
 		/// current rendering camera
 		/// </summary>

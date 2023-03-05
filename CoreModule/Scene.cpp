@@ -4,47 +4,62 @@
 #include "MathStructs.h"
 #include "../Component/Light.h"
 #include "../Editor/AssetDatabase.h"
-#include <algorithm>
 #include "../Rendering/RenderingProvider.h"
+#include "../Editor/EditorApplication.h"
+#include <fstream>
 
 using namespace KritiaEngine::SceneManagement;
 using namespace KritiaEngine::Lighting;
 using namespace KritiaEngine;
-using namespace KritiaEngineEditor;
+using namespace KritiaEngine::Editor;
+using json = nlohmann::ordered_json;
+
+
 
 std::list<std::shared_ptr<GameObject>> KritiaEngine::SceneManagement::Scene::GetRootGameObjects()
 {
     return rootGameObjects;
 }
 
-KritiaEngine::SceneManagement::Scene::Scene(const std::string &name)
+KritiaEngine::SceneManagement::Scene::Scene(const std::string &name, const std::string& path)
 {
     this->name = name;
+    this->path = path;
     // Create a camera and a light source
+    
+
+}
+
+void KritiaEngine::SceneManagement::Scene::Initialize() {
+    std::ifstream input(path);
+    if (input.good()) {
+        // An serialized scene
+        DeserializeFromFile(input);
+    } else {
+        // A new scene;
+        InitializeCamera();
+        InitializeLighting();
+    }
+    input.close();
+    //InitializeGameObjects();
+}
+
+void KritiaEngine::SceneManagement::Scene::InitializeCamera()
+{
     std::shared_ptr<GameObject> mainCamera = std::shared_ptr<GameObject>(new GameObject("Main Camera"));
     currentCamera = mainCamera;
     currentCamera->AddComponent<Camera>();
     rootGameObjects.push_back(mainCamera);
+    Camera::current = currentCamera->GetComponent<Camera>();
+}
+
+void Scene::InitializeLighting() {
     std::shared_ptr<GameObject> mainLightSource = std::shared_ptr<GameObject>(new GameObject("Main Light Source"));
     this->mainLightSource = mainLightSource;
     std::shared_ptr<Light> light = this->mainLightSource->AddComponent<Light>();
     light->color = Color(1, 1, 1, 1);
     light->Transform()->forward = Vector3::Normalize(Vector3(-1, -1, 1));
     rootGameObjects.push_back(mainLightSource);
-}
-
-void KritiaEngine::SceneManagement::Scene::Initialize() {
-    InitializeCamera();
-    InitializeLighting();
-    InitializeGameObjects();
-}
-
-void KritiaEngine::SceneManagement::Scene::InitializeCamera()
-{
-    Camera::current = currentCamera->GetComponent<Camera>();
-}
-
-void Scene::InitializeLighting() {
     LightingSystem::GetMainLightSource() = this->mainLightSource->GetComponent<Light>();
 }
 
@@ -103,6 +118,39 @@ void Scene::InitializeGameObjects() {
     obj3->Transform()->scale = Vector3(10, 0.1, 10);
     obj3->Transform()->position = Vector3(0, -3, 0);
     rootGameObjects.push_back(obj3);
+    SerializeToFile();
+}
+
+void KritiaEngine::SceneManagement::Scene::SerializeToFile() {
+    json json;
+    json["Type"] = "Scene";
+    json["Name"] = name;
+    json["Number Of GameObjects"] = rootGameObjects.size();
+    int objectIndex = 0;
+    for (std::shared_ptr<GameObject> go : rootGameObjects) {
+        json["GameObject" + std::to_string(objectIndex)] = go->Serialize();
+        objectIndex++;
+    }
+    std::fstream output = std::fstream();
+    std::string fileName = this->name + sceneFilePostfix;
+    output.open(EditorApplication::AssetFolderRootPath + fileName, std::ios::out | std::ios::trunc);
+    output << json.dump() << std::endl;
+    output.close();
+}
+
+void KritiaEngine::SceneManagement::Scene::DeserializeFromFile(std::ifstream& instream) {
+    json json = json::parse(instream);
+    assert(json["Type"] == "Scene");
+    this->name = json["Name"];
+    int numberOfGameObjects = json["Number Of GameObjects"];
+    for (int i = 0; i < numberOfGameObjects; i++) {
+        std::string str = json["GameObject" + std::to_string(i)];
+        nlohmann::ordered_json objectJson = json::parse(str);
+        auto gameObject = std::shared_ptr<GameObject>(new GameObject());
+        gameObject->name = objectJson["Name"];
+        gameObject->Deserialize(objectJson);
+        rootGameObjects.push_back(gameObject);
+    }
 }
 
 

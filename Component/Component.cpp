@@ -19,7 +19,11 @@ void KritiaEngine::Component::ComponentUpdate() {}
 
 void KritiaEngine::Component::OnInspector() {}
 
-void KritiaEngine::Component::ComponentSerialize(nlohmann::json& json, int componentIndex) {
+std::string KritiaEngine::Component::Serialize() {
+	return "Virtual serialization function of Component is called ";
+}
+
+void KritiaEngine::Component::Deserialize(const json& json) {
 
 }
 

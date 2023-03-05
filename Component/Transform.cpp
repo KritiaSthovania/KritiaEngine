@@ -97,11 +97,19 @@ void KritiaEngine::Transform::OnInspector() {
 
 }
 
-void KritiaEngine::Transform::ComponentSerialize(nlohmann::json& json, int componentIndex) {
-	json["Component"+componentIndex] = {
-		{"Type", "Transform"},
-		{"Position", { position.x, position.y, position.z }},
-		{"Rotation", { rotation.x, rotation.y, rotation.z, rotation.w }},
-		{"Scale", { scale.x, scale.y, scale.z }}
-	};
+std::string KritiaEngine::Transform::Serialize() {
+	json json;
+	json["Type"] = "Transform";
+	json["Position"] = { position.x, position.y, position.z };
+	json["Rotation"] = { rotation.x, rotation.y, rotation.z, rotation.w };
+	json["Scale"] = { scale.x, scale.y, scale.z };
+	return json.dump();
+}
+
+void KritiaEngine::Transform::Deserialize(const json& json) {
+	std::cout << json["Position"] << std::endl;
+	this->position = Vector3(json["Position"][0], json["Position"][1], json["Position"][2]);
+	std::cout << json["Rotation"];
+	this->rotation = Quaternion(json["Rotation"][0], json["Rotation"][1], json["Rotation"][2], json["Rotation"][3]);
+	this->scale = Vector3(json["Scale"][0], json["Scale"][1], json["Scale"][2]);
 }

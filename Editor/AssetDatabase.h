@@ -7,7 +7,7 @@
 
 using namespace KritiaEngine;
 
-namespace KritiaEngineEditor {
+namespace KritiaEngine::Editor {
 	class AssetDatabase {
 	public:
 		static void ImportModel(const std::string& path, const std::shared_ptr<Mesh>& mesh);

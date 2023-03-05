@@ -136,6 +136,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Component\ComponentFactory.cpp" />
     <ClCompile Include="CoreModule\Manager\BehaviourManager.cpp" />
     <ClCompile Include="Editor\EditorWindow.cpp" />
     <ClCompile Include="Editor\AssetDatabase.cpp" />
@@ -181,6 +182,7 @@
     <ClCompile Include="Rendering\RenderingProvider.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Component\ComponentFactory.h" />
     <ClInclude Include="CoreModule\Manager\BehaviourManager.h" />
     <ClInclude Include="Editor\EditorWindow.h" />
     <ClInclude Include="Editor\AssetDatabase.h" />

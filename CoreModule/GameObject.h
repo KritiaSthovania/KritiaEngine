@@ -4,10 +4,14 @@
 #include <typeinfo>
 #include "Object.h"
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 namespace KritiaEngine::Editor::GUI {
 	class InspectorWindow;
+}
+
+namespace KritiaEngine::SceneManagement {
+	class Scene;
 }
 
 namespace KritiaEngine {
@@ -15,6 +19,7 @@ namespace KritiaEngine {
 	class Component;
 	class GameObject : public Object{
 		friend class KritiaEngine::Editor::GUI::InspectorWindow;
+		friend class KritiaEngine::SceneManagement::Scene;
 	public:
 		GameObject();
 		GameObject(const char* name);
@@ -37,7 +42,13 @@ namespace KritiaEngine {
 		bool IsActive = true;
 	private:
 		std::list<std::shared_ptr<Component>> components;
-		virtual void Serialize();
+		/// <summary>
+		/// Serialize the GameObject as part of a scene.
+		/// </summary>
+		/// <param name="json">Json of the scene</param>
+		std::string Serialize();
+		void Deserialize(const json& json);
+		void AddComponentFromJson(const json& json);
 	};
 }
 

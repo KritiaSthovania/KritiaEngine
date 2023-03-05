@@ -1,4 +1,4 @@
 #include "EditorApplication.h"
 
-using namespace KritiaEngineEditor;
-const std::string EditorApplication::AssetFolderRootPath = "./Assets";
+using namespace KritiaEngine::Editor;
+const std::string EditorApplication::AssetFolderRootPath = "./Assets/";

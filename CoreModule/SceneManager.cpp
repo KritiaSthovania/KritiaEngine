@@ -1,5 +1,7 @@
 #include "SceneManager.h"
+#include <json/json.hpp>
 
+using json = nlohmann::ordered_json;
 using namespace KritiaEngine::SceneManagement;
 
 std::shared_ptr<Scene> SceneManager::activeScene = nullptr;
@@ -11,9 +13,9 @@ bool SceneManager::inEditor = false;
 /// <param name="inEditor">If we are in the Editor or Game</param>
 void KritiaEngine::SceneManagement::SceneManager::Initialize(bool inEditor)
 {
-	// 目前直接生成测试用的场景
-	activeScene = CreateScene("Demo Scene");
-	LoadScene(activeScene);
+	// 目前直接加载测试用的场景
+	//activeScene = CreateScene("Demo Scene");
+	LoadScene(KritiaEngine::Editor::EditorApplication::AssetFolderRootPath + "Demo Scene" + KritiaEngine::Editor::sceneFilePostfix);
 	SceneManager::inEditor = inEditor;
 	if (inEditor) {
 		Camera::editorCamera = std::shared_ptr<Camera>(new Camera());
@@ -31,6 +33,12 @@ void KritiaEngine::SceneManagement::SceneManager::LoadScene(const std::shared_pt
 {
 	// 目前不考虑读取文件
 	scene->Initialize();
+	scene->path = "";
+}
+
+void KritiaEngine::SceneManagement::SceneManager::LoadScene(const std::string& path) {
+	activeScene = std::make_shared<Scene>(Scene("", path));
+	activeScene->Initialize();
 }
 
 std::shared_ptr<Scene> KritiaEngine::SceneManagement::SceneManager::GetActiveScene() {

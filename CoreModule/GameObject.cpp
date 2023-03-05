@@ -1,14 +1,14 @@
 #include "GameObject.h"
 #include "../Component/Renderer/MeshRenderer.h"
 #include "../Component/Component.h"
-
+#include "../Component/ComponentFactory.h"
 using namespace KritiaEngine;
-using json = nlohmann::json;
+using namespace nlohmann::literals;
+using json = nlohmann::ordered_json;
 
 KritiaEngine::GameObject::GameObject() {
 	components.push_back(std::shared_ptr<KritiaEngine::Transform>(new KritiaEngine::Transform(this)));
 	this->name = "New Game Object";
-
 }
 
 KritiaEngine::GameObject::GameObject(const char* name) {
@@ -26,17 +26,33 @@ void KritiaEngine::GameObject::GameObject::SetActive(bool isActive)
 	IsActive = isActive;
 }
 
-void KritiaEngine::GameObject::Serialize() {
+std::string KritiaEngine::GameObject::Serialize() {
 	json json;
 	json["Type"] = "GameObject";
 	json["Name"] = this->name;
 	json["Number Of Components"] = this->components.size();
 	int componentIndex = 0;
 	for (std::shared_ptr<Component> comp : components) {
-		comp->ComponentSerialize(json, componentIndex);
+		json["Component" + std::to_string(componentIndex)] = comp->Serialize();
 		componentIndex++;
 	}
-	std::cout << json << std::endl;
+	return json.dump();
+}
+
+void KritiaEngine::GameObject::Deserialize(const json& json) {
+	assert(json["Type"] == "GameObject");
+	this->name = json["Name"];
+	int numberOfComponents = json["Number Of Components"];
+	int componentIndex = 0;
+	for (int i = 0; i < 1; i++) {
+		nlohmann::ordered_json componentJson = json::parse((std::string)json["Component" + std::to_string(i)]);
+		this->AddComponentFromJson(json);
+		(*this->components.begin())->Deserialize(componentJson);
+	}
+}
+
+void KritiaEngine::GameObject::AddComponentFromJson(const json& json) {
+	ComponentFactory::AddComponentFromJson(json, this);
 }
 
 

@@ -2,8 +2,9 @@
 #include "Component.h"
 #include "../CoreModule/GameObject.h"
 #include "pch.h"
-
 #include "../CoreModule/Mathf.h"
+
+using json = nlohmann::ordered_json;
 namespace KritiaEngine{
 	class Transform : public Component {
 	public:
@@ -26,7 +27,8 @@ namespace KritiaEngine{
 		void ComponentUpdate();
 		void OnInspector();
 		std::list<std::shared_ptr<Transform>> children;
-		virtual void ComponentSerialize(nlohmann::json& json, int componentIndex);
+		std::string Serialize();
+		void Deserialize(const json& json);
 	};
 }
 
