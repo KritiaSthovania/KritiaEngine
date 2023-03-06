@@ -1,8 +1,11 @@
 #include "SceneManager.h"
+#include "../CoreModule/Manager/BehaviourManager.h"
+#include "../CoreModule/Manager/RendererManager.h"
 #include <json/json.hpp>
 
 using json = nlohmann::ordered_json;
 using namespace KritiaEngine::SceneManagement;
+using namespace KritiaEngine::Manager;
 
 std::shared_ptr<Scene> SceneManager::activeScene = nullptr;
 bool SceneManager::inEditor = false;
@@ -37,6 +40,8 @@ void KritiaEngine::SceneManagement::SceneManager::LoadScene(const std::shared_pt
 }
 
 void KritiaEngine::SceneManagement::SceneManager::LoadScene(const std::string& path) {
+	BehaviourManager::Clear();
+	RendererManager::Clear();
 	activeScene = std::make_shared<Scene>(Scene("", path));
 	activeScene->Initialize();
 }

@@ -2,6 +2,8 @@
 #include "EditorWindow.h"
 #include "EditorWindows/HierachyWindow.h"
 #include "EditorWindows/InspectorWindow.h"
+#include "EditorWindows/MainMenuBar.h"
+#include <nfd/nfd.h>
 
 using namespace KritiaEngine::Editor::GUI;
 using namespace KritiaEngine::Editor;
@@ -20,6 +22,7 @@ void KritiaEngine::Editor::GUI::ImguiManager::Initialize(GLFWwindow* window, boo
 	(void)IO;
 	IO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	IO.FontGlobalScale = UIScaleFactor;
+	IO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	ImGui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(GlslVersion);
@@ -31,10 +34,10 @@ void KritiaEngine::Editor::GUI::ImguiManager::RenderGUI() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
-	
+	CreateMainMenuBar();
 	if (inEditor) {
 		for (std::shared_ptr<EditorWindow> window : editorWindows) {
-			window->Config();
+			//window->Config();
 			ImGui::SetNextWindowBgAlpha(1);
 			ImGui::Begin(window->title, 0, window->flags);
 			window->OnGUI();
@@ -58,4 +61,12 @@ void KritiaEngine::Editor::GUI::ImguiManager::RemoveEditorWindow(std::shared_ptr
 void KritiaEngine::Editor::GUI::ImguiManager::CreateEditorWindows() {
 	EditorWindow::CreateWindow<HierachyWindow>("Hiearachy");
 	EditorWindow::CreateWindow<InspectorWindow>("Inspector");
+}
+
+void KritiaEngine::Editor::GUI::ImguiManager::CreateMainMenuBar() {
+	ImGui::BeginMainMenuBar();
+	if (ImGui::MenuItem("Open Scene")) {
+		MainMenuBar::OpenScene();
+	}
+	ImGui::EndMainMenuBar();
 }

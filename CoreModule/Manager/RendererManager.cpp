@@ -59,6 +59,11 @@ void KritiaEngine::Manager::RendererManager::Render() {
 	RenderingProvider::RenderGPUInstances(true);
 }
 
+void KritiaEngine::Manager::RendererManager::Clear() {
+	opaqueRenderQueue.clear();
+	transparentRenderQueue.clear();
+}
+
 bool KritiaEngine::Manager::RendererManager::CompareRenderer(Renderer * left, Renderer * right) {
 	return Vector3::Magnitude(left->Transform()->position - Camera::current->GetPosition()) < Vector3::Magnitude(right->Transform()->position - Camera::current->GetPosition());
 }

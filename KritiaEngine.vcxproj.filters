@@ -147,6 +147,9 @@
     <ClCompile Include="Component\ComponentFactory.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Editor\EditorWindows\MainMenuBar.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h">
@@ -293,8 +296,20 @@
     <ClInclude Include="Component\ComponentFactory.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="includes\nfd\nfd.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\nfd\nfd.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorWindows\MainMenuBar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="includes\nfd\nfd.lib" />
   </ItemGroup>
 </Project>

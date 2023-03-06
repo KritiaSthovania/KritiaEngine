@@ -14,6 +14,10 @@ namespace KritiaEngine::Manager{
 		static void AddUpdatableComponents(KritiaEngine::Component* component);
 		static void RemoveUpdatableComponents(KritiaEngine::Component* component);
 		static void BehaviourUpdate();
+		/// <summary>
+		/// Clear all MonoBehaviors and Components in the queues (e.g. on load of new scenes).
+		/// </summary>
+		static void Clear();
 	private:
 		static std::list<KritiaEngine::MonoBehaviour*> monoBehaviours;
 		static std::list<KritiaEngine::MonoBehaviour*> monoBehaviourStartQueue;

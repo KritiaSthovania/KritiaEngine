@@ -62,3 +62,10 @@ void KritiaEngine::Manager::BehaviourManager::BehaviourUpdate() {
 		behaviour->BehaviourUpdate();
 	}
 }
+
+void KritiaEngine::Manager::BehaviourManager::Clear() {
+	monoBehaviours.clear();
+	monoBehaviourAwakeQueue.clear();
+	monoBehaviourStartQueue.clear();
+	updatableComponents.clear();
+}
