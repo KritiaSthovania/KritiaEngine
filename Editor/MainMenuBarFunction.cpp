@@ -1,10 +1,10 @@
-#include "MainMenuBar.h"
-#include "../EditorApplication.h"
-#include "../../CoreModule/SceneManager.h"
+#include "MainMenuBarFunction.h"
+#include "EditorApplication.h"
+#include "../CoreModule/SceneManager.h"
 #include <nfd/nfd.h>
 #include <stdio.h>
 
-void KritiaEngine::Editor::MainMenuBar::OpenScene() {
+void KritiaEngine::Editor::GUI::MainMenuBarFunction::OpenScene() {
     NFD_Init();
 
     nfdchar_t* outPath;

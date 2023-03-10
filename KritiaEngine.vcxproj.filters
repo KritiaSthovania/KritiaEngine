@@ -147,7 +147,10 @@
     <ClCompile Include="Component\ComponentFactory.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Editor\EditorWindows\MainMenuBar.cpp">
+    <ClCompile Include="Editor\MainMenuBarFunction.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorWindows\ProjectFileExplorer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -278,9 +281,6 @@
     <ClInclude Include="includes\pch.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="includes\stb_image.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Editor\ImguiManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -302,7 +302,13 @@
     <ClInclude Include="includes\nfd\nfd.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Editor\EditorWindows\MainMenuBar.h">
+    <ClInclude Include="Editor\MainMenuBarFunction.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\stb\stb_image.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorWindows\ProjectFileExplorer.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

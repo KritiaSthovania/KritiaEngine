@@ -22,7 +22,7 @@ namespace KritiaEngine::Editor::GUI {
 		static std::shared_ptr<GameObject> currentSelectedGameObject;
 	private:
 		static void CreateEditorWindows();
-		static void CreateMainMenuBar();
+		static void RenderMainMenuBar();
 		static bool inEditor;
 		static const char* GlslVersion;
 		static float UIScaleFactor;

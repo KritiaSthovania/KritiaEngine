@@ -4,7 +4,8 @@ namespace KritiaEngine::Editor {
 	constexpr const char* sceneFilePostfix = ".scene.json";
 	class EditorApplication {
 	public:
-		static const std::string AssetFolderRootPath;
+		static const std::string assetFolderRootPath;
+		static std::string currentProjectFolderPath;
 	};
 }
 

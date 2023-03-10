@@ -17,8 +17,9 @@ bool SceneManager::inEditor = false;
 void KritiaEngine::SceneManagement::SceneManager::Initialize(bool inEditor)
 {
 	// 目前直接加载测试用的场景
-	//activeScene = CreateScene("Demo Scene");
-	LoadScene(KritiaEngine::Editor::EditorApplication::AssetFolderRootPath + "Demo Scene" + KritiaEngine::Editor::sceneFilePostfix);
+	activeScene = CreateScene("Demo Scene");
+	LoadScene(activeScene);
+	//LoadScene(KritiaEngine::Editor::EditorApplication::AssetFolderRootPath + "Demo Scene" + KritiaEngine::Editor::sceneFilePostfix);
 	SceneManager::inEditor = inEditor;
 	if (inEditor) {
 		Camera::editorCamera = std::shared_ptr<Camera>(new Camera());
@@ -42,10 +43,11 @@ void KritiaEngine::SceneManagement::SceneManager::LoadScene(const std::shared_pt
 void KritiaEngine::SceneManagement::SceneManager::LoadScene(const std::string& path) {
 	BehaviourManager::Clear();
 	RendererManager::Clear();
-	activeScene = std::make_shared<Scene>(Scene("", path));
+	activeScene = std::shared_ptr<Scene>(new Scene("", path));
 	activeScene->Initialize();
 }
 
 std::shared_ptr<Scene> KritiaEngine::SceneManagement::SceneManager::GetActiveScene() {
 	return activeScene;
+
 }

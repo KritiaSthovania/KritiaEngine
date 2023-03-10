@@ -1,9 +1,9 @@
 #include "OpenGLRendering.h"
 #include "RenderingProvider.h"
 #include "../CoreModule/Settings.h"
-#include <stb_image.h>
 #include "../CoreModule/Lighting.h"
 #include "../Component/Transform.h"
+#include <stb/stb_image.h>
 
 using namespace KritiaEngine::Rendering;
 using namespace KritiaEngine;
@@ -394,7 +394,7 @@ void KritiaEngine::Rendering::OpenGLRendering::SetMainLightProperties(const std:
 	shader->SetFloat("ambientIntensity", mainlight->ambientIntensity);
 	shader->SetFloat("diffuseIntensity", mainlight->diffuseIntensity);
 	shader->SetFloat("specularIntensity", mainlight->specularIntensity);
-	shader->SetVec3("mainLightColor", mainlight->color.RGB());
+	shader->SetVec3("mainLightColor", mainlight->color.GetRGB());
 }
 
 void KritiaEngine::Rendering::OpenGLRendering::SetPointLightProperties(const Vector3& pos, const std::shared_ptr<Shader>& shader) {
@@ -403,7 +403,7 @@ void KritiaEngine::Rendering::OpenGLRendering::SetPointLightProperties(const Vec
 	for (int i = 0; i < numberOfLights; i++) {
 		std::string str = "pointLights[" + std::to_string(i) + "]";
 		if (pointLights[i] != nullptr) {
-			shader->SetVec3(str + ".color", pointLights[i]->color.RGB());
+			shader->SetVec3(str + ".color", pointLights[i]->color.GetRGB());
 			shader->SetVec3(str + ".position", pointLights[i]->Transform()->position);
 			shader->SetFloat(str + ".constant", pointLights[i]->constantAttenuationFactor);
 			shader->SetFloat(str + ".linear", pointLights[i]->linearAttenuationFactor);
@@ -425,7 +425,7 @@ void KritiaEngine::Rendering::OpenGLRendering::SetSpotLightProperties(const Vect
 	for (int i = 0; i < numberOfLights; i++) {
 		std::string str = "spotLights[" + std::to_string(i) + "]";
 		if (spotLights[i] != nullptr) {
-			shader->SetVec3(str + ".color", spotLights[i]->color.RGB());
+			shader->SetVec3(str + ".color", spotLights[i]->color.GetRGB());
 			shader->SetVec3(str + ".position", spotLights[i]->Transform()->position);
 			shader->SetVec3(str + ".direction", spotLights[i]->Transform()->forward);
 			shader->SetFloat(str + ".constant", spotLights[i]->constantAttenuationFactor);

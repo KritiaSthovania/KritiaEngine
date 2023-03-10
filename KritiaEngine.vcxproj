@@ -176,7 +176,8 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Component\MeshFilter.cpp" />
     <ClCompile Include="CoreModule\Manager\RendererManager.cpp" />
-    <ClCompile Include="Editor\EditorWindows\MainMenuBar.cpp" />
+    <ClCompile Include="Editor\MainMenuBarFunction.cpp" />
+    <ClCompile Include="Editor\EditorWindows\ProjectFileExplorer.cpp" />
     <ClCompile Include="Rendering\OpenGLRendering.cpp" />
     <ClCompile Include="Rendering\Shader.cpp" />
     <ClCompile Include="Editor\EditorApplication.cpp" />
@@ -210,6 +211,7 @@
     <ClInclude Include="CoreModule\Texture.h" />
     <ClInclude Include="CoreModule\Time.h" />
     <ClInclude Include="CoreModule\Utilities.h" />
+    <ClInclude Include="Editor\EditorWindows\ProjectFileExplorer.h" />
     <ClInclude Include="Editor\ImguiManager.h" />
     <ClInclude Include="Editor\EditorWindows\HierachyWindow.h" />
     <ClInclude Include="includes\imgui\backends\imgui_impl_glfw.h" />
@@ -224,12 +226,12 @@
     <ClInclude Include="includes\nfd\nfd.h" />
     <ClInclude Include="includes\nfd\nfd.hpp" />
     <ClInclude Include="includes\pch.h" />
-    <ClInclude Include="includes\stb_image.h" />
     <ClInclude Include="Editor\EditorWindows\InspectorWindow.h" />
+    <ClInclude Include="includes\stb\stb_image.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="Component\MeshFilter.h" />
     <ClInclude Include="CoreModule\Manager\RendererManager.h" />
-    <ClInclude Include="Editor\EditorWindows\MainMenuBar.h" />
+    <ClInclude Include="Editor\MainMenuBarFunction.h" />
     <ClInclude Include="Rendering\OpenGLRendering.h" />
     <ClInclude Include="Rendering\Shader.h" />
     <ClInclude Include="Editor\EditorApplication.h" />

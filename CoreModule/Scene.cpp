@@ -25,9 +25,6 @@ KritiaEngine::SceneManagement::Scene::Scene(const std::string &name, const std::
 {
     this->name = name;
     this->path = path;
-    // Create a camera and a light source
-    
-
 }
 
 void KritiaEngine::SceneManagement::Scene::Initialize() {
@@ -133,7 +130,7 @@ void KritiaEngine::SceneManagement::Scene::SerializeToFile() {
     }
     std::fstream output = std::fstream();
     std::string fileName = this->name + sceneFilePostfix;
-    output.open(EditorApplication::AssetFolderRootPath + fileName, std::ios::out | std::ios::trunc);
+    output.open(EditorApplication::assetFolderRootPath + fileName, std::ios::out | std::ios::trunc);
     output << json.dump() << std::endl;
     output.close();
 }
@@ -151,6 +148,7 @@ void KritiaEngine::SceneManagement::Scene::DeserializeFromFile(std::ifstream& in
         gameObject->Deserialize(objectJson);
         rootGameObjects.push_back(gameObject);
     }
+    std::cout << rootGameObjects.size();
 }
 
 

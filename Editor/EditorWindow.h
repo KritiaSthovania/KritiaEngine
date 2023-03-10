@@ -14,7 +14,7 @@ namespace KritiaEngine::Editor {
 		/// <typeparam name="T"></typeparam>
 		/// <param name="title"></param>
 		/// <returns></returns>
-		template <typename T> static std::shared_ptr<T> CreateWindow(const char* title) {
+		template <typename T> static std::shared_ptr<T> GetWindow(const char* title) {
 			std::shared_ptr<T> window = std::make_shared<T>(T());
 			window->title = title;
 			KritiaEngine::Editor::GUI::ImguiManager::AddEditorWindow(window);

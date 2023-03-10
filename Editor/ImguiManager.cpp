@@ -2,7 +2,8 @@
 #include "EditorWindow.h"
 #include "EditorWindows/HierachyWindow.h"
 #include "EditorWindows/InspectorWindow.h"
-#include "EditorWindows/MainMenuBar.h"
+#include "EditorWindows/ProjectFileExplorer.h"
+#include "MainMenuBarFunction.h"
 #include <nfd/nfd.h>
 
 using namespace KritiaEngine::Editor::GUI;
@@ -34,8 +35,8 @@ void KritiaEngine::Editor::GUI::ImguiManager::RenderGUI() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
-	CreateMainMenuBar();
 	if (inEditor) {
+		RenderMainMenuBar();
 		for (std::shared_ptr<EditorWindow> window : editorWindows) {
 			//window->Config();
 			ImGui::SetNextWindowBgAlpha(1);
@@ -59,14 +60,15 @@ void KritiaEngine::Editor::GUI::ImguiManager::RemoveEditorWindow(std::shared_ptr
 }
 
 void KritiaEngine::Editor::GUI::ImguiManager::CreateEditorWindows() {
-	EditorWindow::CreateWindow<HierachyWindow>("Hiearachy");
-	EditorWindow::CreateWindow<InspectorWindow>("Inspector");
+	EditorWindow::GetWindow<HierachyWindow>("Hiearachy");
+	EditorWindow::GetWindow<InspectorWindow>("Inspector");
+	EditorWindow::GetWindow<ProjectFileExplorer>("Project");
 }
 
-void KritiaEngine::Editor::GUI::ImguiManager::CreateMainMenuBar() {
+void KritiaEngine::Editor::GUI::ImguiManager::RenderMainMenuBar() {
 	ImGui::BeginMainMenuBar();
 	if (ImGui::MenuItem("Open Scene")) {
-		MainMenuBar::OpenScene();
+		MainMenuBarFunction::OpenScene();
 	}
 	ImGui::EndMainMenuBar();
 }

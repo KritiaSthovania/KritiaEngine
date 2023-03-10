@@ -5,9 +5,6 @@
 
 using namespace KritiaEngine::SceneManagement;
 
-KritiaEngine::Editor::GUI::HierachyWindow::HierachyWindow() {
-}
-
 void KritiaEngine::Editor::GUI::HierachyWindow::OnGUI() {
 	if (ImGui::TreeNodeEx(SceneManager::GetActiveScene()->name.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth)) {
 		for (std::shared_ptr<GameObject> gameObject : SceneManager::GetActiveScene()->GetRootGameObjects()) {

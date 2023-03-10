@@ -22,7 +22,7 @@ namespace KritiaEngine {
 		/// <summary>
 		/// Get the RGB components
 		/// </summary>
-		Vector3 RGB();
+		Vector3 GetRGB();
 		friend Color operator*(float a, const Color& vec);
 		Color operator+ (const Color& vec);
 		Color operator- (const Color& vec);

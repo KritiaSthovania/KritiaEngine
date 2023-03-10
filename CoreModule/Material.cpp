@@ -66,7 +66,7 @@ void Material::Initialize() {
 		shader->SetInt("parallaxMap", parallaxSamplerIndex);
 		shader->SetInt("shadowMap", shadowSamplerIndex);
 		shader->SetFloat("shininess", shininess);
-		shader->SetVec3("albedo", albedo.RGB());
+		shader->SetVec3("albedo", albedo.GetRGB());
 		for (int i = 0; i < Lighting::LightingSystem::MaxPointLightsForOneObject; i++) {
 			std::string str = "pointLights[" + std::to_string(i) + "]" + ".shadowMapCube";
 			shader->SetInt(str, shadowSamplerIndex + 1 + i);
