@@ -29,13 +29,11 @@ void KritiaEngine::SceneManagement::SceneManager::Initialize(bool inEditor)
 
 std::shared_ptr<Scene> KritiaEngine::SceneManagement::SceneManager::CreateScene(const std::string &name)
 {
-	// 目前不考虑创建文件
 	return std::shared_ptr<Scene>(new Scene(name));
 }
 
 void KritiaEngine::SceneManagement::SceneManager::LoadScene(const std::shared_ptr<Scene>& scene)
 {
-	// 目前不考虑读取文件
 	scene->Initialize();
 	scene->path = "";
 }
@@ -45,6 +43,10 @@ void KritiaEngine::SceneManagement::SceneManager::LoadScene(const std::string& p
 	RendererManager::Clear();
 	activeScene = std::shared_ptr<Scene>(new Scene("", path));
 	activeScene->Initialize();
+}
+
+void KritiaEngine::SceneManagement::SceneManager::SaveScene() {
+	activeScene->SerializeToFile();
 }
 
 std::shared_ptr<Scene> KritiaEngine::SceneManagement::SceneManager::GetActiveScene() {

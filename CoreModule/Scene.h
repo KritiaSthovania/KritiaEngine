@@ -17,9 +17,12 @@ namespace KritiaEngine::SceneManagement {
 		/// Returns a vector of all root game objects in the scene.
 		/// </summary>
 		std::list<std::shared_ptr<GameObject>> GetRootGameObjects();
+		/// <summary>
+		/// The full path (with the file name of the scene)
+		/// </summary>
 		std::string path;
 	private:
-		Scene(const std::string& name, const std::string& path = KritiaEngine::Editor::EditorApplication::assetFolderRootPath);
+		Scene(const std::string& name, const std::string& path = "");
 		// All initialize functions don't load resources for now.
 		void Initialize();
 		void InitializeCamera();

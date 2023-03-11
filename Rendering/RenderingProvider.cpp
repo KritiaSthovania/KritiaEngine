@@ -1,6 +1,5 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-
 #include "RenderingProvider.h"
 #include "../CoreModule/Settings.h"
 #include "../CoreModule/Lighting.h"

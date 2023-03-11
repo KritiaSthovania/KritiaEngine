@@ -130,7 +130,8 @@ void KritiaEngine::SceneManagement::Scene::SerializeToFile() {
     }
     std::fstream output = std::fstream();
     std::string fileName = this->name + sceneFilePostfix;
-    output.open(EditorApplication::assetFolderRootPath + fileName, std::ios::out | std::ios::trunc);
+    assert(path != "");
+    output.open(path, std::ios::out | std::ios::trunc);
     output << json.dump() << std::endl;
     output.close();
 }
@@ -148,7 +149,6 @@ void KritiaEngine::SceneManagement::Scene::DeserializeFromFile(std::ifstream& in
         gameObject->Deserialize(objectJson);
         rootGameObjects.push_back(gameObject);
     }
-    std::cout << rootGameObjects.size();
 }
 
 

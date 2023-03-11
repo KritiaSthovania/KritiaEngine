@@ -70,5 +70,8 @@ void KritiaEngine::Editor::GUI::ImguiManager::RenderMainMenuBar() {
 	if (ImGui::MenuItem("Open Scene")) {
 		MainMenuBarFunction::OpenScene();
 	}
+	if (ImGui::MenuItem("Save Scene")) {
+		MainMenuBarFunction::SaveScene();
+	}
 	ImGui::EndMainMenuBar();
 }
