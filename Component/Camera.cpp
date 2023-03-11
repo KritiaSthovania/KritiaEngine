@@ -138,3 +138,23 @@ void Camera::EditorUpdateCameraVectors() {
     Right = Vector3::Normalize(Vector3::Cross(Forward, WorldUp));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
     Up = Vector3::Normalize(Vector3::Cross(Right, Forward));
 }
+
+std::string KritiaEngine::Camera::Serialize() {
+    json json;
+    json["Fovy"] = Fovy;
+    return json.dump();
+}
+
+void KritiaEngine::Camera::Deserialize(const json& json) {
+    this->Fovy = json["Fovy"];
+}
+
+void KritiaEngine::Camera::OnInspector() {
+    ImGui::Text("Field Of View Verticle");
+    ImGui::SameLine();
+    ImGui::InputFloat("##Fovy", &Fovy);
+}
+
+std::string KritiaEngine::Camera::GetInspectorLabel() {
+    return inspectorLabel;
+}

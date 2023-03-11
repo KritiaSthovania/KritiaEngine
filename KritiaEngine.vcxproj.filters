@@ -153,6 +153,12 @@
     <ClCompile Include="Editor\EditorWindows\ProjectFileExplorer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Editor\ImguiAlias.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Manager\GameObjectManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h">
@@ -309,6 +315,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Editor\EditorWindows\ProjectFileExplorer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\ImguiAlias.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Manager\GameObjectManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -82,19 +82,9 @@ void KritiaEngine::Transform::ComponentUpdate() {
 }
 
 void KritiaEngine::Transform::OnInspector() {
-	if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-		ImGui::Text("Position");
-		ImGui::SameLine();
-		ImGui::InputFloat3("##Position", &position.x);
-		ImGui::Text("Rotation");
-		ImGui::SameLine();
-		ImGui::InputFloat3("##Rotation", &rotationEuler.x);
-		ImGui::Text("Scale   ");
-		ImGui::SameLine();
-		ImGui::InputFloat3("##Scale", &scale.x);
-		ImGui::TreePop();
-	} 
-
+	ImguiAlias::FloatField3("Position", &position.x);
+	ImguiAlias::FloatField3("Rotation", &rotationEuler.x);
+	ImguiAlias::FloatField3("Scale", &scale.x);
 }
 
 std::string KritiaEngine::Transform::Serialize() {
@@ -110,4 +100,8 @@ void KritiaEngine::Transform::Deserialize(const json& json) {
 	this->position = Vector3(json["Position"][0], json["Position"][1], json["Position"][2]);
 	this->rotation = Quaternion(json["Rotation"][0], json["Rotation"][1], json["Rotation"][2], json["Rotation"][3]);
 	this->scale = Vector3(json["Scale"][0], json["Scale"][1], json["Scale"][2]);
+}
+
+std::string KritiaEngine::Transform::GetInspectorLabel() {
+	return inspectorLabel;
 }

@@ -5,6 +5,8 @@
 #include "pch.h"
 #include "../CoreModule/Manager/BehaviourManager.h"
 #include "../CoreModule/GameObject.h"
+#include "../Editor/ImguiAlias.h"
+using ImguiAlias = KritiaEngine::Editor::GUI::ImguiAlias;
 
 namespace KritiaEngine {
 	class Transform;
@@ -27,9 +29,11 @@ namespace KritiaEngine {
 		// If this component is attached to BehaviourManager, this update function will always be called.
 		// Must manually add this component to BehaviourManager
 		virtual void ComponentUpdate();
-		virtual void OnInspector();
-		virtual std::string Serialize();
-		virtual void Deserialize(const json& json);
+		virtual void OnInspector() = 0;
+		virtual std::string Serialize() = 0;
+		virtual void Deserialize(const json& json) = 0;
+		virtual std::string GetInspectorLabel () = 0;
+		std::string inspectorLabel;
 	};
 }
 

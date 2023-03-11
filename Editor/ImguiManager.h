@@ -28,7 +28,6 @@ namespace KritiaEngine::Editor::GUI {
 		static float UIScaleFactor;
 		static std::list<std::shared_ptr<EditorWindow>> editorWindows;
 	};
-	
 }
 
 

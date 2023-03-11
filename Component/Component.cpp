@@ -17,13 +17,3 @@ std::shared_ptr<Transform> KritiaEngine::Component::Transform() {
 
 void KritiaEngine::Component::ComponentUpdate() {}
 
-void KritiaEngine::Component::OnInspector() {}
-
-std::string KritiaEngine::Component::Serialize() {
-	return "Virtual serialization function of Component is called ";
-}
-
-void KritiaEngine::Component::Deserialize(const json& json) {
-
-}
-

@@ -74,6 +74,18 @@ void KritiaEngine::MeshRenderer::UpdateMaterial() {
 	}
 }
 
+void KritiaEngine::MeshRenderer::OnInspector() {}
+
+std::string KritiaEngine::MeshRenderer::Serialize() {
+	return std::string();
+}
+
+void KritiaEngine::MeshRenderer::Deserialize(const json& json) {}
+
+std::string KritiaEngine::MeshRenderer::GetInspectorLabel() {
+	return inspectorLabel;
+}
+
 void MeshRenderer::Initialize() {
 	meshFilter = gameObject->GetComponent<MeshFilter>();
 	meshFilter->SetupMesh();

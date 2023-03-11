@@ -19,6 +19,13 @@ namespace KritiaEngine {
 		void BehaviourUpdate();
 		bool awoken = false;
 		bool started = false;
+
+		// Í¨¹ý Behaviour ¼Ì³Ð
+		virtual void OnInspector() override;
+		virtual std::string Serialize() override;
+		virtual void Deserialize(const json& json) override;
+		virtual std::string GetInspectorLabel() override;
+		std::string inspectorLabel = "MonoBehaviour";
 	};
 
 }

@@ -33,3 +33,15 @@ void KritiaEngine::MonoBehaviour::BehaviourUpdate() {
 		Update();
 	}
 }
+
+void KritiaEngine::MonoBehaviour::OnInspector() {}
+
+std::string KritiaEngine::MonoBehaviour::Serialize() {
+	return std::string();
+}
+
+void KritiaEngine::MonoBehaviour::Deserialize(const json& json) {}
+
+std::string KritiaEngine::MonoBehaviour::GetInspectorLabel() {
+	return inspectorLabel;
+}

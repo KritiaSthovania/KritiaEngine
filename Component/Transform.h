@@ -25,10 +25,12 @@ namespace KritiaEngine{
 		Vector3 rotationEuler;
 		Vector3 cachedRotationEuler;
 		void ComponentUpdate();
-		void OnInspector();
 		std::list<std::shared_ptr<Transform>> children;
-		std::string Serialize();
-		void Deserialize(const json& json);
+		virtual void OnInspector() override;
+		virtual std::string Serialize() override;
+		virtual void Deserialize(const json& json) override;
+		virtual std::string GetInspectorLabel() override;
+		std::string inspectorLabel = "Transform";
 	};
 }
 

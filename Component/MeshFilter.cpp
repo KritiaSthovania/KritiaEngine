@@ -11,3 +11,15 @@ void KritiaEngine::MeshFilter::SetupMesh() {
 		RenderingProvider::SetupMesh(mesh);
 	}
 }
+
+void KritiaEngine::MeshFilter::OnInspector() {}
+
+std::string KritiaEngine::MeshFilter::Serialize() {
+	return std::string();
+}
+
+void KritiaEngine::MeshFilter::Deserialize(const json& json) {}
+
+std::string KritiaEngine::MeshFilter::GetInspectorLabel() {
+	return inspectorLabel;
+}

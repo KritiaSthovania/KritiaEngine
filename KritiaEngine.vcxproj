@@ -165,6 +165,8 @@
     <ClCompile Include="CoreModule\Utilities.cpp" />
     <ClCompile Include="Editor\ImguiManager.cpp" />
     <ClCompile Include="Editor\EditorWindows\HierachyWindow.cpp" />
+    <ClCompile Include="Editor\ImguiAlias.cpp" />
+    <ClCompile Include="CoreModule\Manager\GameObjectManager.cpp" />
     <ClCompile Include="includes\imgui\backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="includes\imgui\backends\imgui_impl_opengl3.cpp" />
     <ClCompile Include="includes\imgui\imgui.cpp" />
@@ -214,6 +216,8 @@
     <ClInclude Include="Editor\EditorWindows\ProjectFileExplorer.h" />
     <ClInclude Include="Editor\ImguiManager.h" />
     <ClInclude Include="Editor\EditorWindows\HierachyWindow.h" />
+    <ClInclude Include="Editor\ImguiAlias.h" />
+    <ClInclude Include="CoreModule\Manager\GameObjectManager.h" />
     <ClInclude Include="includes\imgui\backends\imgui_impl_glfw.h" />
     <ClInclude Include="includes\imgui\backends\imgui_impl_opengl3.h" />
     <ClInclude Include="includes\imgui\backends\imgui_impl_opengl3_loader.h" />

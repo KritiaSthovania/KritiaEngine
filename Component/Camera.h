@@ -40,12 +40,17 @@ namespace KritiaEngine {
 		void EditorProcessMouseScroll(float yoffset);
 		// calculates the front vector from the Camera's (updated) Euler Angles
 		void EditorUpdateCameraVectors();
+		virtual std::string Serialize() override;
+		virtual void Deserialize(const json& json) override;
+		virtual void OnInspector() override;
+		virtual std::string GetInspectorLabel() override;
 		Vector3 Position;
 		Vector3 Up;
 		Vector3 Right;
 		Vector3 Forward;
 		Vector3 Target;
 		Vector3 WorldUp;
+		std::string inspectorLabel = "Camera";
 	};
 
 

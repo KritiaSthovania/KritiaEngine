@@ -32,14 +32,15 @@ namespace KritiaEngine {
 		float ambientIntensity = 0.1f;
 		float diffuseIntensity = 0.5f;
 		float specularIntensity = 1;
-		// for point light
+		bool castingShadow = true;
+		// for point light and spot light
 		float constantAttenuationFactor = 1;
 		float linearAttenuationFactor = 0.14f;
 		float quadraticAttenuationFactor = 0.07f;
 		// for spotlight
 		float cutOffAngleInner = 15;
 		float cutOffAngleOuter = 20;
-		bool castingShadow = true;
+
 	protected:
 		void OnObjectDestroy();
 	private:
@@ -51,6 +52,13 @@ namespace KritiaEngine {
 		Vector3 cachedPosition;
 		Quaternion cachedRotation;
 		void UpdateLightMatrices();
+
+		// Í¨¹ý Behaviour ¼Ì³Ð
+		virtual void OnInspector() override;
+		virtual std::string Serialize() override;
+		virtual void Deserialize(const json& json) override;
+		virtual std::string GetInspectorLabel() override;
+		std::string inspectorLabel = "Light";
 	};
 }
 

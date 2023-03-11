@@ -6,7 +6,11 @@
 void KritiaEngine::Editor::GUI::InspectorWindow::OnGUI() {
 	if (ImguiManager::currentSelectedGameObject != nullptr) {
 		for (std::shared_ptr<Component> comp : ImguiManager::currentSelectedGameObject->components) {
-			comp->OnInspector();
+			ImGui::Separator();
+			if (ImGui::TreeNodeEx(comp->GetInspectorLabel().c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth)) {
+				comp->OnInspector();
+				ImGui::TreePop();
+			}
 		}
 	}
 }

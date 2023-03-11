@@ -1,6 +1,7 @@
 #include "SceneManager.h"
 #include "../CoreModule/Manager/BehaviourManager.h"
 #include "../CoreModule/Manager/RendererManager.h"
+#include "../Editor/ImguiManager.h"
 #include <json/json.hpp>
 
 using json = nlohmann::ordered_json;
@@ -41,6 +42,7 @@ void KritiaEngine::SceneManagement::SceneManager::LoadScene(const std::shared_pt
 void KritiaEngine::SceneManagement::SceneManager::LoadScene(const std::string& path) {
 	BehaviourManager::Clear();
 	RendererManager::Clear();
+	KritiaEngine::Editor::GUI::ImguiManager::currentSelectedGameObject = nullptr;
 	activeScene = std::shared_ptr<Scene>(new Scene("", path));
 	activeScene->Initialize();
 }

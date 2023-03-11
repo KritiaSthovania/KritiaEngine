@@ -59,25 +59,138 @@ void KritiaEngine::Light::OnObjectDestroy() {
 void KritiaEngine::Light::UpdateLightMatrices() {
 
 	switch (this->type) {
-		case LightType::Directional:
-			directionalLightMatrix = Matrix4x4::Ortho(-20, 20, -20, 20, Settings::NearPlaneDistant, Settings::FarPlaneDistance) * Matrix4x4::LookAt(Transform()->position, Transform()->forward, Transform()->up);
-			break;
-		case LightType::Point:
-		{
-			Matrix4x4 shadowProj = Matrix4x4::Perspective(90.0f, (float)Settings::ShadowWidth / (float)Settings::ShadowHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistance);
-			pointLightMatrixRight = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(1.0, 0.0, 0.0), Vector3(0.0, -1.0, 0.0));
-			pointLightMatrixLeft = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(-1.0, 0.0, 0.0), Vector3(0.0, -1.0, 0.0));
-			pointLightMatrixTop = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, 1.0, 0.0), Vector3(0.0, 0.0, 1.0));
-			pointLightMatrixBottom = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, -1.0, 0.0), Vector3(0.0, 0.0, -1.0));
-			pointLightMatrixNear = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, 0.0, 1.0), Vector3(0.0, -1.0, 0.0));
-			pointLightMatrixFar = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, 0.0, -1.0), Vector3(0.0, -1.0, 0.0));
-			break;
+	case LightType::Directional:
+		directionalLightMatrix = Matrix4x4::Ortho(-20, 20, -20, 20, Settings::NearPlaneDistant, Settings::FarPlaneDistance) * Matrix4x4::LookAt(Transform()->position, Transform()->forward, Transform()->up);
+		break;
+	case LightType::Point:
+	{
+		Matrix4x4 shadowProj = Matrix4x4::Perspective(90.0f, (float)Settings::ShadowWidth / (float)Settings::ShadowHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistance);
+		pointLightMatrixRight = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(1.0, 0.0, 0.0), Vector3(0.0, -1.0, 0.0));
+		pointLightMatrixLeft = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(-1.0, 0.0, 0.0), Vector3(0.0, -1.0, 0.0));
+		pointLightMatrixTop = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, 1.0, 0.0), Vector3(0.0, 0.0, 1.0));
+		pointLightMatrixBottom = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, -1.0, 0.0), Vector3(0.0, 0.0, -1.0));
+		pointLightMatrixNear = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, 0.0, 1.0), Vector3(0.0, -1.0, 0.0));
+		pointLightMatrixFar = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, 0.0, -1.0), Vector3(0.0, -1.0, 0.0));
+		break;
+	}
+	case LightType::Spot:
+	{
+		Matrix4x4 shadowProj = Matrix4x4::Perspective(90, (float)Settings::ShadowWidth / (float)Settings::ShadowHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistance);
+		spotLightMatrix = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->forward, Transform()->up);
+		break;
+	}
+	}
+}
+
+void KritiaEngine::Light::OnInspector() {
+	const char* preview;
+	switch (type) {
+	case LightType::Directional:
+		preview = "Directional";
+		break;
+	case LightType::Spot:
+		preview = "Spot";
+		break;
+	case LightType::Point:
+		preview = "Point";
+		break;
+	default:
+		preview = "Directional";
+		break;
+	}
+	ImGui::Text("Type");
+	ImGui::SameLine();
+	if (ImGui::BeginCombo("##Type", preview)) {
+		if (ImGui::Selectable("Directional")) {
+			type = LightType::Directional;
 		}
-		case LightType::Spot:
-		{
-			Matrix4x4 shadowProj = Matrix4x4::Perspective(90, (float)Settings::ShadowWidth / (float)Settings::ShadowHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistance);
-			spotLightMatrix = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->forward, Transform()->up);
-			break;
+		if (ImGui::Selectable("Spot")) {
+			type = LightType::Spot;
+		}
+		if (ImGui::Selectable("Point")) {
+			type = LightType::Point;
+		}
+		ImGui::EndCombo();
+	}
+	ImguiAlias::ColorField3("Color", &color.r);
+	ImguiAlias::BoolField("Casting Shadow", &castingShadow);
+	if (ImGui::TreeNodeEx("Intensity", ImguiAlias::treeFlagDefaultOpenAndSpanFullWidth)) {
+		ImguiAlias::FloatField("Ambient", &ambientIntensity);
+		ImguiAlias::FloatField("Diffuse", &diffuseIntensity);
+		ImguiAlias::FloatField("Specular", &specularIntensity);
+		ImGui::TreePop();
+	}
+	if (type == LightType::Point || type == LightType::Spot) {
+		if (ImGui::TreeNodeEx("Point/Spot Light Attenuation", ImGuiTreeNodeFlags_SpanFullWidth)) {
+			ImguiAlias::FloatField("Constant Factor", &constantAttenuationFactor);
+			ImguiAlias::FloatField("Linear Factor", &linearAttenuationFactor);
+			ImguiAlias::FloatField("Quadratic Factor", &quadraticAttenuationFactor);
+			ImGui::TreePop();
 		}
 	}
+	if (type == LightType::Spot) {
+		if (ImGui::TreeNodeEx("Spot Light Cutoff Angle", ImGuiTreeNodeFlags_SpanFullWidth)){
+			ImguiAlias::FloatField("Inner", &cutOffAngleInner);
+			ImguiAlias::FloatField("Outer", &cutOffAngleOuter);
+			ImGui::TreePop();
+		}
+	}
+}
+
+std::string KritiaEngine::Light::Serialize() {
+	json json;
+	const char* preview;
+	switch (type) {
+	case LightType::Directional:
+		preview = "Directional";
+		break;
+	case LightType::Spot:
+		preview = "Spot";
+		break;
+	case LightType::Point:
+		preview = "Point";
+		break;
+	default:
+		preview = "Directional";
+		break;
+	}
+	json["LightType"] = preview;
+	json["Color"] = { color.r, color.g, color.b, color.a };
+	json["CastingShadow"] = castingShadow;
+	json["Ambient"] = ambientIntensity;
+	json["Diffuse"] = diffuseIntensity;
+	json["Specular"] = specularIntensity;
+	json["ConstantFactor"] = constantAttenuationFactor;
+	json["LinearFactor"] = linearAttenuationFactor;
+	json["QuadraticFactor"] = quadraticAttenuationFactor;
+	json["InnerCutoff"] = cutOffAngleInner;
+	json["OuterCutoff"] = cutOffAngleOuter;
+	return json.dump();
+}
+
+void KritiaEngine::Light::Deserialize(const json& json) {
+	if (json["LightType"] == "Spot") {
+		type = LightType::Spot;
+	} else if (json["LightType"] == "Point") {
+		type = LightType::Point;
+	} else {
+		type = LightType::Directional;
+	}
+	color.r = json["Color"][0];
+	color.g = json["Color"][1];
+	color.b = json["Color"][2];
+	color.a = json["Color"][3];
+	castingShadow = json["CastingShadow"];
+	ambientIntensity = json["Ambient"];
+	diffuseIntensity = json["Diffuse"];
+	specularIntensity = json["Specular"];
+	constantAttenuationFactor = json["ConstantFactor"];
+	linearAttenuationFactor = json["LinearFactor"];
+	quadraticAttenuationFactor = json["QuadraticFactor"];
+	cutOffAngleInner = json["InnerCutoff"];
+	cutOffAngleOuter = json["OuterCutoff"];
+}
+
+std::string KritiaEngine::Light::GetInspectorLabel() {
+	return inspectorLabel;
 }
