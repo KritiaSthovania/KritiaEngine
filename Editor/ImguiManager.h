@@ -13,6 +13,7 @@ namespace KritiaEngine::Editor {
 }
 
 namespace KritiaEngine::Editor::GUI {
+	constexpr const char* meshPayloadTag = "Mesh";
 	class ImguiManager {
 	public:
 		static void Initialize(GLFWwindow* window, bool inEditor);
@@ -27,6 +28,7 @@ namespace KritiaEngine::Editor::GUI {
 		static const char* GlslVersion;
 		static float UIScaleFactor;
 		static std::list<std::shared_ptr<EditorWindow>> editorWindows;
+
 	};
 }
 

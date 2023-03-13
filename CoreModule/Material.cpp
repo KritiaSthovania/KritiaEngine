@@ -84,5 +84,13 @@ void Material::Initialize() {
 	}
 }
 
+std::string KritiaEngine::Material::Serialize() {
+	return std::string();
+}
+
+std::shared_ptr<Material> KritiaEngine::Material::DeserializeFromPath(const std::string& path) {
+	return std::shared_ptr<Material>();
+}
+
 
 

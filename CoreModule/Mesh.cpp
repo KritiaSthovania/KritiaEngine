@@ -1,5 +1,18 @@
 #include "Mesh.h"
 
+using namespace KritiaEngine;
+
+KritiaEngine::Mesh::Mesh(const std::string& path) {
+    //Not Implemented
+}
+
+std::string KritiaEngine::Mesh::Serialize() {
+    return std::string();
+}
+
+std::shared_ptr<Mesh> KritiaEngine::Mesh::DeserializeFromPath(const std::string& path) {
+    return std::shared_ptr<Mesh>();
+}
 
 KritiaEngine::Mesh::Mesh(const std::vector<std::vector<Vertex>>& vertices, const std::vector<std::vector<unsigned int>>& indices, const std::vector<std::shared_ptr<Material>>& materials) {
     this->submeshVertices = vertices;

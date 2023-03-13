@@ -46,7 +46,7 @@ namespace KritiaEngine {
 		/// Serialize the GameObject as part of a scene.
 		/// </summary>
 		/// <param name="json">Json of the scene</param>
-		std::string Serialize();
+		virtual std::string Serialize() override;
 		void Deserialize(const json& json);
 		void AddComponentFromJson(const json& json);
 	};

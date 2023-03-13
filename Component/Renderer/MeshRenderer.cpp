@@ -3,10 +3,13 @@
 #include "../../CoreModule/GameObject.h"
 #include "../../Rendering/RenderingProvider.h"
 #include "../../CoreModule/Manager/RendererManager.h"
+#include "../../Editor/EditorApplication.h"
 
 using namespace KritiaEngine;
 using namespace KritiaEngine::Manager;
 using namespace KritiaEngine::Rendering;
+using namespace KritiaEngine::Editor::GUI;
+using namespace KritiaEngine::Editor;
 
 MeshRenderer::MeshRenderer(GameObject* gameObject) {
 	this->gameObject = gameObject;
@@ -74,13 +77,29 @@ void KritiaEngine::MeshRenderer::UpdateMaterial() {
 	}
 }
 
-void KritiaEngine::MeshRenderer::OnInspector() {}
-
-std::string KritiaEngine::MeshRenderer::Serialize() {
-	return std::string();
+void KritiaEngine::MeshRenderer::OnInspector() {
+	ImGui::Text("Materials");
+	ImGui::SameLine();
+	if (ImGui::CollapsingHeader("##Materials", ImGuiTreeNodeFlags_SpanFullWidth)) {
+		for (int i = 0; i < materials.size(); i++) {
+			//TODO: Drag And Drop
+			if (ImGui::Button(materials[i]->name.c_str())) {
+				const char* path = ImguiAlias::OpenFindResourceWindow("Material", materialFilePostfix);
+				materials[i] = Material::DeserializeFromPath(path);
+			}
+		}
+	}
 }
 
-void KritiaEngine::MeshRenderer::Deserialize(const json& json) {}
+std::string KritiaEngine::MeshRenderer::Serialize() {
+	json json;
+	json["Type"] = "MeshRenderer";
+	return json.dump();
+}
+
+void KritiaEngine::MeshRenderer::Deserialize(const json& json) {
+	assert(json["Type"] == "MeshRenderer");
+}
 
 std::string KritiaEngine::MeshRenderer::GetInspectorLabel() {
 	return inspectorLabel;

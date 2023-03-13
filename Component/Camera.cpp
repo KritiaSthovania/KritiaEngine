@@ -141,11 +141,13 @@ void Camera::EditorUpdateCameraVectors() {
 
 std::string KritiaEngine::Camera::Serialize() {
     json json;
+    json["Type"] = "Camera";
     json["Fovy"] = Fovy;
     return json.dump();
 }
 
 void KritiaEngine::Camera::Deserialize(const json& json) {
+    assert(json["Type"] == "Camera");
     this->Fovy = json["Fovy"];
 }
 

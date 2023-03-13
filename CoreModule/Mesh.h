@@ -18,8 +18,6 @@ namespace KritiaEngine {
 		};
 		Mesh() = default;
 		Mesh(const std::vector<std::vector<Vertex>>& vertices, const std::vector<std::vector<unsigned int>>& indices, const std::vector<std::shared_ptr<Material>>& materials);
-		~Mesh() {
-		}
 		static Mesh Cube();
 		std::vector<std::vector<Vertex>> submeshVertices;
 		std::vector<std::vector<unsigned int>> submeshIndices;
@@ -27,9 +25,13 @@ namespace KritiaEngine {
 		int submeshSize;
 		friend bool operator< (const std::tuple<Mesh, Material, int>& left, const std::tuple<Mesh, Material, int>& right);
 	private:
+		Mesh(const std::string& path);
+		virtual std::string Serialize() override;
+		static std::shared_ptr<Mesh> DeserializeFromPath(const std::string& path);
 		std::vector<unsigned int> VAOs, VBOs, EBOs;
 		bool isSetup = false;
 		static std::vector<float> GetDefaultCubeVertices();
+		std::string path;
 	};
 
 }

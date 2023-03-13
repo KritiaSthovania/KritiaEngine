@@ -11,7 +11,8 @@ namespace KritiaEngine {
 		std::string type;
 		std::string path;
 	private:
-
+		virtual std::string Serialize() override;
+		std::shared_ptr<Texture> DeserializeFromPath(const std::string& path);
 	};
 }
 

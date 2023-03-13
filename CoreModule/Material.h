@@ -44,6 +44,8 @@ namespace KritiaEngine {
         /// Compile Shader, Load Texture
         /// </summary>
 		void Initialize();
+		virtual std::string Serialize() override;
+		static std::shared_ptr<Material> DeserializeFromPath(const std::string& path);
 		int diffuseSamplerIndex = 0, specularSamplerIndex = 1, normalSamplerIndex = 2, parallaxSamplerIndex = 3, shadowSamplerIndex = 4;
 		unsigned int mainTextureID, specularMapID, normalMapID, parallaxMapID;
 		unsigned int matricesVPID;

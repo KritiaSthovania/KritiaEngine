@@ -7,7 +7,7 @@
 void KritiaEngine::Editor::GUI::MainMenuBarFunction::OpenScene() {
     NFD_Init();
     nfdchar_t* outPath;
-    nfdfilteritem_t filterItem[1] = { { "Scene File", "scene.json"}};
+    nfdfilteritem_t filterItem[1] = { { "Scene File", "scene.json"} };
     nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 1, NULL);
     if (result == NFD_OKAY) {
         SceneManagement::SceneManager::LoadScene(outPath);

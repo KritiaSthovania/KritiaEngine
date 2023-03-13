@@ -154,6 +154,7 @@ std::string KritiaEngine::Light::Serialize() {
 		preview = "Directional";
 		break;
 	}
+	json["Type"] = "Light";
 	json["LightType"] = preview;
 	json["Color"] = { color.r, color.g, color.b, color.a };
 	json["CastingShadow"] = castingShadow;
@@ -169,6 +170,7 @@ std::string KritiaEngine::Light::Serialize() {
 }
 
 void KritiaEngine::Light::Deserialize(const json& json) {
+	assert(json["Type"] == "Light");
 	if (json["LightType"] == "Spot") {
 		type = LightType::Spot;
 	} else if (json["LightType"] == "Point") {

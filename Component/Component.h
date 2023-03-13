@@ -6,6 +6,7 @@
 #include "../CoreModule/Manager/BehaviourManager.h"
 #include "../CoreModule/GameObject.h"
 #include "../Editor/ImguiAlias.h"
+#include "../Editor/ImguiManager.h"
 using ImguiAlias = KritiaEngine::Editor::GUI::ImguiAlias;
 
 namespace KritiaEngine {
