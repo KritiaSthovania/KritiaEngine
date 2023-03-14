@@ -1,14 +1,15 @@
 #pragma once
 
-#include "../Component/Camera.h"
 #include "GameObject.h"
 #include "Texture.h"
+#include "Interface/SerializableAndDeserializable.h"
+#include "../Component/Camera.h"
 #include "../Rendering/Shader.h"
-#include <json/json.hpp>
 #include "../Editor/EditorApplication.h"
+#include <json/json.hpp>
 
 namespace KritiaEngine::SceneManagement {
-	class Scene
+	class Scene : private FileSerializable, PathDeserializable
 	{
 		friend class SceneManager;
 	public:
@@ -31,8 +32,8 @@ namespace KritiaEngine::SceneManagement {
 		/// <summary>
 		/// Save the serialized json data to file.
 		/// </summary>
-		void SerializeToFile();
-		void DeserializeFromFile(std::ifstream& instream);
+		virtual void SerializeToFile() override;
+		virtual void DeserializeFromPath(const std::string& path) override;
 		/// <summary>
 		/// current rendering camera
 		/// </summary>
@@ -41,6 +42,7 @@ namespace KritiaEngine::SceneManagement {
 		std::shared_ptr<GameObject> mainLightSource;
 		std::list<std::shared_ptr<GameObject>> opaqueObjects;
 		std::list<std::shared_ptr<GameObject>> transparentObjects;
+
 	};
 
 }

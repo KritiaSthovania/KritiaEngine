@@ -14,8 +14,7 @@ void KritiaEngine::Texture::LoadImage(const std::string& path)
 std::string KritiaEngine::Texture::Serialize() {
 	return std::string();
 }
+void KritiaEngine::Texture::DeserializeFromPath(const std::string& path) {
 
-std::shared_ptr<Texture> KritiaEngine::Texture::DeserializeFromPath(const std::string& path) {
-	return std::shared_ptr<Texture>();
 }
 

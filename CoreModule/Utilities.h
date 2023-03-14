@@ -3,7 +3,7 @@
 
 namespace KritiaEngine {
 	struct Color {
-		friend std::ostream& operator<<(std::ostream& cout, Color color);
+		friend std::ostream& operator<<(std::ostream& cout, Color& color);
 
 	public:
 		/// <summary>
@@ -32,5 +32,6 @@ namespace KritiaEngine {
 		void operator-= (const Color& vec);
 		void operator*= (float a);
 		void operator/= (float a);
+		operator std::vector<float>() const;
 	};
 }

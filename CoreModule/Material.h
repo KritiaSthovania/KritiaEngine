@@ -4,6 +4,7 @@
 #include "Utilities.h"
 #include "../CoreModule/MathStructs.h"
 #include "Texture.h"
+#include "Interface/SerializableAndDeserializable.h"
 
 namespace KritiaEngine::Rendering {
 	class RenderingProvider;
@@ -11,11 +12,13 @@ namespace KritiaEngine::Rendering {
 }
 
 namespace KritiaEngine {
-	class Material : public Object
+	class Mesh;
+	class Material : public Object, JsonDeserializable, PathDeserializable, JsonSerializable
 	{
 		friend class KritiaEngine::Rendering::RenderingProvider;
 		friend class KritiaEngine::Rendering::OpenGLRendering;
 		friend class MeshRenderer;
+		friend class Mesh;
 	public:
 		enum RenderMode {
 			Opaque,
@@ -45,7 +48,8 @@ namespace KritiaEngine {
         /// </summary>
 		void Initialize();
 		virtual std::string Serialize() override;
-		static std::shared_ptr<Material> DeserializeFromPath(const std::string& path);
+		virtual void DeserializeFromJson(const json& json) override;
+		virtual void DeserializeFromPath(const std::string& path) override;
 		int diffuseSamplerIndex = 0, specularSamplerIndex = 1, normalSamplerIndex = 2, parallaxSamplerIndex = 3, shadowSamplerIndex = 4;
 		unsigned int mainTextureID, specularMapID, normalMapID, parallaxMapID;
 		unsigned int matricesVPID;

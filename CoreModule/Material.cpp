@@ -88,8 +88,10 @@ std::string KritiaEngine::Material::Serialize() {
 	return std::string();
 }
 
-std::shared_ptr<Material> KritiaEngine::Material::DeserializeFromPath(const std::string& path) {
-	return std::shared_ptr<Material>();
+void KritiaEngine::Material::DeserializeFromJson(const json& json) {}
+
+void KritiaEngine::Material::DeserializeFromPath(const std::string& path) {
+	
 }
 
 

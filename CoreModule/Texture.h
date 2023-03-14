@@ -1,7 +1,8 @@
 #pragma once
 #include "Object.h"
+#include "Interface/SerializableAndDeserializable.h"
 namespace KritiaEngine {
-	class Texture : public Object
+	class Texture : public Object, JsonSerializable, PathDeserializable
 	{
 	public:
 		Texture() = default;
@@ -12,7 +13,7 @@ namespace KritiaEngine {
 		std::string path;
 	private:
 		virtual std::string Serialize() override;
-		std::shared_ptr<Texture> DeserializeFromPath(const std::string& path);
+		void DeserializeFromPath(const std::string& path);
 	};
 }
 

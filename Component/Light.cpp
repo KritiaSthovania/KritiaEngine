@@ -169,7 +169,7 @@ std::string KritiaEngine::Light::Serialize() {
 	return json.dump();
 }
 
-void KritiaEngine::Light::Deserialize(const json& json) {
+void KritiaEngine::Light::DeserializeFromJson(const json& json) {
 	assert(json["Type"] == "Light");
 	if (json["LightType"] == "Spot") {
 		type = LightType::Spot;

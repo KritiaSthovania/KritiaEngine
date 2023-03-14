@@ -146,9 +146,9 @@ std::string KritiaEngine::Camera::Serialize() {
     return json.dump();
 }
 
-void KritiaEngine::Camera::Deserialize(const json& json) {
+void KritiaEngine::Camera::DeserializeFromJson(const json& json) {
     assert(json["Type"] == "Camera");
-    this->Fovy = json["Fovy"];
+    Fovy = json["Fovy"];
 }
 
 void KritiaEngine::Camera::OnInspector() {

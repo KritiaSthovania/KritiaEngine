@@ -96,7 +96,7 @@ std::string KritiaEngine::Transform::Serialize() {
 	return json.dump();
 }
 
-void KritiaEngine::Transform::Deserialize(const json& json) {
+void KritiaEngine::Transform::DeserializeFromJson(const json& json) {
 	assert(json["Type"] == "Transform");
 	this->position = Vector3(json["Position"][0], json["Position"][1], json["Position"][2]);
 	this->rotation = Quaternion(json["Rotation"][0], json["Rotation"][1], json["Rotation"][2], json["Rotation"][3]);

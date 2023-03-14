@@ -1,9 +1,9 @@
 #pragma once
 
 #include "pch.h"
-#include <typeinfo>
+#include "Interface/SerializableAndDeserializable.h"
 #include "Object.h"
-
+#include <typeinfo>
 using json = nlohmann::ordered_json;
 
 namespace KritiaEngine::Editor::GUI {
@@ -17,7 +17,7 @@ namespace KritiaEngine::SceneManagement {
 namespace KritiaEngine {
 	class Transform;
 	class Component;
-	class GameObject : public Object{
+	class GameObject : public Object, JsonSerializable, JsonDeserializable{
 		friend class KritiaEngine::Editor::GUI::InspectorWindow;
 		friend class KritiaEngine::SceneManagement::Scene;
 	public:
@@ -47,7 +47,7 @@ namespace KritiaEngine {
 		/// </summary>
 		/// <param name="json">Json of the scene</param>
 		virtual std::string Serialize() override;
-		void Deserialize(const json& json);
+		virtual void DeserializeFromJson(const json& json) override;
 		void AddComponentFromJson(const json& json);
 	};
 }

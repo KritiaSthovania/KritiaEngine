@@ -1,17 +1,18 @@
 #pragma once
 #ifndef COMPONENT
 #define COMPONENT
-#include <imgui/imgui.h>
 #include "pch.h"
+#include "../CoreModule/Interface/SerializableAndDeserializable.h"
 #include "../CoreModule/Manager/BehaviourManager.h"
 #include "../CoreModule/GameObject.h"
 #include "../Editor/ImguiAlias.h"
 #include "../Editor/ImguiManager.h"
+#include <imgui/imgui.h>
 using ImguiAlias = KritiaEngine::Editor::GUI::ImguiAlias;
 
 namespace KritiaEngine {
 	class Transform;
-	class Component : public Object {
+	class Component : public Object, private JsonSerializable, JsonDeserializable{
 		friend class KritiaEngine::Manager::BehaviourManager;
 		friend class KritiaEngine::Editor::GUI::InspectorWindow;
 		friend class GameObject;
@@ -31,8 +32,8 @@ namespace KritiaEngine {
 		// Must manually add this component to BehaviourManager
 		virtual void ComponentUpdate();
 		virtual void OnInspector() = 0;
-		virtual std::string Serialize() = 0;
-		virtual void Deserialize(const json& json) = 0;
+		virtual std::string Serialize() override = 0;
+		virtual void DeserializeFromJson(const json& json) override = 0;
 		virtual std::string GetInspectorLabel () = 0;
 		std::string inspectorLabel;
 	};

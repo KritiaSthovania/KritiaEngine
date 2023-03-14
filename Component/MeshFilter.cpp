@@ -20,7 +20,8 @@ void KritiaEngine::MeshFilter::OnInspector() {
 	if (ImGui::BeginDragDropTarget()) {
 		if (ImGui::Selectable(mesh->name.c_str())) {
 			const char* path = ImguiAlias::OpenFindResourceWindow("Mesh", KritiaEngine::Editor::meshFilePostfix);
-			mesh = Mesh::DeserializeFromPath(path);
+			mesh = std::shared_ptr<Mesh>(new Mesh());
+			mesh->DeserializeFromPath(path);
 		}
 		ImGui::EndDragDropTarget();
 	}
@@ -33,9 +34,10 @@ std::string KritiaEngine::MeshFilter::Serialize() {
 	return json.dump();
 }
 
-void KritiaEngine::MeshFilter::Deserialize(const json& json) {
+void KritiaEngine::MeshFilter::DeserializeFromJson(const json& json) {
 	assert(json["Type"] == "MeshFilter");
-	mesh = std::shared_ptr<Mesh>(new Mesh(json["MeshPath"]));
+	mesh = std::shared_ptr<Mesh>(new Mesh());
+	mesh->DeserializeFromPath(json["MeshPath"]);
 }
 
 std::string KritiaEngine::MeshFilter::GetInspectorLabel() {

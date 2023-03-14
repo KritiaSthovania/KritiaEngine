@@ -85,7 +85,11 @@ void KritiaEngine::Color::operator/=(float a)
 	this->a /= a;
 }
 
-std::ostream& KritiaEngine::operator<<(std::ostream& cout, Color color) {
+KritiaEngine::Color::operator std::vector<float>() const {
+	return std::vector<float>({ r,g,b,a });
+}
+
+std::ostream& KritiaEngine::operator<<(std::ostream& cout, Color& color) {
 	cout << "(" << color.r << ", " << color.g << ", " << color.b << ", " << color.a << ")";
 	return cout;
 }

@@ -150,6 +150,10 @@ KritiaEngine::Vector3::operator glm::vec3() const
 	return glm::vec3(x, y, z);
 }
 
+KritiaEngine::Vector3::operator std::vector<float>() const {
+	return std::vector<float>({ x,y,z });
+}
+
 std::ostream& KritiaEngine::operator<<(std::ostream& cout, Vector3& vec) {
 	cout << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
 	return cout;
@@ -257,6 +261,10 @@ bool KritiaEngine::Vector4::operator!=(const Vector4& vec) {
 KritiaEngine::Vector4::operator glm::vec4() const
 {
 	return glm::vec4(x, y, z, w);
+}
+
+KritiaEngine::Vector4::operator std::vector<float>() const {
+	return std::vector<float>({ x, y, z, w });
 }
 
 std::ostream& KritiaEngine::operator<<(std::ostream& cout, Vector4& vec) {
@@ -633,6 +641,10 @@ void KritiaEngine::Quaternion::operator*=(const Quaternion& quat) {
 
 KritiaEngine::Quaternion::operator glm::quat() const {
 	return glm::quat(w, x, y, z);
+}
+
+KritiaEngine::Quaternion::operator std::vector<float>() const {
+	return std::vector<float>({ x,y,z,w });
 }
 
 bool KritiaEngine::Quaternion::operator==(const Quaternion& quat) {

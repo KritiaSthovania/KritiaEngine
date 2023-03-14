@@ -31,13 +31,15 @@ void KritiaEngine::SceneManagement::Scene::Initialize() {
     std::ifstream input(path);
     if (input.good()) {
         // An serialized scene
-        DeserializeFromFile(input);
+        input.close();
+        DeserializeFromPath(path);
+
     } else {
+        input.close();
         // A new scene;
         InitializeCamera();
         InitializeLighting();
     }
-    input.close();
     //InitializeGameObjects();
 }
 
@@ -136,19 +138,20 @@ void KritiaEngine::SceneManagement::Scene::SerializeToFile() {
     output.close();
 }
 
-void KritiaEngine::SceneManagement::Scene::DeserializeFromFile(std::ifstream& instream) {
+void KritiaEngine::SceneManagement::Scene::DeserializeFromPath(const std::string& path) {
+    std::ifstream instream(path);
     json json = json::parse(instream);
     assert(json["Type"] == "Scene");
     this->name = json["Name"];
     int numberOfGameObjects = json["Number Of GameObjects"];
     for (int i = 0; i < numberOfGameObjects; i++) {
         std::string str = json["GameObject" + std::to_string(i)];
+        // Must separate to avoid parsing error
         nlohmann::ordered_json objectJson = json::parse(str);
         auto gameObject = std::shared_ptr<GameObject>(new GameObject());
         gameObject->name = objectJson["Name"];
-        gameObject->Deserialize(objectJson);
+        gameObject->DeserializeFromJson(objectJson);
         rootGameObjects.push_back(gameObject);
     }
+    instream.close();
 }
-
-

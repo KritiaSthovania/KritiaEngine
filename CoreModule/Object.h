@@ -11,10 +11,6 @@ namespace KritiaEngine{
 	private:
 		// called internally when an object is destroyed.
 		virtual void OnObjectDestroy();
-		/// <summary>
-		/// Serialize to a json string
-		/// </summary>
-		virtual std::string Serialize();
 		const char* guid;
 	};
 

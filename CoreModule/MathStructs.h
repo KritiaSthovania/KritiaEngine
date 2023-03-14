@@ -41,6 +41,7 @@ namespace KritiaEngine {
 		bool operator == (const Vector3& vec);
 		bool operator!= (const Vector3& vec);
 		operator glm::vec3() const;
+		operator std::vector<float>() const;
 	private:
 
 	};
@@ -69,6 +70,7 @@ namespace KritiaEngine {
 		bool operator== (const Vector4& vec);
 		bool operator!= (const Vector4& vec);
 		operator glm::vec4() const;
+		operator std::vector<float>() const;
 	private:
 
 	};
@@ -211,9 +213,10 @@ namespace KritiaEngine {
 
 		Quaternion operator* (const Quaternion& quat);
 		void operator*= (const Quaternion& quat);
-		operator glm::quat() const;
 		bool operator== (const Quaternion& quat);
 		bool operator!= (const Quaternion& quat);
+		operator glm::quat() const;
+		operator std::vector<float>() const;
 	};
 }
 

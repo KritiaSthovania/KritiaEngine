@@ -85,7 +85,8 @@ void KritiaEngine::MeshRenderer::OnInspector() {
 			//TODO: Drag And Drop
 			if (ImGui::Button(materials[i]->name.c_str())) {
 				const char* path = ImguiAlias::OpenFindResourceWindow("Material", materialFilePostfix);
-				materials[i] = Material::DeserializeFromPath(path);
+				materials[i] = std::shared_ptr<Material>(new Material());
+				materials[i]->DeserializeFromPath(path);
 			}
 		}
 	}
@@ -97,7 +98,7 @@ std::string KritiaEngine::MeshRenderer::Serialize() {
 	return json.dump();
 }
 
-void KritiaEngine::MeshRenderer::Deserialize(const json& json) {
+void KritiaEngine::MeshRenderer::DeserializeFromJson(const json& json) {
 	assert(json["Type"] == "MeshRenderer");
 }
 

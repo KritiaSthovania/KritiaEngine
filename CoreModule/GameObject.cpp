@@ -39,7 +39,7 @@ std::string KritiaEngine::GameObject::Serialize() {
 	return json.dump();
 }
 
-void KritiaEngine::GameObject::Deserialize(const json& json) {
+void KritiaEngine::GameObject::DeserializeFromJson(const json& json) {
 	assert(json["Type"] == "GameObject");
 	this->name = json["Name"];
 	int numberOfComponents = json["Number Of Components"];
@@ -47,7 +47,7 @@ void KritiaEngine::GameObject::Deserialize(const json& json) {
 	for (int i = 0; i < 1; i++) {
 		nlohmann::ordered_json componentJson = json::parse((std::string)json["Component" + std::to_string(i)]);
 		this->AddComponentFromJson(json);
-		(*this->components.begin())->Deserialize(componentJson);
+		(*this->components.begin())->DeserializeFromJson(componentJson);
 	}
 }
 

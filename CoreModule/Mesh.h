@@ -3,9 +3,12 @@
 #include "Object.h"
 #include "MathStructs.h"
 #include "Material.h"
+#include "Interface/SerializableAndDeserializable.h"
+#include <json/json.hpp>
+using json = nlohmann::ordered_json;
 
 namespace KritiaEngine {
-	class Mesh : public Object{
+	class Mesh : public Object, PathDeserializable, JsonSerializable{
 		friend class MeshFilter;
 		friend class KritiaEngine::Rendering::RenderingProvider;
 		friend class KritiaEngine::Rendering::OpenGLRendering;
@@ -22,12 +25,15 @@ namespace KritiaEngine {
 		std::vector<std::vector<Vertex>> submeshVertices;
 		std::vector<std::vector<unsigned int>> submeshIndices;
 		std::vector<std::shared_ptr<Material>> submeshMaterials;
-		int submeshSize;
+		int submeshSize = 0;
 		friend bool operator< (const std::tuple<Mesh, Material, int>& left, const std::tuple<Mesh, Material, int>& right);
 	private:
-		Mesh(const std::string& path);
 		virtual std::string Serialize() override;
-		static std::shared_ptr<Mesh> DeserializeFromPath(const std::string& path);
+		std::string SubmeshSerialize(int index);
+		std::string VertexSerialize(const Vertex& v, int vertexIndex);
+		virtual void DeserializeFromPath(const std::string& path) override;
+		void SubmeshDeserialize(const json& json, int index);
+		static Vertex VertexDeserialize(const json& json);
 		std::vector<unsigned int> VAOs, VBOs, EBOs;
 		bool isSetup = false;
 		static std::vector<float> GetDefaultCubeVertices();

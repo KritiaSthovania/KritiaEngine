@@ -28,7 +28,7 @@ namespace KritiaEngine{
 		std::list<std::shared_ptr<Transform>> children;
 		virtual void OnInspector() override;
 		virtual std::string Serialize() override;
-		virtual void Deserialize(const json& json) override;
+		virtual void DeserializeFromJson(const json& json) override;
 		virtual std::string GetInspectorLabel() override;
 		std::string inspectorLabel = "Transform";
 	};
