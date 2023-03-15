@@ -1,7 +1,7 @@
 #pragma once
-
 namespace KritiaEngine::Manager {
-	class GameObjectManager {};
-}
 
+	class ResourceManager {};
+
+}
 

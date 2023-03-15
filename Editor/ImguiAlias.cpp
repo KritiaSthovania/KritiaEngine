@@ -53,4 +53,5 @@ const char* KritiaEngine::Editor::GUI::ImguiAlias::OpenFindResourceWindow(const 
 		printf("Error: %s\n", NFD_GetError());
 	}
 	NFD_Quit();
+	return "";
 }

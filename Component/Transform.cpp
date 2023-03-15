@@ -87,7 +87,7 @@ void KritiaEngine::Transform::OnInspector() {
 	ImguiAlias::FloatField3("Scale", &scale.x);
 }
 
-std::string KritiaEngine::Transform::Serialize() {
+std::string KritiaEngine::Transform::SerializeToJson() {
 	json json;
 	json["Type"] = "Transform";
 	json["Position"] = { position.x, position.y, position.z };

@@ -34,7 +34,7 @@ namespace KritiaEngine {
 
 		// Í¨¹ý Renderer ¼Ì³Ð
 		virtual void OnInspector() override;
-		virtual std::string Serialize() override;
+		virtual std::string SerializeToJson() override;
 		virtual void DeserializeFromJson(const json& json) override;
 		std::string inspectorLabel = "MeshRenderer";
 		virtual std::string GetInspectorLabel() override;

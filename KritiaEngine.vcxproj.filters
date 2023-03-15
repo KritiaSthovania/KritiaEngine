@@ -159,6 +159,9 @@
     <ClCompile Include="CoreModule\Manager\GameObjectManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="CoreModule\Manager\ResourceManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h">
@@ -324,6 +327,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CoreModule\Interface\SerializableAndDeserializable.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Manager\ResourceManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

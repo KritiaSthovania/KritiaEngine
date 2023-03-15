@@ -36,7 +36,7 @@ void KritiaEngine::MonoBehaviour::BehaviourUpdate() {
 
 void KritiaEngine::MonoBehaviour::OnInspector() {}
 
-std::string KritiaEngine::MonoBehaviour::Serialize() {
+std::string KritiaEngine::MonoBehaviour::SerializeToJson() {
 	return std::string();
 }
 

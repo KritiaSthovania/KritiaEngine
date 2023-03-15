@@ -16,6 +16,7 @@ namespace KritiaEngine::Lighting {
 		static std::vector<Light*> GetPointLightAroundPos(const Vector3& pos);
 		static std::shared_ptr<Light> GetMainLightSource();
 		static void SetMainLightSource(std::shared_ptr<Light> light);
+		static void Reset();
 	private:
 		/// <summary>
 		/// The main light source of the current scene.Intended for rendering purposes.

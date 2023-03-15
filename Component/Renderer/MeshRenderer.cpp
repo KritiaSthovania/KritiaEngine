@@ -21,7 +21,7 @@ void KritiaEngine::MeshRenderer::PreInitializeMaterial() {
 	if (this->gameObject->GetComponent<MeshFilter>() != nullptr && this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size() > 0) {
 		for (int i = 0; i < this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(); i++) {
 			materials.push_back(this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials[i]);
-			if (this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials[i]->renderMode == Material::Transparent) {
+			if (this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials[i]->renderMode == Material::RenderMode::Transparent) {
 				containTransparentMaterial = true;
 			}
 		}
@@ -36,7 +36,7 @@ void MeshRenderer::InitializeMaterial() {
 		if (this->gameObject->GetComponent<MeshFilter>() != nullptr && this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size() > 0) {
 			for (int i = 0; i < this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(); i++) {
 				materials.push_back(this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials[i]);
-				if (this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials[i]->renderMode == Material::Transparent) {
+				if (this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials[i]->renderMode == Material::RenderMode::Transparent) {
 					// Move the renderer to the transparent queue
 					if (!containTransparentMaterial) {
 						RendererManager::MoveMeshRendererToTransparentQueue(this);
@@ -50,7 +50,7 @@ void MeshRenderer::InitializeMaterial() {
 	}
 	for (int i = 0; i < materials.size(); i++) {
 		materials[i]->Initialize();
-		if (materials[i]->renderMode == Material::Transparent) {
+		if (materials[i]->renderMode == Material::RenderMode::Transparent) {
 			if (!containTransparentMaterial) {
 				// Move the renderer to the transparent queue
 				RendererManager::MoveMeshRendererToTransparentQueue(this);
@@ -66,7 +66,7 @@ void KritiaEngine::MeshRenderer::UpdateMaterial() {
 	} else {
 		for (int i = materialSize; i < materials.size(); i++) {
 			materials[i]->Initialize();
-			if (materials[i]->renderMode == Material::Transparent) {
+			if (materials[i]->renderMode == Material::RenderMode::Transparent) {
 				if (!containTransparentMaterial) {
 					RendererManager::MoveMeshRendererToTransparentQueue(this);
 					containTransparentMaterial = true;
@@ -85,14 +85,16 @@ void KritiaEngine::MeshRenderer::OnInspector() {
 			//TODO: Drag And Drop
 			if (ImGui::Button(materials[i]->name.c_str())) {
 				const char* path = ImguiAlias::OpenFindResourceWindow("Material", materialFilePostfix);
-				materials[i] = std::shared_ptr<Material>(new Material());
-				materials[i]->DeserializeFromPath(path);
+				if (path != "") {
+					materials[i] = std::shared_ptr<Material>(new Material());
+					materials[i]->DeserializeFromPath(path);
+				}
 			}
 		}
 	}
 }
 
-std::string KritiaEngine::MeshRenderer::Serialize() {
+std::string KritiaEngine::MeshRenderer::SerializeToJson() {
 	json json;
 	json["Type"] = "MeshRenderer";
 	return json.dump();

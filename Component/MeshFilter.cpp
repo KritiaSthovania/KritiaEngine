@@ -20,24 +20,27 @@ void KritiaEngine::MeshFilter::OnInspector() {
 	if (ImGui::BeginDragDropTarget()) {
 		if (ImGui::Selectable(mesh->name.c_str())) {
 			const char* path = ImguiAlias::OpenFindResourceWindow("Mesh", KritiaEngine::Editor::meshFilePostfix);
-			mesh = std::shared_ptr<Mesh>(new Mesh());
-			mesh->DeserializeFromPath(path);
+			if (path != "") {
+				mesh = std::shared_ptr<Mesh>(new Mesh());
+				mesh->DeserializeFromPath(path);
+			}
 		}
 		ImGui::EndDragDropTarget();
 	}
 }
 
-std::string KritiaEngine::MeshFilter::Serialize() {
+std::string KritiaEngine::MeshFilter::SerializeToJson() {
 	json json;
 	json["Type"] = "MeshFilter";
-	json["MeshPath"] = mesh->path;
+	json["Mesh"] = mesh->SerializeToJson();
 	return json.dump();
 }
 
 void KritiaEngine::MeshFilter::DeserializeFromJson(const json& json) {
 	assert(json["Type"] == "MeshFilter");
 	mesh = std::shared_ptr<Mesh>(new Mesh());
-	mesh->DeserializeFromPath(json["MeshPath"]);
+	nlohmann::ordered_json meshJson = json::parse((std::string)json["Mesh"]);
+	mesh->DeserializeFromJson(meshJson);
 }
 
 std::string KritiaEngine::MeshFilter::GetInspectorLabel() {

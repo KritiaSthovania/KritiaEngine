@@ -14,7 +14,7 @@ namespace KritiaEngine {
 
 		// Í¨¹ý Component ¼Ì³Ð
 		virtual void OnInspector() override;
-		virtual std::string Serialize() override;
+		virtual std::string SerializeToJson() override;
 		virtual void DeserializeFromJson(const json& json) override;
 		virtual std::string GetInspectorLabel() override;
 		std::string inspectorLabel = "MeshFilter";

@@ -79,3 +79,8 @@ void KritiaEngine::Lighting::LightingSystem::SetMainLightSource(std::shared_ptr<
         MainLightSource = light;
     }
 }
+
+void KritiaEngine::Lighting::LightingSystem::Reset() {
+    Lights.clear();
+    MainLightSource = nullptr;
+}

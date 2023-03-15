@@ -32,7 +32,7 @@ namespace KritiaEngine {
 		// Must manually add this component to BehaviourManager
 		virtual void ComponentUpdate();
 		virtual void OnInspector() = 0;
-		virtual std::string Serialize() override = 0;
+		virtual std::string SerializeToJson() override = 0;
 		virtual void DeserializeFromJson(const json& json) override = 0;
 		virtual std::string GetInspectorLabel () = 0;
 		std::string inspectorLabel;

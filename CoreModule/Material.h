@@ -20,7 +20,7 @@ namespace KritiaEngine {
 		friend class MeshRenderer;
 		friend class Mesh;
 	public:
-		enum RenderMode {
+		enum class RenderMode {
 			Opaque,
 			Transparent
 		};
@@ -32,7 +32,7 @@ namespace KritiaEngine {
 		/// Specular shininess
 		/// </summary>
 		float shininess = 32;
-		RenderMode renderMode = Opaque;
+		RenderMode renderMode = RenderMode::Opaque;
 		/// <summary>
 		/// The main texture, either diffuse map or transparent texture.
 		/// </summary>
@@ -47,7 +47,7 @@ namespace KritiaEngine {
         /// Compile Shader, Load Texture
         /// </summary>
 		void Initialize();
-		virtual std::string Serialize() override;
+		virtual std::string SerializeToJson() override;
 		virtual void DeserializeFromJson(const json& json) override;
 		virtual void DeserializeFromPath(const std::string& path) override;
 		int diffuseSamplerIndex = 0, specularSamplerIndex = 1, normalSamplerIndex = 2, parallaxSamplerIndex = 3, shadowSamplerIndex = 4;

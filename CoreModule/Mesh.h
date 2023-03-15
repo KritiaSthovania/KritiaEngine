@@ -8,7 +8,7 @@
 using json = nlohmann::ordered_json;
 
 namespace KritiaEngine {
-	class Mesh : public Object, PathDeserializable, JsonSerializable{
+	class Mesh : public Object, PathDeserializable, JsonSerializable, JsonDeserializable{
 		friend class MeshFilter;
 		friend class KritiaEngine::Rendering::RenderingProvider;
 		friend class KritiaEngine::Rendering::OpenGLRendering;
@@ -28,7 +28,7 @@ namespace KritiaEngine {
 		int submeshSize = 0;
 		friend bool operator< (const std::tuple<Mesh, Material, int>& left, const std::tuple<Mesh, Material, int>& right);
 	private:
-		virtual std::string Serialize() override;
+		virtual std::string SerializeToJson() override;
 		std::string SubmeshSerialize(int index);
 		std::string VertexSerialize(const Vertex& v, int vertexIndex);
 		virtual void DeserializeFromPath(const std::string& path) override;
@@ -38,6 +38,9 @@ namespace KritiaEngine {
 		bool isSetup = false;
 		static std::vector<float> GetDefaultCubeVertices();
 		std::string path;
+
+		// Í¨¹ý JsonDeserializable ¼Ì³Ð
+		virtual void DeserializeFromJson(const json& json) override;
 	};
 
 }

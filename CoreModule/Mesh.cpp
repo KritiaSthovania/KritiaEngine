@@ -35,7 +35,7 @@ KritiaEngine::Mesh KritiaEngine::Mesh::Cube() {
     std::shared_ptr<Material> material = std::shared_ptr<Material>(new Material("New Material", std::shared_ptr<Shader>(new KritiaEngine::Shader("./StandardShader/BlinnPhongShader.vs", "./StandardShader/BlinnPhongShader.fs"))));
     material->albedo = Color(1.0f, 1.f, 1.f, 1);
     material->shininess = 32;
-    material->renderMode = Material::Opaque;
+    material->renderMode = Material::RenderMode::Opaque;
     material->mainTexture = std::shared_ptr<Texture>(new Texture("./Assets/Textures/container_diffuse.png"));
     material->specularMap = std::shared_ptr<Texture>(new Texture("./Assets/Textures/container_specular.png"));
     //material->normalMap = std::shared_ptr<Texture>(new Texture("./Assets/Textures/wall/bricks2_normal.jpg"));
@@ -102,7 +102,8 @@ std::vector<float> KritiaEngine::Mesh::GetDefaultCubeVertices() {
 }
 
 
-std::string KritiaEngine::Mesh::Serialize() {
+
+std::string KritiaEngine::Mesh::SerializeToJson() {
     json json;
     json["Type"] = "Mesh";
     json["Name"] = name;
@@ -111,17 +112,19 @@ std::string KritiaEngine::Mesh::Serialize() {
     for (int i = 0; i < submeshSize; i++) {
         json["Submesh" + std::to_string(i)] = SubmeshSerialize(i);
     }
-    return json;
+    return json.dump();
 }
 
 std::string KritiaEngine::Mesh::SubmeshSerialize(int index) {
     json json;
-    json["Number of Vertices"] = submeshVertices.size();
-    for (int i = 0; i < submeshVertices.size(); i++) {
+    json["Number of Vertices"] = submeshVertices[index].size();
+    for (int i = 0; i < submeshVertices[index].size(); i++) {
+        std::cout << i  << std::endl;
         json["Vertex" + std::to_string(i)] = VertexSerialize(submeshVertices[index][i], i);
-        json["Material"] = submeshMaterials[i]->Serialize();
+
     }
-    return json;
+    json["Material"] = submeshMaterials[index]->SerializeToJson();
+    return json.dump();
 }
 
 std::string KritiaEngine::Mesh::VertexSerialize(const Vertex& v, int vertexIndex) {
@@ -131,36 +134,37 @@ std::string KritiaEngine::Mesh::VertexSerialize(const Vertex& v, int vertexIndex
     json["Tangent"] = { v.Tangent.x, v.Tangent.y, v.Tangent.z };
     json["TexCoord"] = { v.TexCoord.x, v.TexCoord.y };
     json["Index"] = vertexIndex;
-    return json;
+    return json.dump();
+}
+
+
+void KritiaEngine::Mesh::DeserializeFromJson(const json& json) {
+    assert(json["Type"] == "Mesh");
+    name = json["Name"];
+    path = json["Path"];
+    submeshSize = json["Number of Submeshes"];
+    submeshVertices.resize(submeshSize);
+    submeshIndices.resize(submeshSize);
+    submeshMaterials.resize(submeshSize);
+    for (int i = 0; i < submeshSize; i++) {
+        nlohmann::json submeshJson = json::parse((std::string)json["Submesh" + std::to_string(i)]);
+        SubmeshDeserialize(submeshJson, i);
+        submeshMaterials[i] = std::shared_ptr<Material>(new Material());
+        submeshMaterials[i]->DeserializeFromJson(json::parse((std::string)submeshJson["Material"]));
+    }
 }
 
 void KritiaEngine::Mesh::DeserializeFromPath(const std::string& path) {
     std::ifstream instream(path);
     json json = json::parse(instream);
-    assert(json["Type"] == "Mesh");
-    std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(new Mesh());
-    mesh->name = json["Name"];
-    mesh->path = json["Path"];
-    mesh->submeshSize = json["Number of Submeshes"];
-    mesh->submeshVertices.resize(mesh->submeshSize);
-    mesh->submeshVertices.resize(mesh->submeshSize);
-    mesh->submeshMaterials.resize(mesh->submeshSize);
-    for (int i = 0; i < mesh->submeshSize; i++) {
-        // Must first get str to avoid parsing error
-        std::string str = json["Submesh" + std::to_string(i)];
-        nlohmann::ordered_json submeshJson = json::parse(str);
-        mesh->SubmeshDeserialize(submeshJson, i);
-        mesh->submeshMaterials[i] = std::shared_ptr<Material>(new Material());
-        mesh->submeshMaterials[i]->DeserializeFromJson(json["Material"]);
-    }
+    DeserializeFromJson(json);
     instream.close();
 }
 
 void KritiaEngine::Mesh::SubmeshDeserialize(const json& json, int index) {
     int numberOfVertices = json["Number of Vertices"];
     for (int i = 0; i < numberOfVertices; i++) {
-        std::string str = json["Vertex" + std::to_string(i)];
-        nlohmann::ordered_json vertexJson = json::parse(str);
+        nlohmann::ordered_json vertexJson = json::parse((std::string)json["Vertex" + std::to_string(i)]);
         submeshVertices[index].push_back(Mesh::VertexDeserialize(vertexJson));
         submeshIndices[index].push_back(vertexJson["Index"]);
     }
@@ -171,7 +175,7 @@ Mesh::Vertex KritiaEngine::Mesh::VertexDeserialize(const json& json) {
     Vertex v;
     v.Position = Vector3(json["Position"][0], json["Position"][1], json["Position"][2]);
     v.Normal = Vector3(json["Normal"][0], json["Normal"][1], json["Normal"][2]);
-    v.Tangent = Vector3(json["Tangent"][0], json["Tangent"][1], json["Tangent"[2]]);
+    v.Tangent = Vector3(json["Tangent"][0], json["Tangent"][1], json["Tangent"][2]);
     v.TexCoord = Vector2(json["TexCoord"][0], json["TexCoord"][1]);
     return v;
 }

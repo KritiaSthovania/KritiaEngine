@@ -346,14 +346,14 @@ void OpenGLRendering::RenderGPUInstances(bool transparent) {
 		Material material = std::get<1>(key);
 		int submeshIndex = std::get<2>(key);
 		unsigned int amount = gpuInstancingCount[key];
-		if (!transparent && material.renderMode == Material::Opaque) {
+		if (!transparent && material.renderMode == Material::RenderMode::Opaque) {
 			//materialApplyShaderOnRender(model, viewPos, pos);
 			glBindVertexArray(mesh.VAOs[submeshIndex]);
 			glDrawElementsInstanced(GL_TRIANGLES, mesh.submeshIndices[submeshIndex].size(), GL_UNSIGNED_INT, 0, amount);
 			glBindVertexArray(0);
 			gpuInstancingCount[key] = 0;
 			gpuInstancingMatrices[key].clear();
-		} else if (transparent && material.renderMode == Material::Transparent) {
+		} else if (transparent && material.renderMode == Material::RenderMode::Transparent) {
 			glBindVertexArray(mesh.VAOs[submeshIndex]);
 			glDrawElementsInstanced(GL_TRIANGLES, mesh.submeshIndices[submeshIndex].size(), GL_UNSIGNED_INT, 0, amount);
 			glBindVertexArray(0);

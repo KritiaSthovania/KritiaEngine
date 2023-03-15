@@ -1,11 +1,16 @@
 #include "Shader.h"
-
+#include <fstream>
 KritiaEngine::Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
+    this->vertexPath = vertexPath;
+    this->fragmentPath = fragmentPath;
 	LoadShaderFile(vertexPath, fragmentPath);
 }
 
 KritiaEngine::Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath) {
+    this->vertexPath = vertexPath;
+    this->fragmentPath = fragmentPath;
+    this->geometryPath = geometryPath;
     LoadShaderFile(vertexPath, fragmentPath, geometryPath);
 }
 
@@ -200,5 +205,30 @@ void KritiaEngine::Shader::CheckCompileErrors(unsigned int shader, std::string t
             glGetProgramInfoLog(shader, 1024, NULL, infoLog);
             std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
         }
+    }
+}
+
+std::string KritiaEngine::Shader::SerializeToJson() {
+    json json;
+    json["Type"] = "Shader";
+    json["VertexPath"] = vertexPath;
+    json["FragmentPath"] = fragmentPath;
+    json["GeometryPath"] = geometryPath == "" ? "Null" : geometryPath;
+    return json.dump();
+}
+
+void KritiaEngine::Shader::DeserializeFromPath(const std::string& path) {
+    std::ifstream input(path);
+    json json = json::parse(input);
+    DeserializeFromJson(json);
+    input.close();
+}
+
+void KritiaEngine::Shader::DeserializeFromJson(const json& json) {
+    assert(json["Type"] == "Shader");
+    vertexPath = json["VertexPath"];
+    fragmentPath = json["FragmentPath"];
+    if (json["GeometryPath"] != "Null") {
+        geometryPath = json["GeometryPath"];
     }
 }

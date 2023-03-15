@@ -26,14 +26,14 @@ void KritiaEngine::GameObject::GameObject::SetActive(bool isActive)
 	IsActive = isActive;
 }
 
-std::string KritiaEngine::GameObject::Serialize() {
+std::string KritiaEngine::GameObject::SerializeToJson() {
 	json json;
 	json["Type"] = "GameObject";
 	json["Name"] = this->name;
 	json["Number Of Components"] = this->components.size();
 	int componentIndex = 0;
 	for (std::shared_ptr<Component> comp : components) {
-		json["Component" + std::to_string(componentIndex)] = comp->Serialize();
+		json["Component" + std::to_string(componentIndex)] = comp->SerializeToJson();
 		componentIndex++;
 	}
 	return json.dump();
@@ -44,10 +44,10 @@ void KritiaEngine::GameObject::DeserializeFromJson(const json& json) {
 	this->name = json["Name"];
 	int numberOfComponents = json["Number Of Components"];
 	int componentIndex = 0;
-	for (int i = 0; i < 1; i++) {
+	for (int i = 0; i < numberOfComponents; i++) {
 		nlohmann::ordered_json componentJson = json::parse((std::string)json["Component" + std::to_string(i)]);
-		this->AddComponentFromJson(json);
-		(*this->components.begin())->DeserializeFromJson(componentJson);
+		this->AddComponentFromJson(componentJson);
+		(*this->components.rbegin())->DeserializeFromJson(componentJson);
 	}
 }
 

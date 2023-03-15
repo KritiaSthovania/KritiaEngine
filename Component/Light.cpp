@@ -137,7 +137,7 @@ void KritiaEngine::Light::OnInspector() {
 	}
 }
 
-std::string KritiaEngine::Light::Serialize() {
+std::string KritiaEngine::Light::SerializeToJson() {
 	json json;
 	const char* preview;
 	switch (type) {

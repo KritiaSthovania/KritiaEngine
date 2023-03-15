@@ -1,9 +1,10 @@
 #include "Material.h"
 #include "Lighting.h"
 #include "Settings.h"
-#include <stb_image.h>
 #include "../Component/Transform.h"
 #include "../Rendering/RenderingProvider.h"
+#include <stb_image.h>
+#include <fstream>
 
 using namespace KritiaEngine;
 using namespace KritiaEngine::Rendering;
@@ -31,18 +32,18 @@ void Material::Initialize() {
 		shader->Use();
 		shader->UniformBlockBinding(shader->GetUniformBlockIndex("MatricesVP"), static_cast<unsigned int>(RenderingProvider::UniformBindingPoint::MatricesVP));
 		if (mainTexture != nullptr) {
-			if (renderMode == Transparent) {
+			if (renderMode == RenderMode::Transparent) {
 				mainTextureID = RenderingProvider::Load2DTexture(mainTexture, true);
 
-			} else if (renderMode == Opaque) {
+			} else if (renderMode == RenderMode::Opaque) {
 				mainTextureID = RenderingProvider::Load2DTexture(mainTexture, false);
 			}
 		}
 		if (specularMap != nullptr) {
-			if (renderMode == Transparent) {
+			if (renderMode == RenderMode::Transparent) {
 				specularMapID = RenderingProvider::Load2DTexture(specularMap, true);
 
-			} else if (renderMode == Opaque) {
+			} else if (renderMode == RenderMode::Opaque) {
 				specularMapID = RenderingProvider::Load2DTexture(specularMap, false);
 			}
 		}
@@ -84,14 +85,62 @@ void Material::Initialize() {
 	}
 }
 
-std::string KritiaEngine::Material::Serialize() {
-	return std::string();
+std::string KritiaEngine::Material::SerializeToJson() {
+	json json;
+	json["Type"] = "Material";
+	if (renderMode == RenderMode::Opaque) {
+		json["RenderMode"] = "Opaque";
+	} else if( renderMode == RenderMode::Transparent) {
+		json["RenderMode"] = "Transparent";
+	}
+	json["Albedo"] = { albedo.r, albedo.g, albedo.b };
+	json["Shininess"] = shininess;
+	json["GPUInstancingEnabled"] = GPUInstancingEnabled;
+	json["MainTexture"] = mainTexture == nullptr ? "Null" : mainTexture->SerializeToJson();
+	json["SpecularMap"] = specularMap == nullptr ? "Null" : specularMap->SerializeToJson();
+	json["NormalMap"] = normalMap == nullptr ? "Null" : normalMap->SerializeToJson();
+	json["ParallaxMap"] = parallaxMap == nullptr ? "Null" : parallaxMap->SerializeToJson();
+	json["Shader"] = shader == nullptr ? "Null" : shader->SerializeToJson();
+	return json.dump();
 }
 
-void KritiaEngine::Material::DeserializeFromJson(const json& json) {}
+void KritiaEngine::Material::DeserializeFromJson(const json& json) {
+	assert(json["Type"] == "Material");
+	if (json["RenderMode"] == "Opaque") {
+		this->renderMode = RenderMode::Opaque;
+	} else if (json["RenderMode"] == "Transparent") {
+		this->renderMode = RenderMode::Transparent;
+	}
+	albedo = Color(json["Albedo"][0], json["Albedo"][1], json["Albedo"][2], 1);
+	shininess = json["Shininess"];
+	GPUInstancingEnabled = json["GPUInstancingEnabled"];
+	if (json["MainTexture"] != "Null") {
+		mainTexture = std::shared_ptr<Texture>(new Texture());
+		nlohmann::ordered_json mainTexJson = json::parse((std::string)json["MainTexture"]);
+		mainTexture->DeserializeFromJson(mainTexJson);
+	}
+	if (json["SpecularMap"] != "Null") {
+		specularMap = std::shared_ptr<Texture>(new Texture());
+		nlohmann::ordered_json specJson = json::parse((std::string)json["SpecularMap"]);
+		specularMap->DeserializeFromJson(specJson);
+	}
+	if (json["NormalMap"] != "Null") {
+		normalMap = std::shared_ptr<Texture>(new Texture());
+		nlohmann::ordered_json normalJson = json::parse((std::string)json["NormalMap"]);
+		normalMap->DeserializeFromJson(normalJson);
+	}
+	if (json["ParallaxMap"] != "Null") {
+		parallaxMap = std::shared_ptr<Texture>(new Texture());
+		nlohmann::ordered_json paraJson = json::parse((std::string)json["ParallexMap"]);
+		parallaxMap->DeserializeFromJson(paraJson);
+	}
+}
 
 void KritiaEngine::Material::DeserializeFromPath(const std::string& path) {
-	
+	std::ifstream instream(path);
+	json json = json::parse(instream);
+	DeserializeFromJson(json);
+	instream.close();
 }
 
 

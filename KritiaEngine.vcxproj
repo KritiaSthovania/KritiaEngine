@@ -184,6 +184,7 @@
     <ClCompile Include="Rendering\Shader.cpp" />
     <ClCompile Include="Editor\EditorApplication.cpp" />
     <ClCompile Include="Rendering\RenderingProvider.cpp" />
+    <ClCompile Include="CoreModule\Manager\ResourceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\ComponentFactory.h" />
@@ -241,6 +242,7 @@
     <ClInclude Include="Rendering\Shader.h" />
     <ClInclude Include="Editor\EditorApplication.h" />
     <ClInclude Include="Rendering\RenderingProvider.h" />
+    <ClInclude Include="CoreModule\Manager\ResourceManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

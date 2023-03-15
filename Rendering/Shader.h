@@ -10,9 +10,10 @@
 #include "../CoreModule/MathStructs.h"
 #include "../CoreModule/Utilities.h"
 #include "../CoreModule/Object.h"
+#include "../CoreModule/Interface/SerializableAndDeserializable.h"
 
 namespace KritiaEngine {
-    class Shader : Object{
+    class Shader : Object, JsonSerializable, PathDeserializable, JsonDeserializable{
     public:
         Shader() = default;
         // constructor generates the shader on the fly
@@ -37,12 +38,24 @@ namespace KritiaEngine {
         bool HasUniform(const std::string& uniformName) const;
         unsigned int GetUniformBlockIndex(const std::string& name) const;
         void UniformBlockBinding(unsigned int index, unsigned int bindingPoint);
+        // 通过 JsonSerializable 继承
+        virtual std::string SerializeToJson() override;
+
+        // 通过 PathDeserializable 继承
+        virtual void DeserializeFromPath(const std::string& path) override;
+
+        virtual void DeserializeFromJson(const json& json) override;
     private:
         bool loaded = false;
         GLuint id;
+        std::string vertexPath;
+        std::string fragmentPath;
+        std::string geometryPath;
         // utility function for checking shader compilation/linking errors.
         // ------------------------------------------------------------------------
         void CheckCompileErrors(unsigned int shader, std::string type);
+
+
     };
 }
 

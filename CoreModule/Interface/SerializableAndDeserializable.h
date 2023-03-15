@@ -7,7 +7,7 @@ namespace KritiaEngine{
 	//////////////////////////// Serializables ////////////////////////////////
 	class JsonSerializable {
 	public:
-		virtual std::string Serialize() = 0;
+		virtual std::string SerializeToJson() = 0;
 	};
 
 	class FileSerializable {

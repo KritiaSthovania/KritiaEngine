@@ -39,6 +39,7 @@ void KritiaEngine::SceneManagement::Scene::Initialize() {
         // A new scene;
         InitializeCamera();
         InitializeLighting();
+        //InitializeGameObjects();
     }
     //InitializeGameObjects();
 }
@@ -59,7 +60,7 @@ void Scene::InitializeLighting() {
     light->color = Color(1, 1, 1, 1);
     light->Transform()->forward = Vector3::Normalize(Vector3(-1, -1, 1));
     rootGameObjects.push_back(mainLightSource);
-    LightingSystem::GetMainLightSource() = this->mainLightSource->GetComponent<Light>();
+    LightingSystem::SetMainLightSource(this->mainLightSource->GetComponent<Light>());
 }
 
 void Scene::InitializeGameObjects() {
@@ -117,7 +118,6 @@ void Scene::InitializeGameObjects() {
     obj3->Transform()->scale = Vector3(10, 0.1, 10);
     obj3->Transform()->position = Vector3(0, -3, 0);
     rootGameObjects.push_back(obj3);
-    SerializeToFile();
 }
 
 void KritiaEngine::SceneManagement::Scene::SerializeToFile() {
@@ -127,7 +127,7 @@ void KritiaEngine::SceneManagement::Scene::SerializeToFile() {
     json["Number Of GameObjects"] = rootGameObjects.size();
     int objectIndex = 0;
     for (std::shared_ptr<GameObject> go : rootGameObjects) {
-        json["GameObject" + std::to_string(objectIndex)] = go->Serialize();
+        json["GameObject" + std::to_string(objectIndex)] = go->SerializeToJson();
         objectIndex++;
     }
     std::fstream output = std::fstream();

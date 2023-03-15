@@ -139,7 +139,7 @@ void Camera::EditorUpdateCameraVectors() {
     Up = Vector3::Normalize(Vector3::Cross(Right, Forward));
 }
 
-std::string KritiaEngine::Camera::Serialize() {
+std::string KritiaEngine::Camera::SerializeToJson() {
     json json;
     json["Type"] = "Camera";
     json["Fovy"] = Fovy;
