@@ -222,7 +222,6 @@ void OpenGLRendering::ApplyMaterialShaderOnRender(const Matrix4x4& model, const 
 	SetMainLightProperties(shader);
 	SetPointLightProperties(pos, shader);
 	SetSpotLightProperties(pos, shader);
-
 	// model matrix
 	shader->SetMat4("model", model);
 	Matrix4x4 mat4 = model;
@@ -385,22 +384,26 @@ void KritiaEngine::Rendering::OpenGLRendering::CreateSkybox(const std::vector<Te
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 }
 
-
-
 void KritiaEngine::Rendering::OpenGLRendering::SetMainLightProperties(const std::shared_ptr<Shader>& shader) {
 	// main light source should always be a directional light, and there should always be one such light source.
-	std::shared_ptr<Light> mainlight = Lighting::LightingSystem::GetMainLightSource();
-	shader->SetVec3("mainLightDirection", mainlight->Transform()->forward);
-	shader->SetFloat("ambientIntensity", mainlight->ambientIntensity);
-	shader->SetFloat("diffuseIntensity", mainlight->diffuseIntensity);
-	shader->SetFloat("specularIntensity", mainlight->specularIntensity);
-	shader->SetVec3("mainLightColor", mainlight->color.GetRGB());
+	Light* mainlight = Lighting::LightingSystem::GetMainLightSource();
+	if (mainlight->type != LightType::Directional) {
+		shader->SetVec3("mainLightColor", Vector3::Zero());
+	} else {
+		shader->SetVec3("mainLightDirection", mainlight->Transform()->forward);
+		shader->SetFloat("ambientIntensity", mainlight->ambientIntensity);
+		shader->SetFloat("diffuseIntensity", mainlight->diffuseIntensity);
+		shader->SetFloat("specularIntensity", mainlight->specularIntensity);
+		shader->SetVec3("mainLightColor", mainlight->color.GetRGB());
+	}
 }
 
 void KritiaEngine::Rendering::OpenGLRendering::SetPointLightProperties(const Vector3& pos, const std::shared_ptr<Shader>& shader) {
 	std::vector<Light*> pointLights = Lighting::LightingSystem::GetPointLightAroundPos(pos);
 	int numberOfLights = pointLights.size() < Lighting::LightingSystem::MaxPointLightsForOneObject ? pointLights.size() : Lighting::LightingSystem::MaxPointLightsForOneObject;
+	int j = 0;
 	for (int i = 0; i < numberOfLights; i++) {
+		j = i + 1;
 		std::string str = "pointLights[" + std::to_string(i) + "]";
 		if (pointLights[i] != nullptr) {
 			shader->SetVec3(str + ".color", pointLights[i]->color.GetRGB());
@@ -417,12 +420,18 @@ void KritiaEngine::Rendering::OpenGLRendering::SetPointLightProperties(const Vec
 			break;
 		}	
 	}
+	for (; j < Lighting::LightingSystem::MaxPointLightsForOneObject; j++) {
+		std::string str = "pointLights[" + std::to_string(j) + "]";
+		shader->SetVec3(str + ".color", Vector3::Zero());
+	}
 }
 
 void KritiaEngine::Rendering::OpenGLRendering::SetSpotLightProperties(const Vector3& pos, const std::shared_ptr<Shader>& shader) {
 	std::vector<Light*> spotLights = Lighting::LightingSystem::GetSpotLightAroundPos(pos);
 	int numberOfLights = spotLights.size() < Lighting::LightingSystem::MaxSpotLightsForOneObject ? spotLights.size() : Lighting::LightingSystem::MaxSpotLightsForOneObject;
+	int j = 0;
 	for (int i = 0; i < numberOfLights; i++) {
+		j = i + 1;
 		std::string str = "spotLights[" + std::to_string(i) + "]";
 		if (spotLights[i] != nullptr) {
 			shader->SetVec3(str + ".color", spotLights[i]->color.GetRGB());
@@ -442,5 +451,9 @@ void KritiaEngine::Rendering::OpenGLRendering::SetSpotLightProperties(const Vect
 		} else {
 			break;
 		}
+	}
+	for (; j < Lighting::LightingSystem::MaxPointLightsForOneObject; j++) {
+		std::string str = "spotLights[" + std::to_string(j) + "]";
+		shader->SetVec3(str + ".color", Vector3::Zero());
 	}
 }

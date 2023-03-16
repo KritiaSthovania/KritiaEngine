@@ -12,8 +12,8 @@ KritiaEngine::Light::Light(GameObject* gameObject)
 	this->gameObject = gameObject;
 	this->color = Color();
 	this->type = KritiaEngine::LightType::Directional;
-	cachedPosition = Transform()->position;
-	cachedRotation = Transform()->rotation;
+	cachedPosition = Vector3::Zero();
+	cachedRotation = Quaternion::Identity();
 	UpdateLightMatrices();
 	KritiaEngine::Lighting::LightingSystem::AddLight(this);
 	RenderingProvider::CreateShadowMap(this);
@@ -57,29 +57,19 @@ void KritiaEngine::Light::OnObjectDestroy() {
 }
 
 void KritiaEngine::Light::UpdateLightMatrices() {
-
-	switch (this->type) {
-	case LightType::Directional:
-		directionalLightMatrix = Matrix4x4::Ortho(-20, 20, -20, 20, Settings::NearPlaneDistant, Settings::FarPlaneDistance) * Matrix4x4::LookAt(Transform()->position, Transform()->forward, Transform()->up);
-		break;
-	case LightType::Point:
-	{
-		Matrix4x4 shadowProj = Matrix4x4::Perspective(90.0f, (float)Settings::ShadowWidth / (float)Settings::ShadowHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistance);
-		pointLightMatrixRight = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(1.0, 0.0, 0.0), Vector3(0.0, -1.0, 0.0));
-		pointLightMatrixLeft = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(-1.0, 0.0, 0.0), Vector3(0.0, -1.0, 0.0));
-		pointLightMatrixTop = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, 1.0, 0.0), Vector3(0.0, 0.0, 1.0));
-		pointLightMatrixBottom = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, -1.0, 0.0), Vector3(0.0, 0.0, -1.0));
-		pointLightMatrixNear = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, 0.0, 1.0), Vector3(0.0, -1.0, 0.0));
-		pointLightMatrixFar = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, 0.0, -1.0), Vector3(0.0, -1.0, 0.0));
-		break;
-	}
-	case LightType::Spot:
-	{
-		Matrix4x4 shadowProj = Matrix4x4::Perspective(90, (float)Settings::ShadowWidth / (float)Settings::ShadowHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistance);
-		spotLightMatrix = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->forward, Transform()->up);
-		break;
-	}
-	}
+	// Directional
+	directionalLightMatrix = Matrix4x4::Ortho(-20, 20, -20, 20, Settings::NearPlaneDistant, Settings::FarPlaneDistance) * Matrix4x4::LookAt(Transform()->position, Transform()->forward, Transform()->up);
+	// Point
+	Matrix4x4 shadowProj = Matrix4x4::Perspective(90.0f, (float)Settings::ShadowWidth / (float)Settings::ShadowHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistance);
+	pointLightMatrixRight = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(1.0, 0.0, 0.0), Vector3(0.0, -1.0, 0.0));
+	pointLightMatrixLeft = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(-1.0, 0.0, 0.0), Vector3(0.0, -1.0, 0.0));
+	pointLightMatrixTop = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, 1.0, 0.0), Vector3(0.0, 0.0, 1.0));
+	pointLightMatrixBottom = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, -1.0, 0.0), Vector3(0.0, 0.0, -1.0));
+	pointLightMatrixNear = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, 0.0, 1.0), Vector3(0.0, -1.0, 0.0));
+	pointLightMatrixFar = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, 0.0, -1.0), Vector3(0.0, -1.0, 0.0));
+	// Spot
+	Matrix4x4 shadowProjSpot = Matrix4x4::Perspective(90, (float)Settings::ShadowWidth / (float)Settings::ShadowHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistance);
+	spotLightMatrix = shadowProjSpot * Matrix4x4::LookAt(Transform()->position, Transform()->forward, Transform()->up);
 }
 
 void KritiaEngine::Light::OnInspector() {

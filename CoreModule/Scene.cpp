@@ -60,7 +60,7 @@ void Scene::InitializeLighting() {
     light->color = Color(1, 1, 1, 1);
     light->Transform()->forward = Vector3::Normalize(Vector3(-1, -1, 1));
     rootGameObjects.push_back(mainLightSource);
-    LightingSystem::SetMainLightSource(this->mainLightSource->GetComponent<Light>());
+    LightingSystem::SetMainLightSource(this->mainLightSource->GetComponent<Light>().get());
 }
 
 void Scene::InitializeGameObjects() {

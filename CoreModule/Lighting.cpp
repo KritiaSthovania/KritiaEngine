@@ -4,7 +4,7 @@
 
 using namespace KritiaEngine::Lighting;
 using namespace KritiaEngine;
-std::shared_ptr<KritiaEngine::Light> LightingSystem::MainLightSource = nullptr;
+Light* LightingSystem::MainLightSource = nullptr;
 const int LightingSystem::MaxSpotLightsForOneObject = 1;
 const int LightingSystem::MaxPointLightsForOneObject = 4;
 std::list<Light*> LightingSystem::Lights = std::list<Light*>();
@@ -61,20 +61,20 @@ std::vector<Light*> KritiaEngine::Lighting::LightingSystem::GetPointLightAroundP
     return result;
 }
 
-std::shared_ptr<Light> KritiaEngine::Lighting::LightingSystem::GetMainLightSource() {
+Light* KritiaEngine::Lighting::LightingSystem::GetMainLightSource() {
     if (MainLightSource != nullptr) {
         return MainLightSource;
     } else {
         for (Light* light : Lights) {
             if (light->type == LightType::Directional) {
-                MainLightSource = std::make_shared<Light>(*light);
+                MainLightSource = light;
             }
         }
     }
     return MainLightSource;
 }
 
-void KritiaEngine::Lighting::LightingSystem::SetMainLightSource(std::shared_ptr<Light> light) {
+void KritiaEngine::Lighting::LightingSystem::SetMainLightSource(Light* light) {
     if (light->type == LightType::Directional) {
         MainLightSource = light;
     }
