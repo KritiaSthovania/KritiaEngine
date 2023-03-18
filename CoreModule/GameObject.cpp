@@ -2,6 +2,8 @@
 #include "../Component/Renderer/MeshRenderer.h"
 #include "../Component/Component.h"
 #include "../Component/ComponentFactory.h"
+#include "../Editor/EditorApplication.h"
+#include <fstream>
 using namespace KritiaEngine;
 using namespace nlohmann::literals;
 using json = nlohmann::ordered_json;
@@ -53,6 +55,18 @@ void KritiaEngine::GameObject::DeserializeFromJson(const json& json) {
 
 void KritiaEngine::GameObject::AddComponentFromJson(const json& json) {
 	ComponentFactory::AddComponentFromJson(json, this);
+}
+
+void KritiaEngine::GameObject::SerializeToFile() {
+	std::string jsonStr = SerializeToJson();
+	std::string path = ImguiAlias::OpenFindResourceWindow("Prefab", KritiaEngine::Editor::prefabFilePostfix);
+	if (!path.ends_with(KritiaEngine::Editor::prefabFilePostfix)) {
+		path += ("/" + (std::string)KritiaEngine::Editor::prefabFilePostfix);
+	}
+	std::fstream output;
+	output.open(path, std::ios::out | std::ios::trunc);
+	output << jsonStr << std::endl;
+	output.close();
 }
 
 

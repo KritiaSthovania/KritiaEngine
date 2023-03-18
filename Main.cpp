@@ -4,6 +4,7 @@
 #include "CoreModule/Input.h"
 #include "CoreModule/SceneManager.h"
 #include "CoreModule/Manager/RendererManager.h"
+#include "CoreModule/Settings.h"
 #include "Editor/ImguiManager.h"
 
 using namespace KritiaEngine;
@@ -12,14 +13,16 @@ using namespace KritiaEngine::Manager;
 using namespace KritiaEngine::Rendering;
 using namespace KritiaEngine::Editor::GUI;
 
+constexpr const char* title = "Kritia Engine";
+
 int main() 
 {
+    Settings::Deserialize();
     if (!InitializeWindow()) {
         return -1;
     }
-    InitializeGUI();
     InitializeCoreModules();
-
+    InitializeGUI();
     // 游戏循环, Tick
     while (!glfwWindowShouldClose(window)) 
     {
@@ -67,7 +70,7 @@ bool InitializeWindow()
         glfwWindowHint(GLFW_SAMPLES, 4);
     }
 
-    window = glfwCreateWindow(Settings::ScreenWidth, Settings::ScreenHeight, "Kritia Engine", NULL, NULL);
+    window = glfwCreateWindow(Settings::ScreenWidth, Settings::ScreenHeight, title, NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();

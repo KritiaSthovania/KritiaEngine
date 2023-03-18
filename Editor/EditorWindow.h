@@ -27,7 +27,7 @@ namespace KritiaEngine::Editor {
 		/// Define defualt configuration here, e.g. size, pos
 		/// </summary>
 		virtual void Config();
-		ImGuiWindowFlags flags = 0;
+		virtual int GetFlags();
 	private:
 		void OnObjectDestroy();
 	};

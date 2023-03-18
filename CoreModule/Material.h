@@ -13,7 +13,7 @@ namespace KritiaEngine::Rendering {
 
 namespace KritiaEngine {
 	class Mesh;
-	class Material : public Object, JsonDeserializable, PathDeserializable, JsonSerializable
+	class Material : public Object, JsonDeserializable, PathDeserializable, JsonSerializable, FileSerializable
 	{
 		friend class KritiaEngine::Rendering::RenderingProvider;
 		friend class KritiaEngine::Rendering::OpenGLRendering;
@@ -54,6 +54,9 @@ namespace KritiaEngine {
 		unsigned int mainTextureID, specularMapID, normalMapID, parallaxMapID;
 		unsigned int matricesVPID;
 		bool initialized = false;
+
+		// Í¨¹ý FileSerializable ¼Ì³Ð
+		virtual void SerializeToFile() override;
 	};
 }
 

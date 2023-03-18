@@ -5,7 +5,7 @@ namespace KritiaEngine::Editor::GUI {
 	public:
 		static void OpenScene();
 		static void SaveScene();
-		static void OpenSettingWindow();
+		static void OpenSettingWindow(bool* opened);
 	};
 
 }

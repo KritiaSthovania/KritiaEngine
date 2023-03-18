@@ -4,6 +4,7 @@
 #include "EditorWindows/InspectorWindow.h"
 #include "EditorWindows/ProjectFileExplorer.h"
 #include "MainMenuBarFunction.h"
+#include "../CoreModule/Settings.h"
 #include <nfd/nfd.h>
 
 using namespace KritiaEngine::Editor::GUI;
@@ -12,6 +13,7 @@ using namespace KritiaEngine::Editor;
 const char* ImguiManager::GlslVersion = "#version 130";
 bool ImguiManager::inEditor = true;
 float ImguiManager::UIScaleFactor = 2;
+bool ImguiManager::settingWindowOpened = false;
 std::shared_ptr<KritiaEngine::GameObject> ImguiManager::currentSelectedGameObject = nullptr;
 std::list<std::shared_ptr<EditorWindow>> ImguiManager::editorWindows = std::list<std::shared_ptr<EditorWindow>>();
 
@@ -31,18 +33,21 @@ void KritiaEngine::Editor::GUI::ImguiManager::Initialize(GLFWwindow* window, boo
 }
 
 void KritiaEngine::Editor::GUI::ImguiManager::RenderGUI() {
-
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
+	ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
 	if (inEditor) {
 		RenderMainMenuBar();
 		for (std::shared_ptr<EditorWindow> window : editorWindows) {
 			//window->Config();
 			ImGui::SetNextWindowBgAlpha(1);
-			ImGui::Begin(window->title, 0, window->flags);
+			ImGui::Begin(window->title, 0, window->GetFlags());
 			window->OnGUI();
 			ImGui::End();
+		}
+		if (settingWindowOpened) {
+			MainMenuBarFunction::OpenSettingWindow(&settingWindowOpened);
 		}
 	}
 
@@ -72,6 +77,9 @@ void KritiaEngine::Editor::GUI::ImguiManager::RenderMainMenuBar() {
 	}
 	if (ImGui::MenuItem("Save Scene")) {
 		MainMenuBarFunction::SaveScene();
+	}
+	if (ImGui::MenuItem("Settings")) {
+		settingWindowOpened = true;
 	}
 	ImGui::EndMainMenuBar();
 }

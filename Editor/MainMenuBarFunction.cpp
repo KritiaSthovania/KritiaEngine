@@ -1,6 +1,7 @@
 #include "MainMenuBarFunction.h"
 #include "EditorApplication.h"
 #include "../CoreModule/SceneManager.h"
+#include "../CoreModule/Settings.h"
 #include <nfd/nfd.h>
 #include <stdio.h>
 
@@ -44,7 +45,12 @@ void KritiaEngine::Editor::GUI::MainMenuBarFunction::SaveScene() {
 
 }
 
-void KritiaEngine::Editor::GUI::MainMenuBarFunction::OpenSettingWindow() {
-
-
+void KritiaEngine::Editor::GUI::MainMenuBarFunction::OpenSettingWindow(bool* opened) {
+    if (ImGui::Begin("Settings", opened, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse)) {
+        Settings::ShowOnEditorWindow();
+        ImGui::End();
+    }
+    if (*opened == false) {
+        Settings::Serialize();
+    }
 }

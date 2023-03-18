@@ -58,9 +58,9 @@ void KritiaEngine::Light::OnObjectDestroy() {
 
 void KritiaEngine::Light::UpdateLightMatrices() {
 	// Directional
-	directionalLightMatrix = Matrix4x4::Ortho(-20, 20, -20, 20, Settings::NearPlaneDistant, Settings::FarPlaneDistance) * Matrix4x4::LookAt(Transform()->position, Transform()->forward, Transform()->up);
+	directionalLightMatrix = Matrix4x4::Ortho(-20, 20, -20, 20, Settings::NearPlaneDistance, Settings::FarPlaneDistance) * Matrix4x4::LookAt(Transform()->position, Transform()->forward, Transform()->up);
 	// Point
-	Matrix4x4 shadowProj = Matrix4x4::Perspective(90.0f, (float)Settings::ShadowWidth / (float)Settings::ShadowHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistance);
+	Matrix4x4 shadowProj = Matrix4x4::Perspective(90.0f, (float)Settings::ShadowWidth / (float)Settings::ShadowHeight, Settings::NearPlaneDistance, Settings::FarPlaneDistance);
 	pointLightMatrixRight = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(1.0, 0.0, 0.0), Vector3(0.0, -1.0, 0.0));
 	pointLightMatrixLeft = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(-1.0, 0.0, 0.0), Vector3(0.0, -1.0, 0.0));
 	pointLightMatrixTop = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, 1.0, 0.0), Vector3(0.0, 0.0, 1.0));
@@ -68,7 +68,7 @@ void KritiaEngine::Light::UpdateLightMatrices() {
 	pointLightMatrixNear = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, 0.0, 1.0), Vector3(0.0, -1.0, 0.0));
 	pointLightMatrixFar = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(0.0, 0.0, -1.0), Vector3(0.0, -1.0, 0.0));
 	// Spot
-	Matrix4x4 shadowProjSpot = Matrix4x4::Perspective(90, (float)Settings::ShadowWidth / (float)Settings::ShadowHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistance);
+	Matrix4x4 shadowProjSpot = Matrix4x4::Perspective(90, (float)Settings::ShadowWidth / (float)Settings::ShadowHeight, Settings::NearPlaneDistance, Settings::FarPlaneDistance);
 	spotLightMatrix = shadowProjSpot * Matrix4x4::LookAt(Transform()->position, Transform()->forward, Transform()->up);
 }
 

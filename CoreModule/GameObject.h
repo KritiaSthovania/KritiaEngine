@@ -17,7 +17,7 @@ namespace KritiaEngine::SceneManagement {
 namespace KritiaEngine {
 	class Transform;
 	class Component;
-	class GameObject : public Object, JsonSerializable, JsonDeserializable{
+	class GameObject : public Object, JsonSerializable, JsonDeserializable, FileSerializable{
 		friend class KritiaEngine::Editor::GUI::InspectorWindow;
 		friend class KritiaEngine::SceneManagement::Scene;
 	public:
@@ -49,6 +49,9 @@ namespace KritiaEngine {
 		virtual std::string SerializeToJson() override;
 		virtual void DeserializeFromJson(const json& json) override;
 		void AddComponentFromJson(const json& json);
+
+		// Í¨¹ý FileSerializable ¼Ì³Ð
+		virtual void SerializeToFile() override;
 	};
 }
 

@@ -22,6 +22,12 @@ void KritiaEngine::Editor::GUI::ImguiAlias::FloatField4(const char* label, float
 	ImGui::InputFloat4(std::format("##{}\n", label).c_str(), value);
 }
 
+void KritiaEngine::Editor::GUI::ImguiAlias::IntField(const char* label, int* value) {
+	ImGui::Text(label);
+	ImGui::SameLine();
+	ImGui::InputInt(std::format("##{}\n", label).c_str(), value);
+}
+
 void KritiaEngine::Editor::GUI::ImguiAlias::BoolField(const char* label, bool* value) {
 	ImGui::Text(label);
 	ImGui::SameLine();

@@ -27,6 +27,7 @@ namespace KritiaEngine::Editor::GUI {
 		static bool inEditor;
 		static const char* GlslVersion;
 		static float UIScaleFactor;
+		static bool settingWindowOpened;
 		static std::list<std::shared_ptr<EditorWindow>> editorWindows;
 
 	};

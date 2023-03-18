@@ -5,6 +5,10 @@ void KritiaEngine::Editor::EditorWindow::OnGUI() {}
 
 void KritiaEngine::Editor::EditorWindow::Config() {}
 
+int KritiaEngine::Editor::EditorWindow::GetFlags() {
+	return ImGuiWindowFlags_None;
+}
+
 void KritiaEngine::Editor::EditorWindow::OnObjectDestroy() {
 	
 }

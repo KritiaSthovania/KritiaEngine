@@ -32,7 +32,7 @@ void KritiaEngine::Manager::RendererManager::MoveMeshRendererToTransparentQueue(
 }
 
 void KritiaEngine::Manager::RendererManager::Render() {
-	Matrix4x4 projection = Matrix4x4::Perspective(Camera::current->Fovy, (float)Settings::ScreenWidth / Settings::ScreenHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistance);
+	Matrix4x4 projection = Matrix4x4::Perspective(Camera::current->Fovy, (float)Settings::ScreenWidth / Settings::ScreenHeight, Settings::NearPlaneDistance, Settings::FarPlaneDistance);
 	RenderingProvider::UpdateUniformBufferMatricesVP(Camera::current->GetViewMatrix(), projection);
 	opaqueRenderQueue.sort(CompareRenderer);
 	// Render shadow map only for opaque objects
@@ -69,7 +69,7 @@ bool KritiaEngine::Manager::RendererManager::CompareRenderer(Renderer * left, Re
 }
 
 void KritiaEngine::Manager::RendererManager::RenderSkybox() {
-	Matrix4x4 projection = Matrix4x4::Perspective(Camera::current->Fovy, (float)Settings::ScreenWidth / Settings::ScreenHeight, Settings::NearPlaneDistant, Settings::FarPlaneDistance);
+	Matrix4x4 projection = Matrix4x4::Perspective(Camera::current->Fovy, (float)Settings::ScreenWidth / Settings::ScreenHeight, Settings::NearPlaneDistance, Settings::FarPlaneDistance);
 	Matrix4x4 view = Camera::current->GetViewMatrix();
 	RenderingProvider::RenderSkybox(projection, view);
 }

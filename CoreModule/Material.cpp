@@ -3,6 +3,7 @@
 #include "Settings.h"
 #include "../Component/Transform.h"
 #include "../Rendering/RenderingProvider.h"
+#include "../Editor/EditorApplication.h"
 #include <stb_image.h>
 #include <fstream>
 
@@ -143,5 +144,14 @@ void KritiaEngine::Material::DeserializeFromPath(const std::string& path) {
 	instream.close();
 }
 
-
-
+void KritiaEngine::Material::SerializeToFile() {
+	std::string jsonStr = SerializeToJson();
+	std::string path = ImguiAlias::OpenFindResourceWindow("Material", KritiaEngine::Editor::materialFilePostfix);
+	if (!path.ends_with(KritiaEngine::Editor::materialFilePostfix)) {
+		path += ("/" + (std::string)KritiaEngine::Editor::materialFilePostfix);
+	}
+	std::fstream output;
+	output.open(path, std::ios::out | std::ios::trunc);
+	output << jsonStr << std::endl;
+	output.close();
+}

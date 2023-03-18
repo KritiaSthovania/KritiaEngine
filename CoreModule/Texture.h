@@ -3,7 +3,7 @@
 #include "Interface/SerializableAndDeserializable.h"
 namespace KritiaEngine {
 	class Material;
-	class Texture : public Object, JsonSerializable, PathDeserializable, JsonDeserializable
+	class Texture : public Object, JsonSerializable, PathDeserializable, JsonDeserializable, FileSerializable
 	{
 		friend class Material;
 	public:
@@ -15,6 +15,9 @@ namespace KritiaEngine {
 		virtual std::string SerializeToJson() override;
 		virtual void DeserializeFromPath(const std::string& path) override;
 		virtual void DeserializeFromJson(const json& json) override;
+
+		// Í¨¹ý FileSerializable ¼Ì³Ð
+		virtual void SerializeToFile() override;
 	};
 }
 
