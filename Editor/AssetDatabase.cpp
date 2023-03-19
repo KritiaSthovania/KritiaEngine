@@ -1,9 +1,23 @@
 #include "AssetDatabase.h"
 #include "../CoreModule/Texture.h"
 #include "../CoreModule/Material.h"
-
+#include "EditorApplication.h"
+#include <fstream>
 using namespace KritiaEngine::Editor;
 using namespace KritiaEngine;
+
+void KritiaEngine::Editor::AssetDatabase::ImportAsset(const std::string& path) {
+    // 3D Models
+    if (path.ends_with(".obj") || path.ends_with(".fbx")) {
+        std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(new Mesh());
+        ImportModel(path, mesh);
+        // in windows use \\ as separator
+        std::string name = path.substr(path.find_last_of('\\') + 1, path.find_last_of('.') - path.find_last_of('\\') - 1);
+        mesh->name = name;
+        mesh->path = EditorApplication::assetFolderRootPath + mesh->name + meshFilePostfix;
+        mesh->SerializeToFile();
+    }
+}
 
 void KritiaEngine::Editor::AssetDatabase::ImportModel(const std::string& path, const std::shared_ptr<Mesh>& mesh) {
 	Assimp::Importer importer;
@@ -14,8 +28,8 @@ void KritiaEngine::Editor::AssetDatabase::ImportModel(const std::string& path, c
         return;
     }
     std::string directory = path.substr(0, path.find_last_of('/'));
-
     ProcessNode(directory, scene->mRootNode, scene, mesh);
+    mesh->submeshSize = mesh->submeshVertices.size();
 }
 
 void KritiaEngine::Editor::AssetDatabase::ProcessNode(const std::string& directory, aiNode* node, const aiScene* scene, const std::shared_ptr<Mesh>& mesh) {

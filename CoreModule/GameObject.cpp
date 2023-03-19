@@ -3,19 +3,24 @@
 #include "../Component/Component.h"
 #include "../Component/ComponentFactory.h"
 #include "../Editor/EditorApplication.h"
+#include "Manager/GameObjectManager.h"
+#include "SceneManager.h"
 #include <fstream>
 using namespace KritiaEngine;
+using namespace KritiaEngine::Manager;
 using namespace nlohmann::literals;
 using json = nlohmann::ordered_json;
 
 KritiaEngine::GameObject::GameObject() {
 	components.push_back(std::shared_ptr<KritiaEngine::Transform>(new KritiaEngine::Transform(this)));
 	this->name = "New Game Object";
+	SceneManagement::SceneManager::GetActiveScene()->GetRootGameObjects().push_back(this);
 }
 
 KritiaEngine::GameObject::GameObject(const char* name) {
 	components.push_back(std::shared_ptr<KritiaEngine::Transform>(new KritiaEngine::Transform(this)));
 	this->name = name;
+	SceneManagement::SceneManager::GetActiveScene()->GetRootGameObjects().push_back(this);
 }
 
 std::shared_ptr<KritiaEngine::Transform> KritiaEngine::GameObject::Transform()
@@ -67,6 +72,11 @@ void KritiaEngine::GameObject::SerializeToFile() {
 	output.open(path, std::ios::out | std::ios::trunc);
 	output << jsonStr << std::endl;
 	output.close();
+}
+
+void KritiaEngine::GameObject::OnObjectDestroy() {
+	SceneManagement::SceneManager::GetActiveScene()->GetRootGameObjects().remove(this);
+	delete this;
 }
 
 

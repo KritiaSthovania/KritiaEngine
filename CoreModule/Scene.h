@@ -13,11 +13,12 @@ namespace KritiaEngine::SceneManagement {
 	{
 		friend class SceneManager;
 	public:
+		~Scene();
 		std::string name;
 		/// <summary>
 		/// Returns a vector of all root game objects in the scene.
 		/// </summary>
-		std::list<std::shared_ptr<GameObject>> GetRootGameObjects();
+		std::list<GameObject*>& GetRootGameObjects();
 		/// <summary>
 		/// The full path (with the file name of the scene)
 		/// </summary>
@@ -37,11 +38,11 @@ namespace KritiaEngine::SceneManagement {
 		/// <summary>
 		/// current rendering camera
 		/// </summary>
-		std::shared_ptr<GameObject> currentCamera;
-		std::list<std::shared_ptr<GameObject>> rootGameObjects;
-		std::shared_ptr<GameObject> mainLightSource;
-		std::list<std::shared_ptr<GameObject>> opaqueObjects;
-		std::list<std::shared_ptr<GameObject>> transparentObjects;
+		GameObject* currentCamera;
+		std::list<GameObject*> rootGameObjects;
+		GameObject* mainLightSource;
+		std::list<GameObject*> opaqueObjects;
+		std::list<GameObject*> transparentObjects;
 
 	};
 

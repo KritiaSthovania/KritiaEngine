@@ -7,11 +7,16 @@
 #include <json/json.hpp>
 using json = nlohmann::ordered_json;
 
+namespace KritiaEngine::Editor {
+	class AssetDatabase;
+}
+
 namespace KritiaEngine {
-	class Mesh : public Object, PathDeserializable, JsonSerializable, JsonDeserializable{
+	class Mesh : public Object, PathDeserializable, JsonSerializable, JsonDeserializable, FileSerializable{
 		friend class MeshFilter;
 		friend class KritiaEngine::Rendering::RenderingProvider;
 		friend class KritiaEngine::Rendering::OpenGLRendering;
+		friend class KritiaEngine::Editor::AssetDatabase;
 	public:
 		struct Vertex {
 			Vector3 Position;
@@ -41,6 +46,9 @@ namespace KritiaEngine {
 
 		// 通过 JsonDeserializable 继承
 		virtual void DeserializeFromJson(const json& json) override;
+
+		// 通过 FileSerializable 继承
+		virtual void SerializeToFile() override;
 	};
 
 }

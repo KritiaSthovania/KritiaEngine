@@ -52,6 +52,7 @@ namespace KritiaEngine {
 
 		// Í¨¹ý FileSerializable ¼Ì³Ð
 		virtual void SerializeToFile() override;
+		virtual void OnObjectDestroy() override;
 	};
 }
 

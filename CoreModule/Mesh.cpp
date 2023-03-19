@@ -154,6 +154,14 @@ void KritiaEngine::Mesh::DeserializeFromJson(const json& json) {
     }
 }
 
+void KritiaEngine::Mesh::SerializeToFile() {
+    std::string jsonStr = SerializeToJson();
+    std::fstream output;
+    output.open(path, std::ios::out | std::ios::trunc);
+    output << jsonStr << std::endl;
+    output.close();
+}
+
 void KritiaEngine::Mesh::DeserializeFromPath(const std::string& path) {
     std::ifstream instream(path);
     json json = json::parse(instream);

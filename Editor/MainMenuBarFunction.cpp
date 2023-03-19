@@ -1,5 +1,6 @@
 #include "MainMenuBarFunction.h"
 #include "EditorApplication.h"
+#include "AssetDatabase.h"
 #include "../CoreModule/SceneManager.h"
 #include "../CoreModule/Settings.h"
 #include <nfd/nfd.h>
@@ -27,7 +28,6 @@ void KritiaEngine::Editor::GUI::MainMenuBarFunction::SaveScene() {
         NFD_Init();
         nfdchar_t* outPath;
         nfdfilteritem_t filterItem[1] = { { "Scene File", "scene.json"} };
-        std::cout << EditorApplication::assetFolderRootPath.c_str();
         nfdresult_t result = NFD_SaveDialog(&outPath, filterItem, 1, (EditorApplication::currentProjectFolderPath + EditorApplication::assetFolderRootPath).c_str(), SceneManagement::SceneManager::GetActiveScene()->name.c_str());
         if (result == NFD_OKAY) {
             SceneManagement::SceneManager::GetActiveScene()->path = outPath;
@@ -53,4 +53,21 @@ void KritiaEngine::Editor::GUI::MainMenuBarFunction::OpenSettingWindow(bool* ope
     if (*opened == false) {
         Settings::Serialize();
     }
+}
+
+void KritiaEngine::Editor::GUI::MainMenuBarFunction::OpenImportAssetWindow() {
+    NFD_Init();
+    nfdchar_t* outPath;
+    const int filterSize = 1;
+    nfdfilteritem_t filterItem[filterSize] = { { "Models", "fbx,obj"} };
+    nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, filterSize, NULL);
+    if (result == NFD_OKAY) {
+        AssetDatabase::ImportAsset(outPath);
+        NFD_FreePath(outPath);
+    } else if (result == NFD_CANCEL) {
+        puts("User pressed cancel.");
+    } else {
+        printf("Error: %s\n", NFD_GetError());
+    }
+    NFD_Quit();
 }

@@ -13,9 +13,10 @@ using namespace KritiaEngine::Editor;
 const char* ImguiManager::GlslVersion = "#version 130";
 bool ImguiManager::inEditor = true;
 float ImguiManager::UIScaleFactor = 2;
-bool ImguiManager::settingWindowOpened = false;
-std::shared_ptr<KritiaEngine::GameObject> ImguiManager::currentSelectedGameObject = nullptr;
+KritiaEngine::GameObject* ImguiManager::currentSelectedGameObject = nullptr;
 std::list<std::shared_ptr<EditorWindow>> ImguiManager::editorWindows = std::list<std::shared_ptr<EditorWindow>>();
+//////////////////// window opened  ////////////////////
+bool ImguiManager::settingWindowOpened = false;
 
 void KritiaEngine::Editor::GUI::ImguiManager::Initialize(GLFWwindow* window, bool inEditor) {
 	ImguiManager::inEditor = inEditor;
@@ -39,15 +40,13 @@ void KritiaEngine::Editor::GUI::ImguiManager::RenderGUI() {
 	ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
 	if (inEditor) {
 		RenderMainMenuBar();
+		RenderWindowOpenedFromMainMenuBar();
 		for (std::shared_ptr<EditorWindow> window : editorWindows) {
 			//window->Config();
 			ImGui::SetNextWindowBgAlpha(1);
 			ImGui::Begin(window->title, 0, window->GetFlags());
 			window->OnGUI();
 			ImGui::End();
-		}
-		if (settingWindowOpened) {
-			MainMenuBarFunction::OpenSettingWindow(&settingWindowOpened);
 		}
 	}
 
@@ -62,6 +61,12 @@ void KritiaEngine::Editor::GUI::ImguiManager::AddEditorWindow(std::shared_ptr<Ed
 
 void KritiaEngine::Editor::GUI::ImguiManager::RemoveEditorWindow(std::shared_ptr<EditorWindow> window) {
 	editorWindows.remove(window);
+}
+
+void KritiaEngine::Editor::GUI::ImguiManager::RenderWindowOpenedFromMainMenuBar() {
+	if (settingWindowOpened) {
+		MainMenuBarFunction::OpenSettingWindow(&settingWindowOpened);
+	}
 }
 
 void KritiaEngine::Editor::GUI::ImguiManager::CreateEditorWindows() {
@@ -80,6 +85,9 @@ void KritiaEngine::Editor::GUI::ImguiManager::RenderMainMenuBar() {
 	}
 	if (ImGui::MenuItem("Settings")) {
 		settingWindowOpened = true;
+	}
+	if (ImGui::MenuItem("Import Asset")) {
+		MainMenuBarFunction::OpenImportAssetWindow();
 	}
 	ImGui::EndMainMenuBar();
 }

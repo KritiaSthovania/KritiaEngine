@@ -1,6 +1,7 @@
 #include "SceneManager.h"
 #include "../CoreModule/Manager/BehaviourManager.h"
 #include "../CoreModule/Manager/RendererManager.h"
+#include "../CoreModule/Manager/GameObjectManager.h"
 #include "Lighting.h"
 #include "../Editor/ImguiManager.h"
 #include <json/json.hpp>
@@ -18,10 +19,8 @@ bool SceneManager::inEditor = false;
 /// <param name="inEditor">If we are in the Editor or Game</param>
 void KritiaEngine::SceneManagement::SceneManager::Initialize(bool inEditor)
 {
-	// 目前直接加载测试用的场景
 	activeScene = CreateScene("Demo Scene");
 	LoadScene(activeScene);
-	//LoadScene(KritiaEngine::Editor::EditorApplication::AssetFolderRootPath + "Demo Scene" + KritiaEngine::Editor::sceneFilePostfix);
 	SceneManager::inEditor = inEditor;
 	if (inEditor) {
 		Camera::editorCamera = std::shared_ptr<Camera>(new Camera());
@@ -43,6 +42,7 @@ void KritiaEngine::SceneManagement::SceneManager::LoadScene(const std::shared_pt
 void KritiaEngine::SceneManagement::SceneManager::LoadScene(const std::string& path) {
 	BehaviourManager::Clear();
 	RendererManager::Clear();
+	GameObjectManager::Clear();
 	KritiaEngine::Lighting::LightingSystem::Reset();
 	KritiaEngine::Editor::GUI::ImguiManager::currentSelectedGameObject = nullptr;
 	activeScene = std::shared_ptr<Scene>(new Scene("", path));

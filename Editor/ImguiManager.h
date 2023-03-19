@@ -20,15 +20,17 @@ namespace KritiaEngine::Editor::GUI {
 		static void RenderGUI();
 		static void AddEditorWindow(std::shared_ptr<EditorWindow> window);
 		static void RemoveEditorWindow(std::shared_ptr<EditorWindow> window);
-		static std::shared_ptr<GameObject> currentSelectedGameObject;
+		static GameObject* currentSelectedGameObject;
 	private:
+		static void RenderWindowOpenedFromMainMenuBar();
 		static void CreateEditorWindows();
 		static void RenderMainMenuBar();
 		static bool inEditor;
 		static const char* GlslVersion;
 		static float UIScaleFactor;
-		static bool settingWindowOpened;
 		static std::list<std::shared_ptr<EditorWindow>> editorWindows;
+		// window opened
+		static bool settingWindowOpened;
 
 	};
 }

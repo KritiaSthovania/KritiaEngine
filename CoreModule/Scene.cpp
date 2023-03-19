@@ -16,7 +16,7 @@ using json = nlohmann::ordered_json;
 
 
 
-std::list<std::shared_ptr<GameObject>> KritiaEngine::SceneManagement::Scene::GetRootGameObjects()
+std::list<GameObject*>& KritiaEngine::SceneManagement::Scene::GetRootGameObjects()
 {
     return rootGameObjects;
 }
@@ -25,6 +25,13 @@ KritiaEngine::SceneManagement::Scene::Scene(const std::string &name, const std::
 {
     this->name = name;
     this->path = path;
+}
+
+KritiaEngine::SceneManagement::Scene::~Scene() {
+    for (GameObject* go : rootGameObjects) {
+        delete go;
+    }
+    rootGameObjects.clear();
 }
 
 void KritiaEngine::SceneManagement::Scene::Initialize() {
@@ -46,20 +53,18 @@ void KritiaEngine::SceneManagement::Scene::Initialize() {
 
 void KritiaEngine::SceneManagement::Scene::InitializeCamera()
 {
-    std::shared_ptr<GameObject> mainCamera = std::shared_ptr<GameObject>(new GameObject("Main Camera"));
+    GameObject* mainCamera = new GameObject("Main Camera");
     currentCamera = mainCamera;
     currentCamera->AddComponent<Camera>();
-    rootGameObjects.push_back(mainCamera);
     Camera::current = currentCamera->GetComponent<Camera>();
 }
 
 void Scene::InitializeLighting() {
-    std::shared_ptr<GameObject> mainLightSource = std::shared_ptr<GameObject>(new GameObject("Main Light Source"));
+    GameObject* mainLightSource = new GameObject("Main Light Source");
     this->mainLightSource = mainLightSource;
     std::shared_ptr<Light> light = this->mainLightSource->AddComponent<Light>();
     light->color = Color(1, 1, 1, 1);
     light->Transform()->forward = Vector3::Normalize(Vector3(-1, -1, 1));
-    rootGameObjects.push_back(mainLightSource);
     LightingSystem::SetMainLightSource(this->mainLightSource->GetComponent<Light>().get());
 }
 
@@ -98,7 +103,7 @@ void Scene::InitializeGameObjects() {
     //object->Transform()->position = Vector3(0, 0, 0);
     //rootGameObjects.push_back(object);
 
-    std::shared_ptr<GameObject> object2 = std::shared_ptr<GameObject>(new GameObject("Cube"));
+    GameObject* object2 = new GameObject("Cube");
     std::shared_ptr<MeshFilter> meshFilter2 = object2->AddComponent<MeshFilter>();
     //mesh->Vertices = vertices_map;
     //mesh->VerticesSize = sizeof(vertices_map);
@@ -109,15 +114,13 @@ void Scene::InitializeGameObjects() {
     object2->Transform()->scale = Vector3(1, 1, 1);
     object2->Transform()->position = Vector3(0, -2, 0);
     object2->Transform()->rotation = Quaternion::FromEuler(0, 0, 0);
-    rootGameObjects.push_back(object2);
 
-    std::shared_ptr<GameObject> obj3 = std::shared_ptr<GameObject>(new GameObject("Floor"));
+    GameObject* obj3 = new GameObject("Floor");
     std::shared_ptr<MeshFilter> meshFilter3 = obj3->AddComponent<MeshFilter>();
     meshFilter3->mesh = mesh2;
     std::shared_ptr<MeshRenderer> renderer3 = obj3->AddComponent<MeshRenderer>();
     obj3->Transform()->scale = Vector3(10, 0.1, 10);
     obj3->Transform()->position = Vector3(0, -3, 0);
-    rootGameObjects.push_back(obj3);
 }
 
 void KritiaEngine::SceneManagement::Scene::SerializeToFile() {
@@ -126,7 +129,7 @@ void KritiaEngine::SceneManagement::Scene::SerializeToFile() {
     json["Name"] = name;
     json["Number Of GameObjects"] = rootGameObjects.size();
     int objectIndex = 0;
-    for (std::shared_ptr<GameObject> go : rootGameObjects) {
+    for (GameObject* go : rootGameObjects) {
         json["GameObject" + std::to_string(objectIndex)] = go->SerializeToJson();
         objectIndex++;
     }
@@ -148,10 +151,9 @@ void KritiaEngine::SceneManagement::Scene::DeserializeFromPath(const std::string
         std::string str = json["GameObject" + std::to_string(i)];
         // Must separate to avoid parsing error
         nlohmann::ordered_json objectJson = json::parse(str);
-        auto gameObject = std::shared_ptr<GameObject>(new GameObject());
+        GameObject* gameObject = new GameObject();
         gameObject->name = objectJson["Name"];
         gameObject->DeserializeFromJson(objectJson);
-        rootGameObjects.push_back(gameObject);
     }
     instream.close();
 }
