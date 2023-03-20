@@ -103,24 +103,24 @@ void Scene::InitializeGameObjects() {
     //object->Transform()->position = Vector3(0, 0, 0);
     //rootGameObjects.push_back(object);
 
-    GameObject* object2 = new GameObject("Cube");
-    std::shared_ptr<MeshFilter> meshFilter2 = object2->AddComponent<MeshFilter>();
-    //mesh->Vertices = vertices_map;
-    //mesh->VerticesSize = sizeof(vertices_map);
-    std::shared_ptr<Mesh> mesh2 = std::make_shared<Mesh>(Mesh::Cube());
-    //AssetDatabase::ImportModel("./Assets/Models/nanosuit.obj", mesh2);
-    meshFilter2->mesh = mesh2;
-    std::shared_ptr<MeshRenderer> renderer2 = object2->AddComponent<MeshRenderer>();
-    object2->Transform()->scale = Vector3(1, 1, 1);
-    object2->Transform()->position = Vector3(0, -2, 0);
-    object2->Transform()->rotation = Quaternion::FromEuler(0, 0, 0);
+    //GameObject* object2 = new GameObject("Cube");
+    //std::shared_ptr<MeshFilter> meshFilter2 = object2->AddComponent<MeshFilter>();
+    ////mesh->Vertices = vertices_map;
+    ////mesh->VerticesSize = sizeof(vertices_map);
+    //std::shared_ptr<Mesh> mesh2 = std::make_shared<Mesh>(Mesh::Cube());
+    ////AssetDatabase::ImportModel("./Assets/Models/nanosuit.obj", mesh2);
+    //meshFilter2->mesh = mesh2;
+    //std::shared_ptr<MeshRenderer> renderer2 = object2->AddComponent<MeshRenderer>();
+    //object2->Transform()->scale = Vector3(1, 1, 1);
+    //object2->Transform()->position = Vector3(0, -2, 0);
+    //object2->Transform()->rotation = Quaternion::FromEuler(0, 0, 0);
 
-    GameObject* obj3 = new GameObject("Floor");
-    std::shared_ptr<MeshFilter> meshFilter3 = obj3->AddComponent<MeshFilter>();
-    meshFilter3->mesh = mesh2;
-    std::shared_ptr<MeshRenderer> renderer3 = obj3->AddComponent<MeshRenderer>();
-    obj3->Transform()->scale = Vector3(10, 0.1, 10);
-    obj3->Transform()->position = Vector3(0, -3, 0);
+    //GameObject* obj3 = new GameObject("Floor");
+    //std::shared_ptr<MeshFilter> meshFilter3 = obj3->AddComponent<MeshFilter>();
+    //meshFilter3->mesh = mesh2;
+    //std::shared_ptr<MeshRenderer> renderer3 = obj3->AddComponent<MeshRenderer>();
+    //obj3->Transform()->scale = Vector3(10, 0.1, 10);
+    //obj3->Transform()->position = Vector3(0, -3, 0);
 }
 
 void KritiaEngine::SceneManagement::Scene::SerializeToFile() {

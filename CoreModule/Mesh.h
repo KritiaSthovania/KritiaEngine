@@ -11,12 +11,17 @@ namespace KritiaEngine::Editor {
 	class AssetDatabase;
 }
 
+namespace KritiaEngine::Manager {
+	class ResourceManager;
+}
+
 namespace KritiaEngine {
 	class Mesh : public Object, PathDeserializable, JsonSerializable, JsonDeserializable, FileSerializable{
 		friend class MeshFilter;
 		friend class KritiaEngine::Rendering::RenderingProvider;
 		friend class KritiaEngine::Rendering::OpenGLRendering;
 		friend class KritiaEngine::Editor::AssetDatabase;
+		friend class KritiaEngine::Manager::ResourceManager;
 	public:
 		struct Vertex {
 			Vector3 Position;
@@ -26,7 +31,6 @@ namespace KritiaEngine {
 		};
 		Mesh() = default;
 		Mesh(const std::vector<std::vector<Vertex>>& vertices, const std::vector<std::vector<unsigned int>>& indices, const std::vector<std::shared_ptr<Material>>& materials);
-		static Mesh Cube();
 		std::vector<std::vector<Vertex>> submeshVertices;
 		std::vector<std::vector<unsigned int>> submeshIndices;
 		std::vector<std::shared_ptr<Material>> submeshMaterials;
@@ -39,6 +43,9 @@ namespace KritiaEngine {
 		virtual void DeserializeFromPath(const std::string& path) override;
 		void SubmeshDeserialize(const json& json, int index);
 		static Vertex VertexDeserialize(const json& json);
+		/////// Create Primitives/////
+		static Mesh Cube();
+
 		std::vector<unsigned int> VAOs, VBOs, EBOs;
 		bool isSetup = false;
 		static std::vector<float> GetDefaultCubeVertices();

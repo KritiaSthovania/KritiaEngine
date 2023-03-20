@@ -4,25 +4,26 @@ using namespace KritiaEngine;
 using namespace KritiaEngine::Manager;
 
 std::list<MonoBehaviour*> BehaviourManager::monoBehaviours = std::list<MonoBehaviour*>();
-std::list<MonoBehaviour*> BehaviourManager::monoBehaviourStartQueue = std::list<MonoBehaviour*>();
-std::list<MonoBehaviour*> BehaviourManager::monoBehaviourAwakeQueue = std::list<MonoBehaviour*>();
+std::list<MonoBehaviour*> BehaviourManager::monoBehaviourStartList = std::list<MonoBehaviour*>();
+std::list<MonoBehaviour*> BehaviourManager::monoBehaviourAwakeList = std::list<MonoBehaviour*>();
 std::list<Component*> BehaviourManager::updatableComponents = std::list<Component*>();
-
+std::list<MonoBehaviour*> BehaviourManager::monoBehaviourToDelete = std::list<MonoBehaviour*>();
+std::list<Component*> BehaviourManager::updatableComponentsToDelete = std::list<Component*>();
 
 void KritiaEngine::Manager::BehaviourManager::AddMonoBehaviour(MonoBehaviour* behaviour) {
 	monoBehaviours.push_back(behaviour);
-	monoBehaviourStartQueue.push_back(behaviour);
+	monoBehaviourStartList.push_back(behaviour);
 	// if the gameobject is inactive, add the behaviour to a awake list
 	if (!behaviour->awoken) {
-		monoBehaviourAwakeQueue.push_back(behaviour);
+		monoBehaviourAwakeList.push_back(behaviour);
 	}
 }
 
 void KritiaEngine::Manager::BehaviourManager::RemoveMonoBehaviour(MonoBehaviour* behaviour) {
 	monoBehaviours.remove(behaviour);
 	// Just in case someone added a behaviour and deleted it immidiately in the same frame
-	monoBehaviourStartQueue.remove(behaviour);
-	monoBehaviourAwakeQueue.remove(behaviour);
+	monoBehaviourStartList.remove(behaviour);
+	monoBehaviourAwakeList.remove(behaviour);
 }
 
 void KritiaEngine::Manager::BehaviourManager::AddUpdatableComponents(KritiaEngine::Component* component) {
@@ -35,21 +36,21 @@ void KritiaEngine::Manager::BehaviourManager::RemoveUpdatableComponents(KritiaEn
 
 void KritiaEngine::Manager::BehaviourManager::BehaviourUpdate() {
 	//Try to awake behaviours first.
-	if (monoBehaviourAwakeQueue.size() > 0) {
-		for (auto iter = monoBehaviourAwakeQueue.begin(); iter != monoBehaviourAwakeQueue.end();) {
+	if (monoBehaviourAwakeList.size() > 0) {
+		for (auto iter = monoBehaviourAwakeList.begin(); iter != monoBehaviourAwakeList.end();) {
 			(*iter)->BehaviourAwake();
 			if ((*iter)->awoken) {
-				iter = monoBehaviourAwakeQueue.erase(iter);
+				iter = monoBehaviourAwakeList.erase(iter);
 			} else {
 				iter++;
 			}
 		}
 	}
-	if (monoBehaviourStartQueue.size() > 0) {
-		for (auto iter = monoBehaviourStartQueue.begin(); iter != monoBehaviourStartQueue.end();) {
+	if (monoBehaviourStartList.size() > 0) {
+		for (auto iter = monoBehaviourStartList.begin(); iter != monoBehaviourStartList.end();) {
 			(*iter)->BehaviourStart();
 			if ((*iter)->started) {
-				iter = monoBehaviourStartQueue.erase(iter);
+				iter = monoBehaviourStartList.erase(iter);
 			} else {
 				iter++;
 			}
@@ -65,7 +66,7 @@ void KritiaEngine::Manager::BehaviourManager::BehaviourUpdate() {
 
 void KritiaEngine::Manager::BehaviourManager::Clear() {
 	monoBehaviours.clear();
-	monoBehaviourAwakeQueue.clear();
-	monoBehaviourStartQueue.clear();
+	monoBehaviourAwakeList.clear();
+	monoBehaviourStartList.clear();
 	updatableComponents.clear();
 }

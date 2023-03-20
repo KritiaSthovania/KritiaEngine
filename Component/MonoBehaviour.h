@@ -12,8 +12,10 @@ namespace KritiaEngine {
 		//Ã¿Ö¡µ÷ÓÃ
 		virtual void Update() = 0;
 		virtual void OnDestroy() = 0;
-	private:
+	protected:
 		void OnObjectDestroy();
+	private:
+
 		void BehaviourAwake();
 		void BehaviourStart();
 		void BehaviourUpdate();

@@ -11,7 +11,7 @@ namespace KritiaEngine{
 		static bool UseOpenGL;
 		static bool UseGLM;
 		static int ShadowWidth, ShadowHeight;
-
+		static std::string LastOpenedScenePath;
 		// Í¨¹ý JsonSerializable ¼Ì³Ð
 		static void Serialize();
 

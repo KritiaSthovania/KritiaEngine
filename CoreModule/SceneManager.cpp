@@ -4,6 +4,7 @@
 #include "../CoreModule/Manager/GameObjectManager.h"
 #include "Lighting.h"
 #include "../Editor/ImguiManager.h"
+#include "Settings.h"
 #include <json/json.hpp>
 
 using json = nlohmann::ordered_json;
@@ -19,8 +20,13 @@ bool SceneManager::inEditor = false;
 /// <param name="inEditor">If we are in the Editor or Game</param>
 void KritiaEngine::SceneManagement::SceneManager::Initialize(bool inEditor)
 {
-	activeScene = CreateScene("Demo Scene");
-	LoadScene(activeScene);
+	activeScene = CreateScene("New Scene");
+	if (Settings::LastOpenedScenePath != "") {
+		activeScene->path = Settings::LastOpenedScenePath;
+		LoadScene(activeScene->path);
+	} else {
+		LoadScene(activeScene);
+	}
 	SceneManager::inEditor = inEditor;
 	if (inEditor) {
 		Camera::editorCamera = std::shared_ptr<Camera>(new Camera());

@@ -20,9 +20,11 @@ namespace KritiaEngine::Manager{
 		static void Clear();
 	private:
 		static std::list<KritiaEngine::MonoBehaviour*> monoBehaviours;
-		static std::list<KritiaEngine::MonoBehaviour*> monoBehaviourStartQueue;
-		static std::list<KritiaEngine::MonoBehaviour*> monoBehaviourAwakeQueue;
+		static std::list<KritiaEngine::MonoBehaviour*> monoBehaviourStartList;
+		static std::list<KritiaEngine::MonoBehaviour*> monoBehaviourAwakeList;
 		static std::list<KritiaEngine::Component*> updatableComponents;
+		static std::list<KritiaEngine::MonoBehaviour*> monoBehaviourToDelete;
+		static std::list<KritiaEngine::Component*> updatableComponentsToDelete;
 
 	};
 }

@@ -16,6 +16,14 @@ void KritiaEngine::Editor::AssetDatabase::ImportAsset(const std::string& path) {
         mesh->name = name;
         mesh->path = EditorApplication::assetFolderRootPath + mesh->name + meshFilePostfix;
         mesh->SerializeToFile();
+    } 
+    // Textures
+    else if (path.ends_with(".jpg") || path.ends_with(".png")) {
+        std::unique_ptr<Texture> tex = std::unique_ptr<Texture>(new Texture());
+        std::string name = path.substr(path.find_last_of('\\') + 1, path.find_last_of('.') - path.find_last_of('\\') - 1);
+        tex->name = name;
+        tex->path = EditorApplication::assetFolderRootPath + name + textureFilePostfix;
+        tex->SerializeToFile();
     }
 }
 

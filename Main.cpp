@@ -34,7 +34,7 @@ int main()
         //渲染
         Render();
     }
-
+    Settings::Serialize();
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;

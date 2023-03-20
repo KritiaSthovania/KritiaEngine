@@ -1,6 +1,7 @@
 #include "Settings.h"
 #include "../Editor/EditorApplication.h"
 #include "../Editor/ImguiAlias.h"
+#include "SceneManager.h"
 #include <json/json.hpp>
 #include <fstream>
 #include <imgui/imgui.h>
@@ -16,9 +17,11 @@ bool Settings::UseOpenGL = true;
 bool Settings::UseGLM = true;
 int Settings::ShadowWidth = 1024;
 int Settings::ShadowHeight = 1024;
+std::string Settings::LastOpenedScenePath = "";
 
 void KritiaEngine::Settings::Serialize() {
     json json;
+    json["LastOpenedScene"] = SceneManagement::SceneManager::GetActiveScene()->path;
     json["ScreenWidth"] = ScreenWidth;
     json["ScreenHeight"] = ScreenHeight;
     json["NearPlaneDistance"] = NearPlaneDistance;
@@ -36,6 +39,7 @@ void KritiaEngine::Settings::Serialize() {
 void KritiaEngine::Settings::Deserialize() {
     std::ifstream input(Editor::EditorApplication::assetFolderRootPath + "Settings.json");
     json json = json::parse(input);
+    LastOpenedScenePath = json["LastOpenedScene"];
     ScreenWidth = json["ScreenWidth"];
     ScreenHeight = json["ScreenHeight"];
     NearPlaneDistance = json["NearPlaneDistance"];
@@ -57,3 +61,4 @@ void KritiaEngine::Settings::ShowOnEditorWindow() {
     ImguiAlias::IntField("Shadow Width", &ShadowWidth);
     ImguiAlias::IntField("Shadow Height", &ShadowHeight);
 }
+

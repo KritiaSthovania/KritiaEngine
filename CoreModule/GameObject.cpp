@@ -13,7 +13,7 @@ using json = nlohmann::ordered_json;
 
 KritiaEngine::GameObject::GameObject() {
 	components.push_back(std::shared_ptr<KritiaEngine::Transform>(new KritiaEngine::Transform(this)));
-	this->name = "New Game Object";
+	this->name = "New GameObject";
 	SceneManagement::SceneManager::GetActiveScene()->GetRootGameObjects().push_back(this);
 }
 
@@ -75,8 +75,10 @@ void KritiaEngine::GameObject::SerializeToFile() {
 }
 
 void KritiaEngine::GameObject::OnObjectDestroy() {
+	for (std::shared_ptr<Component> comp : components) {
+		Destroy(comp.get());
+	}
 	SceneManagement::SceneManager::GetActiveScene()->GetRootGameObjects().remove(this);
-	delete this;
 }
 
 

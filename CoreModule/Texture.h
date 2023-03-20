@@ -1,11 +1,17 @@
 #pragma once
 #include "Object.h"
 #include "Interface/SerializableAndDeserializable.h"
+
+namespace KritiaEngine::Editor {
+	class AssetDatabase;
+}
+
 namespace KritiaEngine {
 	class Material;
 	class Texture : public Object, JsonSerializable, PathDeserializable, JsonDeserializable, FileSerializable
 	{
 		friend class Material;
+		friend class KritiaEngine::Editor::AssetDatabase;
 	public:
 		Texture() = default;
 		Texture(const std::string& path);

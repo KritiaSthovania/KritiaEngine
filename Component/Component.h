@@ -27,6 +27,8 @@ namespace KritiaEngine {
 
 		// Ù–‘
 		GameObject* gameObject;
+	protected:
+		virtual void OnObjectDestroy() override;
 	private:
 		// If this component is attached to BehaviourManager, this update function will always be called.
 		// Must manually add this component to BehaviourManager
