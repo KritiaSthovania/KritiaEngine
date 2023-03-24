@@ -2,6 +2,7 @@
 
 #include "pch.h"
 #include "Interface/SerializableAndDeserializable.h"
+#include "Interface/Inspectable.h"
 #include "Object.h"
 #include <typeinfo>
 using json = nlohmann::ordered_json;
@@ -17,7 +18,7 @@ namespace KritiaEngine::SceneManagement {
 namespace KritiaEngine {
 	class Transform;
 	class Component;
-	class GameObject : public Object, JsonSerializable, JsonDeserializable, FileSerializable{
+	class GameObject : public Object, JsonSerializable, JsonDeserializable, FileSerializable, Inspectable{
 		friend class KritiaEngine::Editor::GUI::InspectorWindow;
 		friend class KritiaEngine::SceneManagement::Scene;
 	public:
@@ -39,7 +40,7 @@ namespace KritiaEngine {
 			return component;
 		}
 		void SetActive(bool isActive);
-		bool IsActive = true;
+		bool isActive = true;
 	private:
 		std::list<std::shared_ptr<Component>> components;
 		/// <summary>
@@ -53,6 +54,9 @@ namespace KritiaEngine {
 		// 通过 FileSerializable 继承
 		virtual void SerializeToFile() override;
 		virtual void OnObjectDestroy() override;
+
+		// 通过 Inspectable 继承
+		virtual void OnInspector() override;
 	};
 }
 

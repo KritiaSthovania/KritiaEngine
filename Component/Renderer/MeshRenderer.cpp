@@ -3,6 +3,8 @@
 #include "../../CoreModule/GameObject.h"
 #include "../../Rendering/RenderingProvider.h"
 #include "../../CoreModule/Manager/RendererManager.h"
+#include "../../CoreModule/Manager/ResourceManager.h"
+#include "../../Editor/ImguiAlias.h"
 #include "../../Editor/EditorApplication.h"
 
 using namespace KritiaEngine;
@@ -86,12 +88,14 @@ void KritiaEngine::MeshRenderer::OnInspector() {
 	if (ImGui::CollapsingHeader("##Materials", ImGuiTreeNodeFlags_SpanFullWidth)) {
 		for (int i = 0; i < materials.size(); i++) {
 			//TODO: Drag And Drop
-			if (ImGui::Selectable(materials[i]->name.c_str())) {
+			if (ImGui::Button(materials[i]->name.c_str())) {
+				KritiaEngine::Editor::GUI::ImguiManager::currentSelectedInspectable = materials[i].get();
+			}
+			if(ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
 				std::string path = ImguiAlias::OpenFindResourceWindow("Material", materialFilePostfix);
 				if (path != "") {
-					materials[i] = std::shared_ptr<Material>(new Material());
-					materials[i]->DeserializeFromPath(path);
-				}
+					materials[i] = ResourceManager::GetMaterialFromPath(path);
+				}			
 			}
 		}
 	}

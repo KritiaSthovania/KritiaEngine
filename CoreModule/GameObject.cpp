@@ -5,6 +5,8 @@
 #include "../Editor/EditorApplication.h"
 #include "Manager/GameObjectManager.h"
 #include "SceneManager.h"
+#include "../Editor/ImguiAlias.h"
+#include <imgui/imgui.h>
 #include <fstream>
 using namespace KritiaEngine;
 using namespace KritiaEngine::Manager;
@@ -30,7 +32,7 @@ std::shared_ptr<KritiaEngine::Transform> KritiaEngine::GameObject::Transform()
 
 void KritiaEngine::GameObject::GameObject::SetActive(bool isActive)
 {
-	IsActive = isActive;
+	this->isActive = isActive;
 }
 
 std::string KritiaEngine::GameObject::SerializeToJson() {
@@ -79,6 +81,19 @@ void KritiaEngine::GameObject::OnObjectDestroy() {
 		Destroy(comp.get());
 	}
 	SceneManagement::SceneManager::GetActiveScene()->GetRootGameObjects().remove(this);
+}
+
+void KritiaEngine::GameObject::OnInspector() {
+	ImGui::Checkbox("##IsActive", &isActive);
+	ImGui::SameLine();
+	ImGui::Text(name.c_str());
+	for (std::shared_ptr<Component> comp : components) {
+		ImGui::Separator();
+		if (ImGui::TreeNodeEx(comp->GetInspectorLabel().c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth)) {
+			comp->OnInspector();
+			ImGui::TreePop();
+		}
+	}
 }
 
 

@@ -105,6 +105,10 @@ void KritiaEngine::Editor::AssetDatabase::ProcessMesh(const std::string& directo
         if (normalMapPath != "") {
             material->normalMap = std::shared_ptr<Texture>(new Texture(directory + "/" + normalMapPath));
         }
+        if (material->name == "") {
+            material->name = "Submaterial" + std::to_string(meshPtr->submeshMaterials.size());
+        }
+        material->path = directory + "/" + material->name;
         meshPtr->submeshMaterials.push_back(material);
     }
 

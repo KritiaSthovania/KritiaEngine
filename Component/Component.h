@@ -3,6 +3,7 @@
 #define COMPONENT
 #include "pch.h"
 #include "../CoreModule/Interface/SerializableAndDeserializable.h"
+#include "../CoreModule/Interface/Inspectable.h"
 #include "../CoreModule/Manager/BehaviourManager.h"
 #include "../CoreModule/GameObject.h"
 #include "../Editor/ImguiAlias.h"
@@ -12,7 +13,7 @@ using ImguiAlias = KritiaEngine::Editor::GUI::ImguiAlias;
 
 namespace KritiaEngine {
 	class Transform;
-	class Component : public Object, private JsonSerializable, JsonDeserializable{
+	class Component : public Object, private JsonSerializable, JsonDeserializable, Inspectable{
 		friend class KritiaEngine::Manager::BehaviourManager;
 		friend class KritiaEngine::Editor::GUI::InspectorWindow;
 		friend class GameObject;
@@ -33,7 +34,7 @@ namespace KritiaEngine {
 		// If this component is attached to BehaviourManager, this update function will always be called.
 		// Must manually add this component to BehaviourManager
 		virtual void ComponentUpdate();
-		virtual void OnInspector() = 0;
+		virtual void OnInspector() override = 0;
 		virtual std::string SerializeToJson() override = 0;
 		virtual void DeserializeFromJson(const json& json) override = 0;
 		virtual std::string GetInspectorLabel () = 0;

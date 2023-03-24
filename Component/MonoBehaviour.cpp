@@ -15,21 +15,21 @@ void  KritiaEngine::MonoBehaviour::OnObjectDestroy() {
 }
 
 void KritiaEngine::MonoBehaviour::BehaviourAwake() {
-	if (gameObject->IsActive && !awoken) {
+	if (gameObject->isActive && !awoken) {
 		Awake();
 		awoken = true;
 	}
 }
 
 void KritiaEngine::MonoBehaviour::BehaviourStart() {
-	if (gameObject->IsActive && enabled && !started) {
+	if (gameObject->isActive && enabled && !started) {
 		Start();
 		started = true;
 	}
 }
 
 void KritiaEngine::MonoBehaviour::BehaviourUpdate() {
-	if (gameObject->IsActive && enabled) {
+	if (gameObject->isActive && enabled) {
 		Update();
 	}
 }

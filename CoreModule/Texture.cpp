@@ -6,6 +6,7 @@ using namespace KritiaEngine;
 using ImguiAlias = KritiaEngine::Editor::GUI::ImguiAlias;
 KritiaEngine::Texture::Texture(const std::string& path)
 {
+	name = "New Texture";
 	this->path = path;
 }
 
@@ -17,6 +18,7 @@ void KritiaEngine::Texture::LoadImage(const std::string& path)
 std::string KritiaEngine::Texture::SerializeToJson() {
 	json json;
 	json["Type"] = "Texture";
+	json["Name"] = name;
 	json["Path"] = path;
 	return json.dump();
 }
@@ -29,6 +31,7 @@ void KritiaEngine::Texture::DeserializeFromPath(const std::string& path) {
 
 void KritiaEngine::Texture::DeserializeFromJson(const json& json) {
 	assert(json["Type"] == "Texture");
+	name = json["Name"];
 	path = json["Path"];
 }
 

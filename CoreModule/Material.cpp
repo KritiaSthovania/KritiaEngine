@@ -4,6 +4,7 @@
 #include "../Component/Transform.h"
 #include "../Rendering/RenderingProvider.h"
 #include "../Editor/EditorApplication.h"
+#include <imgui/imgui.h>
 #include <stb_image.h>
 #include <fstream>
 
@@ -13,7 +14,7 @@ using namespace KritiaEngine::Editor;
 
 KritiaEngine::Material::Material()
 {
-	name = "New Material";
+	name = "Default Diffuse Material";
 	shader = std::shared_ptr<Shader>(new KritiaEngine::Shader((EditorApplication::currentProjectFolderPath + "/StandardShader/BlinnPhongShader.vs").c_str(), (EditorApplication::currentProjectFolderPath + "/StandardShader/BlinnPhongShader.fs").c_str()));
 }
 
@@ -26,6 +27,11 @@ KritiaEngine::Material::Material(const char* name)
 KritiaEngine::Material::Material(const char* name, const std::shared_ptr<Shader>& shader)
 {
 	this->name = name;
+	this->shader = shader;
+}
+
+KritiaEngine::Material::Material(const std::shared_ptr<Shader>& shader) {
+	this->name = "Default Diffuse Material";
 	this->shader = shader;
 }
 
@@ -80,21 +86,29 @@ void Material::Initialize() {
 		}
 		shader->SetFloat("farPlaneDistance", Settings::FarPlaneDistance);
 		// Make sure the shader supports GPU instancing while using it.
-		if (GPUInstancingEnabled) {
-			shader->SetBool("instancing", GPUInstancingEnabled);
-		}
+		shader->SetBool("instancing", GPUInstancingEnabled);
 		initialized = true;
 	}
+}
+
+void KritiaEngine::Material::SetPropertiesOnRender() {
+	shader->Use();
+	shader->SetFloat("shininess", shininess);
+	shader->SetVec3("albedo", albedo.GetRGB());
+	shader->SetFloat("farPlaneDistance", Settings::FarPlaneDistance);
+	shader->SetBool("instancing", GPUInstancingEnabled);
 }
 
 std::string KritiaEngine::Material::SerializeToJson() {
 	json json;
 	json["Type"] = "Material";
+	json["Name"] = name;
 	if (renderMode == RenderMode::Opaque) {
 		json["RenderMode"] = "Opaque";
 	} else if( renderMode == RenderMode::Transparent) {
 		json["RenderMode"] = "Transparent";
 	}
+	json["Path"] = path;
 	json["Albedo"] = { albedo.r, albedo.g, albedo.b };
 	json["Shininess"] = shininess;
 	json["GPUInstancingEnabled"] = GPUInstancingEnabled;
@@ -106,53 +120,135 @@ std::string KritiaEngine::Material::SerializeToJson() {
 	return json.dump();
 }
 
-void KritiaEngine::Material::DeserializeFromJson(const json& json) {
+std::shared_ptr<Material> KritiaEngine::Material::DeserializeFromJson(const json& json) {
+	std::shared_ptr<Material> mat = std::make_shared<Material>(Material());
 	assert(json["Type"] == "Material");
 	if (json["RenderMode"] == "Opaque") {
-		this->renderMode = RenderMode::Opaque;
+		mat->renderMode = RenderMode::Opaque;
 	} else if (json["RenderMode"] == "Transparent") {
-		this->renderMode = RenderMode::Transparent;
+		mat->renderMode = RenderMode::Transparent;
 	}
-	albedo = Color(json["Albedo"][0], json["Albedo"][1], json["Albedo"][2], 1);
-	shininess = json["Shininess"];
-	GPUInstancingEnabled = json["GPUInstancingEnabled"];
+	mat->name = json["Name"];
+	mat->path = json["Path"];
+	mat->albedo = Color(json["Albedo"][0], json["Albedo"][1], json["Albedo"][2], 1);
+	mat->shininess = json["Shininess"];
+	mat->GPUInstancingEnabled = json["GPUInstancingEnabled"];
 	if (json["MainTexture"] != "Null") {
-		mainTexture = std::shared_ptr<Texture>(new Texture());
+		mat->mainTexture = std::shared_ptr<Texture>(new Texture());
 		nlohmann::ordered_json mainTexJson = json::parse((std::string)json["MainTexture"]);
-		mainTexture->DeserializeFromJson(mainTexJson);
+		mat->mainTexture->DeserializeFromJson(mainTexJson);
 	}
 	if (json["SpecularMap"] != "Null") {
-		specularMap = std::shared_ptr<Texture>(new Texture());
+		mat->specularMap = std::shared_ptr<Texture>(new Texture());
 		nlohmann::ordered_json specJson = json::parse((std::string)json["SpecularMap"]);
-		specularMap->DeserializeFromJson(specJson);
+		mat->specularMap->DeserializeFromJson(specJson);
 	}
 	if (json["NormalMap"] != "Null") {
-		normalMap = std::shared_ptr<Texture>(new Texture());
+		mat->normalMap = std::shared_ptr<Texture>(new Texture());
 		nlohmann::ordered_json normalJson = json::parse((std::string)json["NormalMap"]);
-		normalMap->DeserializeFromJson(normalJson);
+		mat->normalMap->DeserializeFromJson(normalJson);
 	}
 	if (json["ParallaxMap"] != "Null") {
-		parallaxMap = std::shared_ptr<Texture>(new Texture());
+		mat->parallaxMap = std::shared_ptr<Texture>(new Texture());
 		nlohmann::ordered_json paraJson = json::parse((std::string)json["ParallexMap"]);
-		parallaxMap->DeserializeFromJson(paraJson);
+		mat->parallaxMap->DeserializeFromJson(paraJson);
 	}
+	return mat;
 }
 
-void KritiaEngine::Material::DeserializeFromPath(const std::string& path) {
+std::shared_ptr<Material> KritiaEngine::Material::DeserializeFromPath(const std::string& path) {
 	std::ifstream instream(path);
 	json json = json::parse(instream);
-	DeserializeFromJson(json);
 	instream.close();
+	return DeserializeFromJson(json);
 }
 
 void KritiaEngine::Material::SerializeToFile() {
-	std::string jsonStr = SerializeToJson();
 	std::string path = ImguiAlias::OpenSaveResourceWindow("Material", KritiaEngine::Editor::materialFilePostfix, "New Material");
 	if (!path.ends_with(KritiaEngine::Editor::materialFilePostfix)) {
 		path += ("/" + (std::string)KritiaEngine::Editor::materialFilePostfix);
 	}
+	this->path = path;
+	std::string jsonStr = SerializeToJson();
 	std::fstream output;
 	output.open(path, std::ios::out | std::ios::trunc);
 	output << jsonStr << std::endl;
 	output.close();
+}
+
+void KritiaEngine::Material::OnInspector() {
+	ImGui::Text(((std::string)"Material   " + name).c_str());
+	ImGui::Separator();
+	const char* renderModeStr = "";
+	switch (renderMode) {
+	case RenderMode::Opaque:
+		renderModeStr = "Opaque";
+		break;
+	case RenderMode::Transparent:
+		renderModeStr = "Transparent";
+		break;
+	}
+	ImGui::Text("RenderMode");
+	ImGui::SameLine();
+	if (ImGui::BeginCombo("##RenderMode", renderModeStr)) {
+		if (ImGui::Selectable("Opaque")) {
+			renderMode = RenderMode::Opaque;
+		}
+		if (ImGui::Selectable("Transparent")) {
+			renderMode = RenderMode::Transparent;
+		}
+		ImGui::EndCombo();
+	}
+	ImguiAlias::ColorField3("Albedo", &albedo.r);
+	ImguiAlias::FloatField("Shininess", &shininess);
+	ImguiAlias::BoolField("GPUInstancingEnabled", &GPUInstancingEnabled);
+	// TODO: Drag And Drop
+	ImGui::Text("Main Texture ");
+	ImGui::SameLine();
+	if(ImGui::Button(mainTexture == nullptr? "Null" : mainTexture->name.c_str())) {
+
+	}
+	if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+		std::string path = ImguiAlias::OpenFindResourceWindow("Texture", KritiaEngine::Editor::textureFilePostfix);
+		if (path != "") {
+			// mainTexture = Texture::DeserializeFromPath(path);
+		}
+	}
+	ImGui::Text("Specular Map ");
+	ImGui::SameLine();
+	if (ImGui::Button(specularMap == nullptr ? "Null" : specularMap->name.c_str())) {
+
+	}
+	if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+		std::string path = ImguiAlias::OpenFindResourceWindow("Texture", KritiaEngine::Editor::textureFilePostfix);
+		if (path != "") {
+			// specularMap = Texture::DeserializeFromPath(path);
+		}
+	}
+	ImGui::Text("Normal Map   ");
+	ImGui::SameLine();
+	if (ImGui::Button(normalMap == nullptr ? "Null" : normalMap->name.c_str())) {
+
+	}
+	if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+		std::string path = ImguiAlias::OpenFindResourceWindow("Texture", KritiaEngine::Editor::textureFilePostfix);
+		if (path != "") {
+			// normalMap = Texture::DeserializeFromPath(path);
+			shader->SetBool("hasNormalMap", true);
+		}
+	}
+	ImGui::Text("Parallax Map ");
+	ImGui::SameLine();
+	if (ImGui::Button(parallaxMap == nullptr ? "Null" : parallaxMap->name.c_str())) {
+
+	}
+	if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+		std::string path = ImguiAlias::OpenFindResourceWindow("Texture", KritiaEngine::Editor::textureFilePostfix);
+		if (path != "") {
+			// parallaxMap = Texture::DeserializeFromPath(path);
+			shader->SetBool("hasParallaxMap", true);
+			shader->SetFloat("heightScale", 0.1f);
+			shader->SetInt("depthLayers", 10);
+		}
+	}
 }

@@ -332,6 +332,9 @@
     <ClInclude Include="CoreModule\Manager\ResourceManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="CoreModule\Interface\Inspectable.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

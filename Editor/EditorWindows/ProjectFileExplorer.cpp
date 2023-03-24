@@ -1,9 +1,11 @@
 #include "ProjectFileExplorer.h"
 #include "../EditorApplication.h"
+#include "../../CoreModule/Manager/ResourceManager.h"
 #include "../../CoreModule/SceneManager.h"
 #include "../../CoreModule/Material.h"
 
 using namespace std::filesystem;
+using namespace KritiaEngine::Manager;
 
 void KritiaEngine::Editor::GUI::ProjectFileExplorer::OnGUI() {
 	if (ImGui::TreeNodeEx("Assets", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth)) {
@@ -16,10 +18,10 @@ void KritiaEngine::Editor::GUI::ProjectFileExplorer::OnGUI() {
 		}
 		ImGui::TreePop();
 	}
+	// Right Click
 	if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsWindowHovered()) {
 		ImGui::OpenPopup("RightClickDirectory");
 	}
-	// Popup
 	if (ImGui::BeginPopup("RightClickDirectory")) {
 		ShowRightClickMenu();
 		ImGui::EndPopup();
@@ -41,8 +43,11 @@ void KritiaEngine::Editor::GUI::ProjectFileExplorer::DisplayDirectory(const path
 
 void KritiaEngine::Editor::GUI::ProjectFileExplorer::DisplayFile(const path& fileName, const std::string& path) {
 	if (ImGui::Selectable(fileName.filename().string().c_str(), false, ImGuiSelectableFlags_AllowDoubleClick) ) {
-		if (ImGui::IsMouseDoubleClicked(0)) {
-			// Double click different files
+		if (fileName.filename().string().ends_with(KritiaEngine::Editor::materialFilePostfix)) {
+			ImguiManager::currentSelectedInspectable = ResourceManager::GetMaterialFromPath(path + fileName.filename().string()).get();
+		}		
+		// Double left click on different files
+		if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 			if (fileName.filename().string().ends_with(KritiaEngine::Editor::sceneFilePostfix)) {
 				SceneManagement::SceneManager::LoadScene(path + fileName.filename().string());
 			}
@@ -56,6 +61,7 @@ void KritiaEngine::Editor::GUI::ProjectFileExplorer::ShowRightClickMenu() {
 			Material mat = Material();
 			mat.SerializeToFile();
 		}
+		ImGui::EndMenu();
 	}
 
 }

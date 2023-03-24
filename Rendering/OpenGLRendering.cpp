@@ -217,6 +217,7 @@ void KritiaEngine::Rendering::OpenGLRendering::SetupMesh(const std::shared_ptr<M
 }
 
 void OpenGLRendering::ApplyMaterialShaderOnRender(const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos, const std::shared_ptr<Shader>& shader, const std::shared_ptr<Material>& material) {
+	material->SetPropertiesOnRender();
 	shader->Use();
 	// main light source should always be a directional light, and there should always be one such light source.
 	SetMainLightProperties(shader);

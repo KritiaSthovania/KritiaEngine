@@ -5,6 +5,7 @@
 #include "../CoreModule/MathStructs.h"
 #include "Texture.h"
 #include "Interface/SerializableAndDeserializable.h"
+#include "Interface/Inspectable.h"
 
 namespace KritiaEngine::Rendering {
 	class RenderingProvider;
@@ -15,13 +16,18 @@ namespace KritiaEngine::Editor::GUI {
 	class ProjectFileExplorer;
 }
 
+namespace KritiaEngine::Manager {
+	class ResourceManager;
+}
+
 namespace KritiaEngine {
 	class Mesh;
-	class Material : public Object, JsonDeserializable, PathDeserializable, JsonSerializable, FileSerializable
+	class Material : public Object, JsonSerializable, FileSerializable, Inspectable
 	{
 		friend class KritiaEngine::Rendering::RenderingProvider;
 		friend class KritiaEngine::Rendering::OpenGLRendering;
 		friend class KritiaEngine::Editor::GUI::ProjectFileExplorer;
+		friend class KritiaEngine::Manager::ResourceManager;
 		friend class MeshRenderer;
 		friend class Mesh;
 	public:
@@ -32,6 +38,7 @@ namespace KritiaEngine {
 		Material();
 		Material(const char* name);
 		Material(const char* name, const std::shared_ptr<Shader>& shader);
+		Material(const std::shared_ptr<Shader>& shader);
 		Color albedo;
 		/// <summary>
 		/// Specular shininess
@@ -47,21 +54,25 @@ namespace KritiaEngine {
 		std::shared_ptr<Texture> parallaxMap;
 		std::shared_ptr<Shader> shader;
 		bool GPUInstancingEnabled = false;
+		std::string path;
 	private:
 		/// <summary>
         /// Compile Shader, Load Texture
         /// </summary>
 		void Initialize();
+		void SetPropertiesOnRender();
 		virtual std::string SerializeToJson() override;
-		virtual void DeserializeFromJson(const json& json) override;
-		virtual void DeserializeFromPath(const std::string& path) override;
+		static std::shared_ptr<Material> DeserializeFromJson(const json& json);
+		static std::shared_ptr<Material> DeserializeFromPath(const std::string& path);
 		int diffuseSamplerIndex = 0, specularSamplerIndex = 1, normalSamplerIndex = 2, parallaxSamplerIndex = 3, shadowSamplerIndex = 4;
 		unsigned int mainTextureID, specularMapID, normalMapID, parallaxMapID;
 		unsigned int matricesVPID;
 		bool initialized = false;
-
 		// 通过 FileSerializable 继承
 		virtual void SerializeToFile() override;
+
+		// 通过 Inspectable 继承
+		virtual void OnInspector() override;
 	};
 }
 

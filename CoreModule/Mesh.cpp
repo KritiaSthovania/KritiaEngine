@@ -1,4 +1,5 @@
 #include "Mesh.h"
+#include "Manager/ResourceManager.h"
 #include <fstream>
 using namespace KritiaEngine;
 
@@ -32,7 +33,7 @@ KritiaEngine::Mesh KritiaEngine::Mesh::Cube() {
     submeshVertices.push_back(vertices);
     std::vector<std::vector<unsigned int>> submeshIndices = std::vector<std::vector<unsigned int>>();
     submeshIndices.push_back(indices);
-    std::shared_ptr<Material> material = std::shared_ptr<Material>(new Material("New Material", std::shared_ptr<Shader>(new KritiaEngine::Shader("./StandardShader/BlinnPhongShader.vs", "./StandardShader/BlinnPhongShader.fs"))));
+    std::shared_ptr<Material> material = std::shared_ptr<Material>(new Material(std::shared_ptr<Shader>(new KritiaEngine::Shader("./StandardShader/BlinnPhongShader.vs", "./StandardShader/BlinnPhongShader.fs"))));
     material->albedo = Color(1.0f, 1.f, 1.f, 1);
     material->shininess = 32;
     material->renderMode = Material::RenderMode::Opaque;
@@ -121,7 +122,6 @@ std::string KritiaEngine::Mesh::SubmeshSerialize(int index) {
     json json;
     json["Number of Vertices"] = submeshVertices[index].size();
     for (int i = 0; i < submeshVertices[index].size(); i++) {
-        std::cout << i  << std::endl;
         json["Vertex" + std::to_string(i)] = VertexSerialize(submeshVertices[index][i], i);
 
     }
@@ -151,8 +151,7 @@ void KritiaEngine::Mesh::DeserializeFromJson(const json& json) {
     for (int i = 0; i < submeshSize; i++) {
         nlohmann::json submeshJson = json::parse((std::string)json["Submesh" + std::to_string(i)]);
         SubmeshDeserialize(submeshJson, i);
-        submeshMaterials[i] = std::shared_ptr<Material>(new Material());
-        submeshMaterials[i]->DeserializeFromJson(json::parse((std::string)submeshJson["Material"]));
+        submeshMaterials[i] = Manager::ResourceManager::GetMaterialFromJson(json::parse((std::string)submeshJson["Material"]));
     }
 }
 

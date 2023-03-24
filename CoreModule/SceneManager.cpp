@@ -49,8 +49,8 @@ void KritiaEngine::SceneManagement::SceneManager::LoadScene(const std::string& p
 	BehaviourManager::Clear();
 	RendererManager::Clear();
 	GameObjectManager::Clear();
+	Editor::GUI::ImguiManager::currentSelectedInspectable = nullptr;
 	KritiaEngine::Lighting::LightingSystem::Reset();
-	KritiaEngine::Editor::GUI::ImguiManager::currentSelectedGameObject = nullptr;
 	activeScene = std::shared_ptr<Scene>(new Scene("", path));
 	activeScene->Initialize();
 }

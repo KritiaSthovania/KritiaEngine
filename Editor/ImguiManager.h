@@ -1,4 +1,5 @@
 #pragma once
+#include "../CoreModule/Interface/Inspectable.h"
 #include <imgui/imgui.h>
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
@@ -20,7 +21,7 @@ namespace KritiaEngine::Editor::GUI {
 		static void RenderGUI();
 		static void AddEditorWindow(std::shared_ptr<EditorWindow> window);
 		static void RemoveEditorWindow(std::shared_ptr<EditorWindow> window);
-		static GameObject* currentSelectedGameObject;
+		static Inspectable* currentSelectedInspectable;
 	private:
 		static void RenderWindowOpenedFromMainMenuBar();
 		static void CreateEditorWindows();
