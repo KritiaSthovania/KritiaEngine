@@ -42,7 +42,9 @@ KritiaEngine::Mesh KritiaEngine::Mesh::Cube() {
     //material->parallaxMap = std::shared_ptr<Texture>(new Texture("./Assets/Textures/wall/bricks2_disp.jpg"));
     std::vector<std::shared_ptr<Material>> materials;
     materials.push_back(material);
-    return Mesh(submeshVertices, submeshIndices, materials);
+    Mesh mesh = Mesh(submeshVertices, submeshIndices, materials);
+    mesh.name = "Cube";
+    return mesh;
 }
 
 // Tangent may not be correct

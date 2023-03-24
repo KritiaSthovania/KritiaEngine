@@ -35,7 +35,7 @@ void KritiaEngine::Editor::AssetDatabase::ImportModel(const std::string& path, c
         std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
         return;
     }
-    std::string directory = path.substr(0, path.find_last_of('/'));
+    std::string directory = path.substr(0, path.find_last_of('\\'));
     ProcessNode(directory, scene->mRootNode, scene, mesh);
     mesh->submeshSize = mesh->submeshVertices.size();
 }

@@ -18,6 +18,8 @@ MeshRenderer::MeshRenderer(GameObject* gameObject) {
 }
 
 void KritiaEngine::MeshRenderer::PreInitializeMaterial() {
+	materials.clear();
+	// In case there is already a MeshFilter on the object, check whether it should be in the transparent queue or opaque queue
 	if (this->gameObject->GetComponent<MeshFilter>() != nullptr && this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size() > 0) {
 		for (int i = 0; i < this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(); i++) {
 			materials.push_back(this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials[i]);
@@ -33,6 +35,7 @@ void KritiaEngine::MeshRenderer::PreInitializeMaterial() {
 void MeshRenderer::InitializeMaterial() {
 	// At the moment the renderer was added, the mesh has not been added, so we must add the materials of the mesh first.
 	if (!preInitialized) {
+		materials.clear();
 		if (this->gameObject->GetComponent<MeshFilter>() != nullptr && this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size() > 0) {
 			for (int i = 0; i < this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(); i++) {
 				materials.push_back(this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials[i]);
@@ -83,8 +86,8 @@ void KritiaEngine::MeshRenderer::OnInspector() {
 	if (ImGui::CollapsingHeader("##Materials", ImGuiTreeNodeFlags_SpanFullWidth)) {
 		for (int i = 0; i < materials.size(); i++) {
 			//TODO: Drag And Drop
-			if (ImGui::Button(materials[i]->name.c_str())) {
-				const char* path = ImguiAlias::OpenFindResourceWindow("Material", materialFilePostfix);
+			if (ImGui::Selectable(materials[i]->name.c_str())) {
+				std::string path = ImguiAlias::OpenFindResourceWindow("Material", materialFilePostfix);
 				if (path != "") {
 					materials[i] = std::shared_ptr<Material>(new Material());
 					materials[i]->DeserializeFromPath(path);
@@ -123,6 +126,11 @@ void MeshRenderer::Render(const std::shared_ptr<KritiaEngine::Camera>& camera) {
 	if (!initialized) {
 		Initialize();
 	}
+	if (!meshFilter->IsMeshSetup()) {
+		// The mesh is changed, re-initialize
+		preInitialized = false;
+		Initialize();
+	}
 	// materials have changed
 	if (materialSize != materials.size()) {
 		UpdateMaterial();
@@ -144,6 +152,11 @@ void MeshRenderer::Render(const std::shared_ptr<KritiaEngine::Camera>& camera) {
 void KritiaEngine::MeshRenderer::RenderShadowMap(Light* light) {
 	if (light->castingShadow) {
 		if (!initialized) {
+			Initialize();
+		}
+		if (!meshFilter->IsMeshSetup()) {
+			// The mesh is changed, re-initialize
+			preInitialized = false;
 			Initialize();
 		}
 		// materials have changed

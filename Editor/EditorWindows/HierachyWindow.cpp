@@ -8,8 +8,6 @@
 using namespace KritiaEngine::Manager;
 using namespace KritiaEngine::SceneManagement;
 
-std::list<KritiaEngine::GameObject*> KritiaEngine::Editor::GUI::HierachyWindow::objectToDelete;
-
 void KritiaEngine::Editor::GUI::HierachyWindow::OnGUI() {
 	bool objClicked = false;
 	int objecIndex = 0;
@@ -49,21 +47,7 @@ void KritiaEngine::Editor::GUI::HierachyWindow::OnGUI() {
 			ImGui::OpenPopup("RightClickMenuHierachy");
 		}
 		if (ImGui::BeginPopup("RightClickMenuHierachy")) {
-			if (ImGui::Selectable("Empty GameObject")) {
-				GameObject* gameObject = new GameObject("New GameObject");
-				ImGui::CloseCurrentPopup();
-			}
-			if (ImGui::BeginMenu("3D Models")) {
-				if (ImGui::Button("Cube")) {
-					for (int i = 0; i < 1000; i++) {
-						GameObject* gameObject = new GameObject("Cube");
-						CreateMeshPrimitive(ResourceManager::MeshPrimitive::Cube, gameObject);
-
-					}
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::EndMenu();
-			}
+			ShowRightClickMenu();
 			ImGui::EndPopup();
 		}
 	}
@@ -81,3 +65,18 @@ void KritiaEngine::Editor::GUI::HierachyWindow::CreateMeshPrimitive(KritiaEngine
 	obj->AddComponent<MeshRenderer>();
 }
 
+void KritiaEngine::Editor::GUI::HierachyWindow::ShowRightClickMenu() {
+
+	if (ImGui::Selectable("Empty GameObject")) {
+		GameObject* gameObject = new GameObject("New GameObject");
+		ImGui::CloseCurrentPopup();
+	}
+	if (ImGui::BeginMenu("3D Models")) {
+		if (ImGui::Button("Cube")) {
+			GameObject* gameObject = new GameObject("Cube");
+			CreateMeshPrimitive(ResourceManager::MeshPrimitive::Cube, gameObject);
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndMenu();
+	}
+}

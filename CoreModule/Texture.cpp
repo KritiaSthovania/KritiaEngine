@@ -34,7 +34,7 @@ void KritiaEngine::Texture::DeserializeFromJson(const json& json) {
 
 void KritiaEngine::Texture::SerializeToFile() {
 	std::string jsonStr = SerializeToJson();
-	std::string path = ImguiAlias::OpenFindResourceWindow("Texture", KritiaEngine::Editor::textureFilePostfix);
+	std::string path = ImguiAlias::OpenSaveResourceWindow("Texture", KritiaEngine::Editor::textureFilePostfix, "New Texture");
 	if (!path.ends_with(KritiaEngine::Editor::textureFilePostfix)) {
 		path += ("/" + (std::string)KritiaEngine::Editor::textureFilePostfix);
 	}

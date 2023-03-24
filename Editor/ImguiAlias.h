@@ -16,7 +16,8 @@ namespace KritiaEngine::Editor::GUI {
 		/// Return the path to the file.
 		/// </summary>
 		/// <param name="filePostfix">postfix with out the "."</param>
-		static const char* OpenFindResourceWindow(const char* resourceType, const char* filePostfix);
+		static std::string OpenFindResourceWindow(const char* resourceType, const char* filePostfix);
+		static std::string OpenSaveResourceWindow(const char* resourceType, const char* filePostfix, const char* defaultName);
 		static int treeFlagDefaultOpenAndSpanFullWidth;
 	};
 }

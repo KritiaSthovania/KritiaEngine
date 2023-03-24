@@ -8,8 +8,9 @@ namespace KritiaEngine::Editor::GUI {
 		void OnGUI();
 		void Config();
 	private:
-		static void CreateMeshPrimitive(KritiaEngine::Manager::ResourceManager::MeshPrimitive type, GameObject* obj);
-		static std::list<GameObject*> objectToDelete;
+		void CreateMeshPrimitive(KritiaEngine::Manager::ResourceManager::MeshPrimitive type, GameObject* obj);
+		void ShowRightClickMenu();
+		std::list<GameObject*> objectToDelete;
 	};
 }
 

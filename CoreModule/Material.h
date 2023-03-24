@@ -11,12 +11,17 @@ namespace KritiaEngine::Rendering {
 	class OpenGLRendering;
 }
 
+namespace KritiaEngine::Editor::GUI {
+	class ProjectFileExplorer;
+}
+
 namespace KritiaEngine {
 	class Mesh;
 	class Material : public Object, JsonDeserializable, PathDeserializable, JsonSerializable, FileSerializable
 	{
 		friend class KritiaEngine::Rendering::RenderingProvider;
 		friend class KritiaEngine::Rendering::OpenGLRendering;
+		friend class KritiaEngine::Editor::GUI::ProjectFileExplorer;
 		friend class MeshRenderer;
 		friend class Mesh;
 	public:

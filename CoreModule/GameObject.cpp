@@ -64,7 +64,7 @@ void KritiaEngine::GameObject::AddComponentFromJson(const json& json) {
 
 void KritiaEngine::GameObject::SerializeToFile() {
 	std::string jsonStr = SerializeToJson();
-	std::string path = ImguiAlias::OpenFindResourceWindow("Prefab", KritiaEngine::Editor::prefabFilePostfix);
+	std::string path = ImguiAlias::OpenSaveResourceWindow("Prefab", KritiaEngine::Editor::prefabFilePostfix, "New Prefab");
 	if (!path.ends_with(KritiaEngine::Editor::prefabFilePostfix)) {
 		path += ("/" + (std::string)KritiaEngine::Editor::prefabFilePostfix);
 	}

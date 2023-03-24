@@ -14,19 +14,24 @@ void KritiaEngine::MeshFilter::SetupMesh() {
 	}
 }
 
+bool KritiaEngine::MeshFilter::IsMeshSetup() {
+	return mesh->isSetup;
+}
+
 void KritiaEngine::MeshFilter::OnInspector() {
-	ImGui::Text("Mesh");
+	ImGui::Text("Mesh ");
 	ImGui::SameLine();
-	if (ImGui::BeginDragDropTarget()) {
-		if (ImGui::Selectable(mesh->name.c_str())) {
-			const char* path = ImguiAlias::OpenFindResourceWindow("Mesh", KritiaEngine::Editor::meshFilePostfix);
-			if (path != "") {
-				mesh = std::shared_ptr<Mesh>(new Mesh());
-				mesh->DeserializeFromPath(path);
-			}
+	if (ImGui::Button(mesh->name == "" ? "mesh" : mesh->name.c_str())) {
+		std::string path = ImguiAlias::OpenFindResourceWindow("Mesh", KritiaEngine::Editor::meshFilePostfix);
+		if (path != "") {
+			mesh = std::shared_ptr<Mesh>(new Mesh());
+			mesh->DeserializeFromPath(path);
 		}
-		ImGui::EndDragDropTarget();
 	}
+	//if (ImGui::BeginDragDropTarget()) {
+
+	//	ImGui::EndDragDropTarget();
+	//}
 }
 
 std::string KritiaEngine::MeshFilter::SerializeToJson() {

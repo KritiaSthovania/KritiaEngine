@@ -54,8 +54,6 @@ namespace KritiaEngine {
         // utility function for checking shader compilation/linking errors.
         // ------------------------------------------------------------------------
         void CheckCompileErrors(unsigned int shader, std::string type);
-
-
     };
 }
 

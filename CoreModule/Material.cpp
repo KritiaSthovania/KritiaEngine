@@ -9,17 +9,18 @@
 
 using namespace KritiaEngine;
 using namespace KritiaEngine::Rendering;
+using namespace KritiaEngine::Editor;
 
 KritiaEngine::Material::Material()
 {
 	name = "New Material";
-	shader = std::shared_ptr<Shader>(new KritiaEngine::Shader("./StandardShader/BlinnPhongShader.vs", "./StandardShader/BlinnPhongShader.fs"));
+	shader = std::shared_ptr<Shader>(new KritiaEngine::Shader((EditorApplication::currentProjectFolderPath + "/StandardShader/BlinnPhongShader.vs").c_str(), (EditorApplication::currentProjectFolderPath + "/StandardShader/BlinnPhongShader.fs").c_str()));
 }
 
 KritiaEngine::Material::Material(const char* name)
 {
 	this->name = name;
-	shader = std::shared_ptr<Shader>(new KritiaEngine::Shader("./StandardShader/BlinnPhongShader.vs", "./StandardShader/BlinnPhongShader.fs"));
+	shader = std::shared_ptr<Shader>(new KritiaEngine::Shader((EditorApplication::currentProjectFolderPath + "/StandardShader/BlinnPhongShader.vs").c_str(), (EditorApplication::currentProjectFolderPath + "/StandardShader/BlinnPhongShader.fs").c_str()));
 }
 
 KritiaEngine::Material::Material(const char* name, const std::shared_ptr<Shader>& shader)
@@ -146,7 +147,7 @@ void KritiaEngine::Material::DeserializeFromPath(const std::string& path) {
 
 void KritiaEngine::Material::SerializeToFile() {
 	std::string jsonStr = SerializeToJson();
-	std::string path = ImguiAlias::OpenFindResourceWindow("Material", KritiaEngine::Editor::materialFilePostfix);
+	std::string path = ImguiAlias::OpenSaveResourceWindow("Material", KritiaEngine::Editor::materialFilePostfix, "New Material");
 	if (!path.ends_with(KritiaEngine::Editor::materialFilePostfix)) {
 		path += ("/" + (std::string)KritiaEngine::Editor::materialFilePostfix);
 	}
