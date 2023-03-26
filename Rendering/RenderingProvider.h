@@ -27,7 +27,8 @@ namespace KritiaEngine::Rendering{
 		/// Load a 2D texture and return the id, call LoadCubeMap if you want to load a cube map.
 		/// </summary>
 		/// <param name="texture"></param>
-		static unsigned int Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel);
+		static void Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel);
+		static unsigned int Load2DTextureFromPath(const std::string& path, bool alphaChannel);
 		static void RenderSkybox(Matrix4x4 projection, Matrix4x4 view);
 		static void SetupMesh(const std::shared_ptr<Mesh>& mesh);
 		static void RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos);

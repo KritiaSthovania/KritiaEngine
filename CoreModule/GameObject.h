@@ -1,8 +1,8 @@
 #pragma once
 
 #include "pch.h"
-#include "Interface/SerializableAndDeserializable.h"
-#include "Interface/Inspectable.h"
+#include "Interface/ISerializable.h"
+#include "Interface/IInspectable.h"
 #include "Object.h"
 #include <typeinfo>
 using json = nlohmann::ordered_json;
@@ -18,7 +18,7 @@ namespace KritiaEngine::SceneManagement {
 namespace KritiaEngine {
 	class Transform;
 	class Component;
-	class GameObject : public Object, JsonSerializable, JsonDeserializable, FileSerializable, Inspectable{
+	class GameObject : public Object, IJsonSerializable, IJsonDeserializable, IFileSerializable, IInspectable{
 		friend class KritiaEngine::Editor::GUI::InspectorWindow;
 		friend class KritiaEngine::SceneManagement::Scene;
 	public:

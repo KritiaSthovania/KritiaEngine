@@ -1,7 +1,7 @@
 #pragma once
 
 namespace KritiaEngine {
-	class Inspectable {
+	class IInspectable {
 	public:
 		virtual void OnInspector() = 0;
 	};

@@ -29,7 +29,8 @@ namespace KritiaEngine::Rendering {
 		/// <param name="texture"></param>
 		/// <param name="alphaChannel"></param>
 		/// <returns>the texture ID</returns>
-		static unsigned int Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel);
+		static void Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel);
+		static unsigned int Load2DTextureFromPath(const std::string& path, bool alphaChannel);
 		static void RenderSkybox(Matrix4x4 projection, Matrix4x4 view);
 		static void SetupMesh(const std::shared_ptr<Mesh>& mesh);
 		/// <summary>

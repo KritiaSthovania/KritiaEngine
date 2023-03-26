@@ -4,6 +4,7 @@
 #include "../Component/Transform.h"
 #include "../Rendering/RenderingProvider.h"
 #include "../Editor/EditorApplication.h"
+#include "Manager/ResourceManager.h"
 #include <imgui/imgui.h>
 #include <stb_image.h>
 #include <fstream>
@@ -11,6 +12,7 @@
 using namespace KritiaEngine;
 using namespace KritiaEngine::Rendering;
 using namespace KritiaEngine::Editor;
+using namespace KritiaEngine::Manager;
 
 KritiaEngine::Material::Material()
 {
@@ -41,28 +43,28 @@ void Material::Initialize() {
 		shader->UniformBlockBinding(shader->GetUniformBlockIndex("MatricesVP"), static_cast<unsigned int>(RenderingProvider::UniformBindingPoint::MatricesVP));
 		if (mainTexture != nullptr) {
 			if (renderMode == RenderMode::Transparent) {
-				mainTextureID = RenderingProvider::Load2DTexture(mainTexture, true);
+				RenderingProvider::Load2DTexture(mainTexture, true);
 
 			} else if (renderMode == RenderMode::Opaque) {
-				mainTextureID = RenderingProvider::Load2DTexture(mainTexture, false);
+				RenderingProvider::Load2DTexture(mainTexture, false);
 			}
 		}
 		if (specularMap != nullptr) {
 			if (renderMode == RenderMode::Transparent) {
-				specularMapID = RenderingProvider::Load2DTexture(specularMap, true);
+				RenderingProvider::Load2DTexture(specularMap, true);
 
 			} else if (renderMode == RenderMode::Opaque) {
-				specularMapID = RenderingProvider::Load2DTexture(specularMap, false);
+				RenderingProvider::Load2DTexture(specularMap, false);
 			}
 		}
 		if (normalMap != nullptr) {
-			normalMapID = RenderingProvider::Load2DTexture(normalMap, false);
+			RenderingProvider::Load2DTexture(normalMap, false);
 			shader->SetBool("hasNormalMap", true);
 		} else {
 			shader->SetBool("hasNormalMap", false);
 		}
 		if (parallaxMap != nullptr) {
-			parallaxMapID = RenderingProvider::Load2DTexture(parallaxMap, false);
+			RenderingProvider::Load2DTexture(parallaxMap, false);
 			shader->SetBool("hasParallaxMap", true);
 			shader->SetFloat("heightScale", 0.1f);
 			shader->SetInt("depthLayers", 10);
@@ -134,24 +136,20 @@ std::shared_ptr<Material> KritiaEngine::Material::DeserializeFromJson(const json
 	mat->shininess = json["Shininess"];
 	mat->GPUInstancingEnabled = json["GPUInstancingEnabled"];
 	if (json["MainTexture"] != "Null") {
-		mat->mainTexture = std::shared_ptr<Texture>(new Texture());
 		nlohmann::ordered_json mainTexJson = json::parse((std::string)json["MainTexture"]);
-		mat->mainTexture->DeserializeFromJson(mainTexJson);
+		mat->mainTexture = ResourceManager::GetTexture(mainTexJson);
 	}
 	if (json["SpecularMap"] != "Null") {
-		mat->specularMap = std::shared_ptr<Texture>(new Texture());
 		nlohmann::ordered_json specJson = json::parse((std::string)json["SpecularMap"]);
-		mat->specularMap->DeserializeFromJson(specJson);
+		mat->specularMap = ResourceManager::GetTexture(specJson);
 	}
 	if (json["NormalMap"] != "Null") {
-		mat->normalMap = std::shared_ptr<Texture>(new Texture());
 		nlohmann::ordered_json normalJson = json::parse((std::string)json["NormalMap"]);
-		mat->normalMap->DeserializeFromJson(normalJson);
+		mat->normalMap = ResourceManager::GetTexture(normalJson);
 	}
 	if (json["ParallaxMap"] != "Null") {
-		mat->parallaxMap = std::shared_ptr<Texture>(new Texture());
 		nlohmann::ordered_json paraJson = json::parse((std::string)json["ParallexMap"]);
-		mat->parallaxMap->DeserializeFromJson(paraJson);
+		mat->parallaxMap = ResourceManager::GetTexture(paraJson);
 	}
 	return mat;
 }

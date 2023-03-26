@@ -1,8 +1,8 @@
 #pragma once
-#include "Interface/SerializableAndDeserializable.h"
+#include "Interface/ISerializable.h"
 
 namespace KritiaEngine{
-	class Settings {
+	class Settings : public IJsonSerializable, public IJsonDeserializable {
 	public:
 		static int ScreenWidth;
 		static int ScreenHeight;

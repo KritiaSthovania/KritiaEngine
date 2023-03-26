@@ -5,17 +5,17 @@ using json = nlohmann::ordered_json;
 namespace KritiaEngine{
 
 	//////////////////////////// Serializables ////////////////////////////////
-	class JsonSerializable {
+	class IJsonSerializable {
 	public:
 		virtual std::string SerializeToJson() = 0;
 	};
 
-	class FileSerializable {
+	class IFileSerializable {
 	public:
 		virtual void SerializeToFile() = 0;
 	};
 	/////////////////////////// Deserializables //////////////////////////////
-	class JsonDeserializable {
+	class IJsonDeserializable {
 	public:
 		virtual void DeserializeFromJson(const json& json) = 0;
 	};

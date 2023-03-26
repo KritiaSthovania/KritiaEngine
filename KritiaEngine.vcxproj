@@ -188,8 +188,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\ComponentFactory.h" />
-    <ClInclude Include="CoreModule\Interface\Inspectable.h" />
-    <ClInclude Include="CoreModule\Interface\SerializableAndDeserializable.h" />
+    <ClInclude Include="CoreModule\Interface\IInspectable.h" />
+    <ClInclude Include="CoreModule\Interface\ISerializable.h" />
     <ClInclude Include="CoreModule\Manager\BehaviourManager.h" />
     <ClInclude Include="Editor\EditorWindow.h" />
     <ClInclude Include="Editor\AssetDatabase.h" />

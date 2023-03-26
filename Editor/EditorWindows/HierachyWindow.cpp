@@ -15,12 +15,12 @@ void KritiaEngine::Editor::GUI::HierachyWindow::OnGUI() {
 		for (GameObject* gameObject : SceneManager::GetActiveScene()->GetRootGameObjects()) {
 			if (ImGui::TreeNodeEx(gameObject->name.c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth)) {
 				if (ImGui::IsItemToggledOpen() || ImGui::IsItemClicked()) {
-					ImguiManager::currentSelectedInspectable = (Inspectable*)gameObject;
+					ImguiManager::currentSelectedInspectable = (IInspectable*)gameObject;
 				}
 				ImGui::TreePop();
 			} else {
 				if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
-					ImguiManager::currentSelectedInspectable = (Inspectable*)gameObject;
+					ImguiManager::currentSelectedInspectable = (IInspectable*)gameObject;
 				} else if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
 					ImGui::OpenPopup("RightClickMenuHierachyObject" + objecIndex);
 					objClicked = true;

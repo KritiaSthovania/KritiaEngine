@@ -326,13 +326,13 @@
     <ClInclude Include="CoreModule\Manager\GameObjectManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="CoreModule\Interface\SerializableAndDeserializable.h">
+    <ClInclude Include="CoreModule\Interface\ISerializable.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CoreModule\Manager\ResourceManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="CoreModule\Interface\Inspectable.h">
+    <ClInclude Include="CoreModule\Interface\IInspectable.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

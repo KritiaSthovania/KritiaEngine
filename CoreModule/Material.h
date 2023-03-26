@@ -4,8 +4,8 @@
 #include "Utilities.h"
 #include "../CoreModule/MathStructs.h"
 #include "Texture.h"
-#include "Interface/SerializableAndDeserializable.h"
-#include "Interface/Inspectable.h"
+#include "Interface/ISerializable.h"
+#include "Interface/IInspectable.h"
 
 namespace KritiaEngine::Rendering {
 	class RenderingProvider;
@@ -22,7 +22,7 @@ namespace KritiaEngine::Manager {
 
 namespace KritiaEngine {
 	class Mesh;
-	class Material : public Object, JsonSerializable, FileSerializable, Inspectable
+	class Material : public Object, IJsonSerializable, IFileSerializable, IInspectable
 	{
 		friend class KritiaEngine::Rendering::RenderingProvider;
 		friend class KritiaEngine::Rendering::OpenGLRendering;
@@ -65,7 +65,6 @@ namespace KritiaEngine {
 		static std::shared_ptr<Material> DeserializeFromJson(const json& json);
 		static std::shared_ptr<Material> DeserializeFromPath(const std::string& path);
 		int diffuseSamplerIndex = 0, specularSamplerIndex = 1, normalSamplerIndex = 2, parallaxSamplerIndex = 3, shadowSamplerIndex = 4;
-		unsigned int mainTextureID, specularMapID, normalMapID, parallaxMapID;
 		unsigned int matricesVPID;
 		bool initialized = false;
 		// Í¨¹ý FileSerializable ¼Ì³Ð

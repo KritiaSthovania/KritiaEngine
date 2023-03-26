@@ -58,8 +58,8 @@ void KritiaEngine::Editor::GUI::MainMenuBarFunction::OpenSettingWindow(bool* ope
 void KritiaEngine::Editor::GUI::MainMenuBarFunction::OpenImportAssetWindow() {
     NFD_Init();
     nfdchar_t* outPath;
-    const int filterSize = 1;
-    nfdfilteritem_t filterItem[filterSize] = { { "Models", "fbx,obj"} };
+    const int filterSize = 2;
+    nfdfilteritem_t filterItem[filterSize] = { { "Models", "fbx,obj"}, {"Textures", "png,jpg"}};
     nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, filterSize, NULL);
     if (result == NFD_OKAY) {
         AssetDatabase::ImportAsset(outPath);

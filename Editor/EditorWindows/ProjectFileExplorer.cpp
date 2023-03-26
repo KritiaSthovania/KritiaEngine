@@ -44,8 +44,14 @@ void KritiaEngine::Editor::GUI::ProjectFileExplorer::DisplayDirectory(const path
 void KritiaEngine::Editor::GUI::ProjectFileExplorer::DisplayFile(const path& fileName, const std::string& path) {
 	if (ImGui::Selectable(fileName.filename().string().c_str(), false, ImGuiSelectableFlags_AllowDoubleClick) ) {
 		if (fileName.filename().string().ends_with(KritiaEngine::Editor::materialFilePostfix)) {
-			ImguiManager::currentSelectedInspectable = ResourceManager::GetMaterialFromPath(path + fileName.filename().string()).get();
+			ImguiManager::currentSelectedInspectable = (IInspectable*)ResourceManager::GetMaterial(path + fileName.filename().string()).get();
 		}		
+		if (fileName.filename().string().ends_with(KritiaEngine::Editor::textureFilePostfix)) {
+			ImguiManager::currentSelectedInspectable = (IInspectable*)ResourceManager::GetTexture(path + fileName.filename().string()).get();
+		}
+		if (fileName.filename().string().ends_with(KritiaEngine::Editor::meshFilePostfix)) {
+			ImguiManager::currentSelectedInspectable = (IInspectable*)ResourceManager::GetMesh(path + fileName.filename().string()).get();
+		}
 		// Double left click on different files
 		if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 			if (fileName.filename().string().ends_with(KritiaEngine::Editor::sceneFilePostfix)) {

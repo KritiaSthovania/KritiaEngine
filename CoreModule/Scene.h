@@ -2,14 +2,14 @@
 
 #include "GameObject.h"
 #include "Texture.h"
-#include "Interface/SerializableAndDeserializable.h"
+#include "Interface/ISerializable.h"
 #include "../Component/Camera.h"
 #include "../Rendering/Shader.h"
 #include "../Editor/EditorApplication.h"
 #include <json/json.hpp>
 
 namespace KritiaEngine::SceneManagement {
-	class Scene : private FileSerializable, PathDeserializable
+	class Scene : private IFileSerializable
 	{
 		friend class SceneManager;
 	public:
@@ -34,7 +34,7 @@ namespace KritiaEngine::SceneManagement {
 		/// Save the serialized json data to file.
 		/// </summary>
 		virtual void SerializeToFile() override;
-		virtual void DeserializeFromPath(const std::string& path) override;
+		virtual void DeserializeFromPath(const std::string& path);
 		/// <summary>
 		/// current rendering camera
 		/// </summary>

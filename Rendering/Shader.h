@@ -10,10 +10,10 @@
 #include "../CoreModule/MathStructs.h"
 #include "../CoreModule/Utilities.h"
 #include "../CoreModule/Object.h"
-#include "../CoreModule/Interface/SerializableAndDeserializable.h"
+#include "../CoreModule/Interface/ISerializable.h"
 
 namespace KritiaEngine {
-    class Shader : Object, JsonSerializable, PathDeserializable, JsonDeserializable{
+    class Shader : Object, IJsonSerializable, PathDeserializable, IJsonDeserializable{
     public:
         Shader() = default;
         // constructor generates the shader on the fly

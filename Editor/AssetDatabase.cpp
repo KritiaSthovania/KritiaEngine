@@ -1,10 +1,12 @@
 #include "AssetDatabase.h"
 #include "../CoreModule/Texture.h"
 #include "../CoreModule/Material.h"
+#include "../CoreModule/Manager/ResourceManager.h"
 #include "EditorApplication.h"
 #include <fstream>
 using namespace KritiaEngine::Editor;
 using namespace KritiaEngine;
+using namespace KritiaEngine::Manager;
 
 void KritiaEngine::Editor::AssetDatabase::ImportAsset(const std::string& path) {
     // 3D Models
@@ -14,16 +16,20 @@ void KritiaEngine::Editor::AssetDatabase::ImportAsset(const std::string& path) {
         // in windows use \\ as separator
         std::string name = path.substr(path.find_last_of('\\') + 1, path.find_last_of('.') - path.find_last_of('\\') - 1);
         mesh->name = name;
-        mesh->path = EditorApplication::assetFolderRootPath + mesh->name + meshFilePostfix;
+        mesh->path = path;
+        mesh->isPrimitive = false;
+        mesh->submeshSize = mesh->submeshVertices.size();
         mesh->SerializeToFile();
+        ResourceManager::meshes.push_back(mesh);
     } 
     // Textures
     else if (path.ends_with(".jpg") || path.ends_with(".png")) {
-        std::unique_ptr<Texture> tex = std::unique_ptr<Texture>(new Texture());
+        std::shared_ptr<Texture> tex = std::shared_ptr<Texture>(new Texture());
         std::string name = path.substr(path.find_last_of('\\') + 1, path.find_last_of('.') - path.find_last_of('\\') - 1);
         tex->name = name;
-        tex->path = EditorApplication::assetFolderRootPath + name + textureFilePostfix;
+        tex->path = path;
         tex->SerializeToFile();
+        ResourceManager::textures.push_back(tex);
     }
 }
 

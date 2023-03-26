@@ -2,8 +2,8 @@
 #ifndef COMPONENT
 #define COMPONENT
 #include "pch.h"
-#include "../CoreModule/Interface/SerializableAndDeserializable.h"
-#include "../CoreModule/Interface/Inspectable.h"
+#include "../CoreModule/Interface/ISerializable.h"
+#include "../CoreModule/Interface/IInspectable.h"
 #include "../CoreModule/Manager/BehaviourManager.h"
 #include "../CoreModule/GameObject.h"
 #include "../Editor/ImguiAlias.h"
@@ -13,7 +13,7 @@ using ImguiAlias = KritiaEngine::Editor::GUI::ImguiAlias;
 
 namespace KritiaEngine {
 	class Transform;
-	class Component : public Object, private JsonSerializable, JsonDeserializable, Inspectable{
+	class Component : public Object, private IJsonSerializable, IJsonDeserializable, IInspectable{
 		friend class KritiaEngine::Manager::BehaviourManager;
 		friend class KritiaEngine::Editor::GUI::InspectorWindow;
 		friend class GameObject;

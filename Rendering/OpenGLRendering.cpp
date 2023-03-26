@@ -148,9 +148,47 @@ unsigned int OpenGLRendering::LoadCubeMap(const std::vector<Texture>& cubeTextur
 	return id;
 }
 
-unsigned int OpenGLRendering::Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel) {
-	unsigned int id;
+void OpenGLRendering::Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel) {
+	if (!texture->loaded) {
+		int width, height, nrChannels;
+		glGenTextures(1, &texture->ID);
+		glBindTexture(GL_TEXTURE_2D, texture->ID);
+		// 为当前绑定的纹理对象设置环绕、过滤方式
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		unsigned char* data = nullptr;
+		if (alphaChannel) {
+			data = stbi_load(texture->path.c_str(), &width, &height, &nrChannels, 4);
+			if (data) {
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+				glGenerateMipmap(GL_TEXTURE_2D);
+			} else {
+				{
+					std::cout << "Failed to load texture at " << texture->path << std::endl;
+				}
+			}
+
+		} else {
+			data = stbi_load(texture->path.c_str(), &width, &height, &nrChannels, 3);
+			if (data) {
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+				glGenerateMipmap(GL_TEXTURE_2D);
+			} else {
+				{
+					std::cout << "Failed to load texture at" << texture->path << std::endl;
+				}
+			}
+		}
+		stbi_image_free(data);
+		texture->loaded = true;
+	}
+}
+
+unsigned int KritiaEngine::Rendering::OpenGLRendering::Load2DTextureFromPath(const std::string& path, bool alphaChannel) {
 	int width, height, nrChannels;
+	unsigned int id;
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_2D, id);
 	// 为当前绑定的纹理对象设置环绕、过滤方式
@@ -160,24 +198,24 @@ unsigned int OpenGLRendering::Load2DTexture(const std::shared_ptr<Texture>& text
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	unsigned char* data = nullptr;
 	if (alphaChannel) {
-		data = stbi_load(texture->path.c_str(), &width, &height, &nrChannels, 4);
+		data = stbi_load(path.c_str(), &width, &height, &nrChannels, 4);
 		if (data) {
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 		} else {
 			{
-				std::cout << "Failed to load texture at " << texture->path << std::endl;
+				std::cout << "Failed to load texture at " << path << std::endl;
 			}
 		}
 
 	} else {
-		data = stbi_load(texture->path.c_str(), &width, &height, &nrChannels, 3);
+		data = stbi_load(path.c_str(), &width, &height, &nrChannels, 3);
 		if (data) {
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 		} else {
 			{
-				std::cout << "Failed to load texture at" << texture->path << std::endl;
+				std::cout << "Failed to load texture at" << path << std::endl;
 			}
 		}
 	}
@@ -234,13 +272,13 @@ void OpenGLRendering::ApplyMaterialShaderOnRender(const Matrix4x4& model, const 
 	shader->SetMat4("lightSpaceMatrix", Lighting::LightingSystem::GetMainLightSource()->GetLightMatrixVP(0));
 	// bind maps
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, material->mainTextureID);
+	glBindTexture(GL_TEXTURE_2D, material->mainTexture == nullptr? 0 : material->mainTexture->ID);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, material->specularMapID);
+	glBindTexture(GL_TEXTURE_2D, material->specularMap == nullptr? 0 : material->specularMap->ID);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, material->normalMapID);
+	glBindTexture(GL_TEXTURE_2D, material->normalMap == nullptr? 0 : material->normalMap->ID);
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, material->parallaxMapID);
+	glBindTexture(GL_TEXTURE_2D, material->parallaxMap == nullptr? 0 : material->parallaxMap->ID);
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, Lighting::LightingSystem::GetMainLightSource()->shadowMapID);
 }

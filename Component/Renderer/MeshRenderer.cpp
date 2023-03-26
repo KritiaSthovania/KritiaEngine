@@ -94,7 +94,7 @@ void KritiaEngine::MeshRenderer::OnInspector() {
 			if(ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
 				std::string path = ImguiAlias::OpenFindResourceWindow("Material", materialFilePostfix);
 				if (path != "") {
-					materials[i] = ResourceManager::GetMaterialFromPath(path);
+					materials[i] = ResourceManager::GetMaterial(path);
 				}			
 			}
 		}

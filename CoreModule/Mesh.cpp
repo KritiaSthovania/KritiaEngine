@@ -1,7 +1,11 @@
 #include "Mesh.h"
 #include "Manager/ResourceManager.h"
+#include "../Editor/ImguiAlias.h"
+#include "../Editor/EditorApplication.h"
+#include "../Editor/AssetDatabase.h"
 #include <fstream>
 using namespace KritiaEngine;
+using ImguiAlias = KritiaEngine::Editor::GUI::ImguiAlias;
 
 KritiaEngine::Mesh::Mesh(const std::vector<std::vector<Vertex>>& vertices, const std::vector<std::vector<unsigned int>>& indices, const std::vector<std::shared_ptr<Material>>& materials) {
     this->submeshVertices = vertices;
@@ -45,6 +49,8 @@ KritiaEngine::Mesh KritiaEngine::Mesh::Cube() {
     materials.push_back(material);
     Mesh mesh = Mesh(submeshVertices, submeshIndices, materials);
     mesh.name = "Cube";
+    mesh.isPrimitive = true;
+    mesh.path = "Cube";
     return mesh;
 }
 
@@ -104,16 +110,35 @@ std::vector<float> KritiaEngine::Mesh::GetDefaultCubeVertices() {
     return result;
 }
 
+void KritiaEngine::Mesh::OnInspector() {
+    ImGui::Text("Mesh:  ");
+    ImGui::SameLine();
+    ImGui::Text(name.c_str());
+    ImGui::Separator();
+    ImGui::Text("Path:  ");
+    ImGui::SameLine();
+    ImGui::Text(path.c_str());
+    ImGui::Text("Number of Submeshes:  ");
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(submeshSize).c_str());
+    for (int i = 0; i < submeshSize; i++) {
+        ImGui::Text(std::format("Submesh{}: {} vertices", i, submeshVertices[i].size()).c_str());
+    }
+}
+
 
 
 std::string KritiaEngine::Mesh::SerializeToJson() {
     json json;
     json["Type"] = "Mesh";
     json["Name"] = name;
+    json["IsPrimitive"] = isPrimitive;
     json["Path"] = path;
     json["Number of Submeshes"] = submeshSize;
-    for (int i = 0; i < submeshSize; i++) {
-        json["Submesh" + std::to_string(i)] = SubmeshSerialize(i);
+    if (isPrimitive) {
+        for (int i = 0; i < submeshSize; i++) {
+            json["Submesh" + std::to_string(i)] = SubmeshSerialize(i);
+        }
     }
     return json.dump();
 }
@@ -140,22 +165,33 @@ std::string KritiaEngine::Mesh::VertexSerialize(const Vertex& v, int vertexIndex
 }
 
 
-void KritiaEngine::Mesh::DeserializeFromJson(const json& json) {
+std::shared_ptr<Mesh> KritiaEngine::Mesh::DeserializeFromJson(const json& json) {
+    std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(Mesh());
     assert(json["Type"] == "Mesh");
-    name = json["Name"];
-    path = json["Path"];
-    submeshSize = json["Number of Submeshes"];
-    submeshVertices.resize(submeshSize);
-    submeshIndices.resize(submeshSize);
-    submeshMaterials.resize(submeshSize);
-    for (int i = 0; i < submeshSize; i++) {
-        nlohmann::json submeshJson = json::parse((std::string)json["Submesh" + std::to_string(i)]);
-        SubmeshDeserialize(submeshJson, i);
-        submeshMaterials[i] = Manager::ResourceManager::GetMaterialFromJson(json::parse((std::string)submeshJson["Material"]));
+    mesh->name = json["Name"];
+    mesh->path = json["Path"];
+    mesh->isPrimitive = json["IsPrimitive"];
+    mesh->submeshSize = json["Number of Submeshes"];
+    if (mesh->isPrimitive) {
+        mesh->submeshVertices.resize(mesh->submeshSize);
+        mesh->submeshIndices.resize(mesh->submeshSize);
+        mesh->submeshMaterials.resize(mesh->submeshSize);
+        for (int i = 0; i < mesh->submeshSize; i++) {
+            nlohmann::json submeshJson = json::parse((std::string)json["Submesh" + std::to_string(i)]);
+            mesh->SubmeshDeserialize(submeshJson, i);
+            mesh->submeshMaterials[i] = Manager::ResourceManager::GetMaterial(json::parse((std::string)submeshJson["Material"]));
+        }
+    } else {
+        Editor::AssetDatabase::ImportModel(json["Path"], mesh);
     }
+    return mesh;
 }
 
 void KritiaEngine::Mesh::SerializeToFile() {
+    std::string path = ImguiAlias::OpenSaveResourceWindow("Mesh", KritiaEngine::Editor::meshFilePostfix, name.c_str());
+    if (!path.ends_with(KritiaEngine::Editor::meshFilePostfix)) {
+        path += ("/" + (std::string)KritiaEngine::Editor::meshFilePostfix);
+    }
     std::string jsonStr = SerializeToJson();
     std::fstream output;
     output.open(path, std::ios::out | std::ios::trunc);
@@ -163,11 +199,11 @@ void KritiaEngine::Mesh::SerializeToFile() {
     output.close();
 }
 
-void KritiaEngine::Mesh::DeserializeFromPath(const std::string& path) {
+std::shared_ptr<Mesh> KritiaEngine::Mesh::DeserializeFromPath(const std::string& path) {
     std::ifstream instream(path);
-    json json = json::parse(instream);
-    DeserializeFromJson(json);
+    json json = json::parse(instream);    
     instream.close();
+    return  DeserializeFromJson(json);
 }
 
 void KritiaEngine::Mesh::SubmeshDeserialize(const json& json, int index) {

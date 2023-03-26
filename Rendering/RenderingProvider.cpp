@@ -58,9 +58,16 @@ void KritiaEngine::Rendering::RenderingProvider::CreateSkybox() {
 	}
 }
 
-unsigned int KritiaEngine::Rendering::RenderingProvider::Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel) {
+void KritiaEngine::Rendering::RenderingProvider::Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel) {
 	if (Settings::UseOpenGL) {
-		return OpenGLRendering::Load2DTexture(texture, alphaChannel);
+		OpenGLRendering::Load2DTexture(texture, alphaChannel);
+	} else {
+	}
+}
+
+unsigned int KritiaEngine::Rendering::RenderingProvider::Load2DTextureFromPath(const std::string& path, bool alphaChannel) {
+	if (Settings::UseOpenGL) {
+		return OpenGLRendering::Load2DTextureFromPath(path, alphaChannel);
 	} else {
 		return 0;
 	}

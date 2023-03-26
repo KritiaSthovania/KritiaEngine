@@ -40,21 +40,27 @@ void KritiaEngine::Manager::RendererManager::Render() {
 		if (light->castingShadow) {
 			RenderingProvider::SetupRenderShadowMap(light);
 			for (auto renderer : opaqueRenderQueue) {
-				renderer->RenderShadowMap(light);
+				if (renderer->gameObject->isActive) {
+					renderer->RenderShadowMap(light);
+				}
 			}	
 		}
 	}
 	// Render opaque objects from near to far
 	RenderingProvider::SetupRenderSubmesh();
 	for (auto renderer : opaqueRenderQueue) {
-		renderer->Render(Camera::current);
+		if (renderer->gameObject->isActive) {
+			renderer->Render(Camera::current);
+		}
 	}
 	RenderingProvider::RenderGPUInstances(false);
 	RenderSkybox();
 	transparentRenderQueue.sort(CompareRenderer);
 	// Render transparent objects from far to near
 	for (auto iter = transparentRenderQueue.rbegin(); iter != transparentRenderQueue.rend(); iter++) {
-		(*iter)->Render(Camera::current);
+		if ((*iter)->gameObject->isActive) {
+			(*iter)->Render(Camera::current);
+		}
 	}
 	RenderingProvider::RenderGPUInstances(true);
 }

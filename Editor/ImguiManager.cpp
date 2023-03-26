@@ -13,7 +13,7 @@ using namespace KritiaEngine::Editor;
 const char* ImguiManager::GlslVersion = "#version 130";
 bool ImguiManager::inEditor = true;
 float ImguiManager::UIScaleFactor = 2;
-KritiaEngine::Inspectable* ImguiManager::currentSelectedInspectable;
+KritiaEngine::IInspectable* ImguiManager::currentSelectedInspectable;
 std::list<std::shared_ptr<EditorWindow>> ImguiManager::editorWindows = std::list<std::shared_ptr<EditorWindow>>();
 //////////////////// window opened  ////////////////////
 bool ImguiManager::settingWindowOpened = false;
