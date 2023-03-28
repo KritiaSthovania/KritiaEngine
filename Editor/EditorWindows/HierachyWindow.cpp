@@ -33,6 +33,9 @@ void KritiaEngine::Editor::GUI::HierachyWindow::OnGUI() {
 					ImGui::CloseCurrentPopup();
 					ImguiManager::currentSelectedInspectable = nullptr;
 				}
+				if (ImGui::Selectable("Save To Prefab")) {
+					gameObject->SerializeToFile();
+				}
 				ImGui::EndPopup();
 			}
 			objecIndex++;

@@ -22,12 +22,22 @@ bool KritiaEngine::MeshFilter::IsMeshSetup() {
 void KritiaEngine::MeshFilter::OnInspector() {
 	ImGui::Text("Mesh ");
 	ImGui::SameLine();
-	if (ImGui::Button(mesh->name == "" ? "mesh" : mesh->name.c_str())) {
-		std::string path = ImguiAlias::OpenFindResourceWindow("Mesh", KritiaEngine::Editor::meshFilePostfix);
-		if (path != "") {
-			mesh = Manager::ResourceManager::GetMesh(path);
+	if (mesh != nullptr) {
+		if (ImGui::Button(mesh->name == "" ? "mesh" : mesh->name.c_str())) {
+			std::string path = ImguiAlias::OpenFindResourceWindow("Mesh", KritiaEngine::Editor::meshFilePostfix);
+			if (path != "") {
+				mesh = Manager::ResourceManager::GetMesh(path);
+			}
+		}
+	} else {
+		if (ImGui::Button("Null")) {
+			std::string path = ImguiAlias::OpenFindResourceWindow("Mesh", KritiaEngine::Editor::meshFilePostfix);
+			if (path != "") {
+				mesh = Manager::ResourceManager::GetMesh(path);
+			}
 		}
 	}
+
 	//if (ImGui::BeginDragDropTarget()) {
 
 	//	ImGui::EndDragDropTarget();

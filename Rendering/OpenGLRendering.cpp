@@ -337,7 +337,6 @@ void KritiaEngine::Rendering::OpenGLRendering::RenderShadowMap(const std::shared
 		glDrawElements(GL_TRIANGLES, meshFilter->mesh->submeshIndices[submeshIndex].size(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 	}
-	
 }
 
 void KritiaEngine::Rendering::OpenGLRendering::SetupRenderShadowMap(Light* light) {

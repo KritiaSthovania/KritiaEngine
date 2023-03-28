@@ -9,18 +9,28 @@ using json = nlohmann::ordered_json;
 
 namespace KritiaEngine::Editor::GUI {
 	class InspectorWindow;
+	class HierachyWindow;
+	class ProjectFileExplorer;
 }
 
 namespace KritiaEngine::SceneManagement {
 	class Scene;
 }
 
+namespace KritiaEngine::Manager {
+	class ResourceManager;
+}
+
 namespace KritiaEngine {
 	class Transform;
 	class Component;
-	class GameObject : public Object, IJsonSerializable, IJsonDeserializable, IFileSerializable, IInspectable{
+	class GameObject : public Object, IJsonSerializable, IFileSerializable, IInspectable{
 		friend class KritiaEngine::Editor::GUI::InspectorWindow;
+		friend class KritiaEngine::Editor::GUI::HierachyWindow;
+		friend class KritiaEngine::Editor::GUI::ProjectFileExplorer;
+		friend class KritiaEngine::Manager::ResourceManager;
 		friend class KritiaEngine::SceneManagement::Scene;
+		friend class KritiaEngine::Component;
 	public:
 		GameObject();
 		GameObject(const char* name);
@@ -43,14 +53,19 @@ namespace KritiaEngine {
 		bool isActive = true;
 	private:
 		std::list<std::shared_ptr<Component>> components;
+		std::vector<std::shared_ptr<Component>> componentToDelete;
+		std::string path = "";
+		bool hasPrefab = false;
 		/// <summary>
 		/// Serialize the GameObject as part of a scene.
 		/// </summary>
 		/// <param name="json">Json of the scene</param>
 		virtual std::string SerializeToJson() override;
-		virtual void DeserializeFromJson(const json& json) override;
+		static GameObject* DeserializeFromJson(const json& json);
+		static GameObject* DeserializeFromPath(const std::string& path);
+		static GameObject* DeserializeAsPrefab(const std::string& path);
 		void AddComponentFromJson(const json& json);
-
+		void ShowAddComponentPopup();
 		// Í¨¹ý FileSerializable ¼Ì³Ð
 		virtual void SerializeToFile() override;
 		virtual void OnObjectDestroy() override;

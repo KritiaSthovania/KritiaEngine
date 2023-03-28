@@ -43,19 +43,26 @@ void KritiaEngine::Editor::GUI::ProjectFileExplorer::DisplayDirectory(const path
 
 void KritiaEngine::Editor::GUI::ProjectFileExplorer::DisplayFile(const path& fileName, const std::string& path) {
 	if (ImGui::Selectable(fileName.filename().string().c_str(), false, ImGuiSelectableFlags_AllowDoubleClick) ) {
+		std::string completePath = path + fileName.filename().string();
 		if (fileName.filename().string().ends_with(KritiaEngine::Editor::materialFilePostfix)) {
-			ImguiManager::currentSelectedInspectable = (IInspectable*)ResourceManager::GetMaterial(path + fileName.filename().string()).get();
+			ImguiManager::currentSelectedInspectable = (IInspectable*)ResourceManager::GetMaterial(completePath).get();
 		}		
 		if (fileName.filename().string().ends_with(KritiaEngine::Editor::textureFilePostfix)) {
-			ImguiManager::currentSelectedInspectable = (IInspectable*)ResourceManager::GetTexture(path + fileName.filename().string()).get();
+			ImguiManager::currentSelectedInspectable = (IInspectable*)ResourceManager::GetTexture(completePath).get();
 		}
 		if (fileName.filename().string().ends_with(KritiaEngine::Editor::meshFilePostfix)) {
-			ImguiManager::currentSelectedInspectable = (IInspectable*)ResourceManager::GetMesh(path + fileName.filename().string()).get();
+			ImguiManager::currentSelectedInspectable = (IInspectable*)ResourceManager::GetMesh(completePath).get();
+		}
+		if (fileName.filename().string().ends_with(KritiaEngine::Editor::prefabFilePostfix)) {
+			ImguiManager::currentSelectedInspectable = (IInspectable*)ResourceManager::GetPrefab(completePath);
 		}
 		// Double left click on different files
 		if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 			if (fileName.filename().string().ends_with(KritiaEngine::Editor::sceneFilePostfix)) {
-				SceneManagement::SceneManager::LoadScene(path + fileName.filename().string());
+				SceneManagement::SceneManager::LoadScene(completePath);
+			}
+			if (fileName.filename().string().ends_with(KritiaEngine::Editor::prefabFilePostfix)) {
+				GameObject::DeserializeFromPath(completePath);
 			}
 		}
 	}

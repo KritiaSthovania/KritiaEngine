@@ -123,38 +123,12 @@ void MeshRenderer::Initialize() {
 }
 
 void KritiaEngine::MeshRenderer::OnObjectDestroy() {
+	Component::OnObjectDestroy();
 	RendererManager::RemoveMeshRenderer(this, containTransparentMaterial);
 }
 
 void MeshRenderer::Render(const std::shared_ptr<KritiaEngine::Camera>& camera) {
-	if (!initialized) {
-		Initialize();
-	}
-	if (!meshFilter->IsMeshSetup()) {
-		// The mesh is changed, re-initialize
-		preInitialized = false;
-		Initialize();
-	}
-	// materials have changed
-	if (materialSize != materials.size()) {
-		UpdateMaterial();
-	}
-	Matrix4x4 model = Matrix4x4::Identity();
-	model = Mathf::Translate(model, Transform()->position);
-	model *= Quaternion::ToRotationMatrix(Transform()->rotation);
-	model = Mathf::Scale(model, Transform()->scale);
-	for (int i = 0; i < meshFilter->mesh->submeshSize; i++) {
-		RenderingProvider::RenderSubmesh(meshFilter, materials[i], i, model, camera->GetPosition(), Transform()->position);
-	}
-	// 如果材质数大于Submesh数
-	for (int i = this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(); i < materials.size(); i++) {
-		RenderingProvider::RenderSubmesh(meshFilter, materials[i], i - this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(), model, camera->GetPosition(), Transform()->position);
-	}
-}
-
-
-void KritiaEngine::MeshRenderer::RenderShadowMap(Light* light) {
-	if (light->castingShadow) {
+	if (gameObject->GetComponent<MeshFilter>() != nullptr) {
 		if (!initialized) {
 			Initialize();
 		}
@@ -172,8 +146,43 @@ void KritiaEngine::MeshRenderer::RenderShadowMap(Light* light) {
 		model *= Quaternion::ToRotationMatrix(Transform()->rotation);
 		model = Mathf::Scale(model, Transform()->scale);
 		for (int i = 0; i < meshFilter->mesh->submeshSize; i++) {
-			RenderingProvider::RenderShadowMap(meshFilter, i, model, light);
+			RenderingProvider::RenderSubmesh(meshFilter, materials[i], i, model, camera->GetPosition(), Transform()->position);
 		}
+		// 如果材质数大于Submesh数
+		for (int i = this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(); i < materials.size(); i++) {
+			RenderingProvider::RenderSubmesh(meshFilter, materials[i], i - this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(), model, camera->GetPosition(), Transform()->position);
+		}
+	} else {
+		meshFilter = nullptr;
+	}
+}
+
+
+void KritiaEngine::MeshRenderer::RenderShadowMap(Light* light) {
+	if (gameObject->GetComponent<MeshFilter>() != nullptr) {
+		if (light->castingShadow) {
+			if (!initialized) {
+				Initialize();
+			}
+			if (!meshFilter->IsMeshSetup()) {
+				// The mesh is changed, re-initialize
+				preInitialized = false;
+				Initialize();
+			}
+			// materials have changed
+			if (materialSize != materials.size()) {
+				UpdateMaterial();
+			}
+			Matrix4x4 model = Matrix4x4::Identity();
+			model = Mathf::Translate(model, Transform()->position);
+			model *= Quaternion::ToRotationMatrix(Transform()->rotation);
+			model = Mathf::Scale(model, Transform()->scale);
+			for (int i = 0; i < meshFilter->mesh->submeshSize; i++) {
+				RenderingProvider::RenderShadowMap(meshFilter, i, model, light);
+			}
+		}
+	} else {
+		meshFilter = nullptr;
 	}
 }
 

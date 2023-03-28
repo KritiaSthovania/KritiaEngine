@@ -37,13 +37,11 @@ void KritiaEngine::Manager::RendererManager::Render() {
 	opaqueRenderQueue.sort(CompareRenderer);
 	// Render shadow map only for opaque objects
 	for (auto light : Lighting::LightingSystem::Lights) {
-		if (light->castingShadow) {
-			RenderingProvider::SetupRenderShadowMap(light);
-			for (auto renderer : opaqueRenderQueue) {
-				if (renderer->gameObject->isActive) {
-					renderer->RenderShadowMap(light);
-				}
-			}	
+		RenderingProvider::SetupRenderShadowMap(light);
+		for (auto renderer : opaqueRenderQueue) {
+			if (renderer->gameObject->isActive) {
+				renderer->RenderShadowMap(light);
+			}
 		}
 	}
 	// Render opaque objects from near to far

@@ -53,12 +53,13 @@ KritiaEngine::Matrix4x4 KritiaEngine::Light::GetLightMatrixVP(int direction) {
 }
 
 void KritiaEngine::Light::OnObjectDestroy() {
+	Component::OnObjectDestroy();
 	Lighting::LightingSystem::RemoveLight(this);
 }
 
 void KritiaEngine::Light::UpdateLightMatrices() {
 	// Directional
-	directionalLightMatrix = Matrix4x4::Ortho(-20, 20, -20, 20, Settings::NearPlaneDistance, Settings::FarPlaneDistance) * Matrix4x4::LookAt(Transform()->position, Transform()->forward, Transform()->up);
+	directionalLightMatrix = Matrix4x4::Ortho(-20, 20, -20, 20, Settings::NearPlaneDistance, Settings::FarPlaneDistance) * Matrix4x4::LookAt(Vector3(0, 0, 0), Transform()->forward, Transform()->up);
 	// Point
 	Matrix4x4 shadowProj = Matrix4x4::Perspective(90.0f, (float)Settings::ShadowWidth / (float)Settings::ShadowHeight, Settings::NearPlaneDistance, Settings::FarPlaneDistance);
 	pointLightMatrixRight = shadowProj * Matrix4x4::LookAt(Transform()->position, Transform()->position + Vector3(1.0, 0.0, 0.0), Vector3(0.0, -1.0, 0.0));

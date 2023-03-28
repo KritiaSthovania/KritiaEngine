@@ -152,9 +152,7 @@ void KritiaEngine::SceneManagement::Scene::DeserializeFromPath(const std::string
         std::string str = json["GameObject" + std::to_string(i)];
         // Must separate to avoid parsing error
         nlohmann::ordered_json objectJson = json::parse(str);
-        GameObject* gameObject = new GameObject();
-        gameObject->name = objectJson["Name"];
-        gameObject->DeserializeFromJson(objectJson);
+        GameObject* gameObject = GameObject::DeserializeFromJson(objectJson);
     }
     instream.close();
 }

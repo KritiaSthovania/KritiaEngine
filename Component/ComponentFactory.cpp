@@ -6,8 +6,10 @@
 #include "MeshFilter.h"
 #include "Renderer/MeshRenderer.h"
 using json = nlohmann::ordered_json;
+using namespace KritiaEngine;
+std::vector<std::string> ComponentFactory::componentType = { "Transform", "Camera", "Light", "MeshFilter", "MeshRenderer" };
 
-void KritiaEngine::ComponentFactory::AddComponentFromJson(const json& json, GameObject* gameObject) {
+void KritiaEngine::ComponentFactory::AddComponent(const json& json, GameObject* gameObject) {
 	if (json["Type"] == "Transform") {
 		// Do nothing
 	} else if (json["Type"] == "Camera") {
@@ -17,6 +19,20 @@ void KritiaEngine::ComponentFactory::AddComponentFromJson(const json& json, Game
 	} else if (json["Type"] == "MeshFilter") {
 		gameObject->AddComponent<MeshFilter>();
 	} else if (json["Type"] == "MeshRenderer") {
+		gameObject->AddComponent<MeshRenderer>();
+	}
+}
+
+void KritiaEngine::ComponentFactory::AddComponent(const std::string& name, GameObject* gameObject) {
+	if (name == "Transform") {
+		// Do nothing
+	} else if (name == "Camera") {
+		gameObject->AddComponent<Camera>();
+	} else if (name == "Light") {
+		gameObject->AddComponent<Light>();
+	} else if (name == "MeshFilter") {
+		gameObject->AddComponent<MeshFilter>();
+	} else if (name == "MeshRenderer") {
 		gameObject->AddComponent<MeshRenderer>();
 	}
 }

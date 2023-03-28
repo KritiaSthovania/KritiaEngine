@@ -1,5 +1,7 @@
 #include "ResourceManager.h"
-
+#include "RendererManager.h"
+#include "BehaviourManager.h"
+#include "../../Component/Renderer/MeshRenderer.h"
 using namespace KritiaEngine;
 using namespace KritiaEngine::Manager;
 
@@ -7,6 +9,7 @@ std::shared_ptr<Mesh> Manager::ResourceManager::cube = nullptr;
 std::list<std::shared_ptr<Mesh>> ResourceManager::meshes;
 std::list<std::shared_ptr<Material>> ResourceManager::materials;
 std::list<std::shared_ptr<Texture>> ResourceManager::textures;
+std::list<GameObject*> ResourceManager::prefabs;
 
 std::shared_ptr<Mesh> KritiaEngine::Manager::ResourceManager::GetMeshPrimitive(MeshPrimitive type) {
 	switch (type) {
@@ -76,4 +79,17 @@ std::shared_ptr<Texture> KritiaEngine::Manager::ResourceManager::GetTexture(cons
 
 std::shared_ptr<Texture> KritiaEngine::Manager::ResourceManager::GetTexture(const nlohmann::ordered_json& json) {
 	return Texture::DeserializeFromJson(json);
+}
+
+GameObject* KritiaEngine::Manager::ResourceManager::GetPrefab(const std::string& path) {
+	GameObject* gameObject = GameObject::DeserializeAsPrefab(path);
+	prefabs.push_back(gameObject);
+	RendererManager::RemoveMeshRenderer(gameObject->GetComponent<MeshRenderer>().get(), false);
+	RendererManager::RemoveMeshRenderer(gameObject->GetComponent<MeshRenderer>().get(), true);
+	for (std::shared_ptr<Component> comp : gameObject->components) {
+		if (typeid(comp.get()) == typeid(MonoBehaviour)) {
+			BehaviourManager::RemoveMonoBehaviour(dynamic_cast<MonoBehaviour*>(comp.get()));
+		}
+	}
+	return gameObject;
 }

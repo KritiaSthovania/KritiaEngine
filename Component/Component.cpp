@@ -19,6 +19,13 @@ std::shared_ptr<Transform> KritiaEngine::Component::Transform() {
 
 void KritiaEngine::Component::OnObjectDestroy() {
 	BehaviourManager::RemoveUpdatableComponents(this);
+	for (std::list<std::shared_ptr<Component>>::iterator iter = gameObject->components.begin(); iter != gameObject->components.end();) {
+		if ((*iter).get() == this) {
+			iter = gameObject->components.erase(iter);
+		} else {
+			iter++;
+		}
+	}
 }
 
 void KritiaEngine::Component::ComponentUpdate() {}
