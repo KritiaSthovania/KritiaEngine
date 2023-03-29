@@ -23,20 +23,19 @@ std::string KritiaEngine::Texture::SerializeToJson() {
 	json json;
 	json["Type"] = "Texture";
 	json["Name"] = name;
+	if (guid == "") {
+		GenerateGuid();
+	}
+	json["Guid"] = guid;
 	json["Path"] = path;
 	return json.dump();
-}
-std::shared_ptr<Texture> KritiaEngine::Texture::DeserializeFromPath(const std::string& path) {
-	std::ifstream input(path);
-	json json = json::parse(input);
-	input.close();
-	return DeserializeFromJson(json);
 }
 
 std::shared_ptr<Texture> KritiaEngine::Texture::DeserializeFromJson(const json& json) {
 	std::shared_ptr<Texture> tex = std::make_shared<Texture>(Texture());
 	assert(json["Type"] == "Texture");
 	tex->name = json["Name"];
+	tex->guid = json["Guid"];
 	tex->path = json["Path"];
 	return tex;
 }

@@ -34,7 +34,6 @@ namespace KritiaEngine {
 		bool loaded = false;
 		virtual std::string SerializeToJson() override;
 		static std::shared_ptr<Texture> DeserializeFromJson(const json& json);
-		static std::shared_ptr<Texture> DeserializeFromPath(const std::string& path);
 
 		// Í¨¹ý FileSerializable ¼Ì³Ð
 		virtual void SerializeToFile() override;

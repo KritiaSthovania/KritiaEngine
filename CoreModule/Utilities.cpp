@@ -1,5 +1,4 @@
 #include "Utilities.h"
-
 //---------Color--------------
 
 using namespace KritiaEngine;

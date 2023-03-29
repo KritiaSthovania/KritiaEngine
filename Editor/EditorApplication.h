@@ -1,5 +1,6 @@
 #pragma once
 #include <pch.h>
+#include <string>
 namespace KritiaEngine::Editor {
 	constexpr const char* sceneFilePostfix = ".scene.json";
 	constexpr const char* materialFilePostfix = ".mat.json";

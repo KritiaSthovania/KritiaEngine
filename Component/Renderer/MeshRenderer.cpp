@@ -132,7 +132,7 @@ void MeshRenderer::Render(const std::shared_ptr<KritiaEngine::Camera>& camera) {
 		if (!initialized) {
 			Initialize();
 		}
-		if (!meshFilter->IsMeshSetup()) {
+		if (meshFilter->isMeshChanged) {
 			// The mesh is changed, re-initialize
 			preInitialized = false;
 			Initialize();
@@ -164,13 +164,13 @@ void KritiaEngine::MeshRenderer::RenderShadowMap(Light* light) {
 			if (!initialized) {
 				Initialize();
 			}
-			if (!meshFilter->IsMeshSetup()) {
+			if (meshFilter->isMeshChanged) {
 				// The mesh is changed, re-initialize
 				preInitialized = false;
 				Initialize();
 			}
 			// materials have changed
-			if (materialSize != materials.size()) {
+			if (materialSize != materials.size() || materialSize != meshFilter->mesh->submeshMaterials.size()) {
 				UpdateMaterial();
 			}
 			Matrix4x4 model = Matrix4x4::Identity();

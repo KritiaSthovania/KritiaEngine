@@ -46,7 +46,6 @@ namespace KritiaEngine {
 		void SubmeshDeserialize(const json& json, int index);
 		static Vertex VertexDeserialize(const json& json);
 		static std::shared_ptr<Mesh> DeserializeFromJson(const json& json);
-		static std::shared_ptr<Mesh> DeserializeFromPath(const std::string& path);
 
 		/////// Create Primitives/////
 		static Mesh Cube();

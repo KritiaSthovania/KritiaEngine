@@ -6,9 +6,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <memory>
-#include <iostream>
 #include <vector>
 #include <list>
-#include <ostream>
 #include <map>
 #include <queue>
+#include <iostream>
+#include "../CoreModule/Debug.h"

@@ -63,7 +63,6 @@ namespace KritiaEngine {
 		void SetPropertiesOnRender();
 		virtual std::string SerializeToJson() override;
 		static std::shared_ptr<Material> DeserializeFromJson(const json& json);
-		static std::shared_ptr<Material> DeserializeFromPath(const std::string& path);
 		int diffuseSamplerIndex = 0, specularSamplerIndex = 1, normalSamplerIndex = 2, parallaxSamplerIndex = 3, shadowSamplerIndex = 4;
 		unsigned int matricesVPID;
 		bool initialized = false;

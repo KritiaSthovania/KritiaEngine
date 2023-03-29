@@ -39,6 +39,10 @@ std::string KritiaEngine::GameObject::SerializeToJson() {
 	json json;
 	json["Type"] = "GameObject";
 	json["Name"] = this->name;
+	if (guid == "") {
+		GenerateGuid();
+	}
+	json["Guid"] = guid;
 	json["HasPrefab"] = hasPrefab;
 	json["Path"] = path;
 	json["Number Of Components"] = this->components.size();
@@ -70,6 +74,7 @@ GameObject* KritiaEngine::GameObject::DeserializeFromJson(const json& json) {
 	GameObject* gameObject = new GameObject();
 	assert(json["Type"] == "GameObject");
 	gameObject->name = json["Name"];
+	gameObject->guid = json["Guid"];
 	gameObject->hasPrefab = json["HasPrefab"];
 	gameObject->path = json["Path"];
 	int numberOfComponents = json["Number Of Components"];
@@ -89,8 +94,8 @@ GameObject* KritiaEngine::GameObject::DeserializeFromPath(const std::string& pat
 	return DeserializeFromJson(json);
 }
 
-GameObject* KritiaEngine::GameObject::DeserializeAsPrefab(const std::string& path) {
-	GameObject* go = DeserializeFromPath(path);
+GameObject* KritiaEngine::GameObject::DeserializeAsPrefab(const json& json) {
+	GameObject* go = DeserializeFromJson(json);
 	SceneManagement::SceneManager::GetActiveScene()->GetRootGameObjects().remove(go);
 	return go;
 }

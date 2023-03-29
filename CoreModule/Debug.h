@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 #include <iostream>
+#define Debug_Log(m) KritiaEngine::Debug::Log(m);
+
 namespace KritiaEngine {
 	class Debug
 	{

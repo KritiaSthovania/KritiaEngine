@@ -132,6 +132,10 @@ std::string KritiaEngine::Mesh::SerializeToJson() {
     json json;
     json["Type"] = "Mesh";
     json["Name"] = name;
+    if (guid == "") {
+        GenerateGuid();
+    }
+    json["Guid"] = guid;
     json["IsPrimitive"] = isPrimitive;
     json["Path"] = path;
     json["Number of Submeshes"] = submeshSize;
@@ -141,6 +145,18 @@ std::string KritiaEngine::Mesh::SerializeToJson() {
         }
     }
     return json.dump();
+}
+
+void KritiaEngine::Mesh::SerializeToFile() {
+    std::string path = ImguiAlias::OpenSaveResourceWindow("Mesh", KritiaEngine::Editor::meshFilePostfix, name.c_str());
+    if (!path.ends_with(KritiaEngine::Editor::meshFilePostfix)) {
+        path += ("/" + (std::string)KritiaEngine::Editor::meshFilePostfix);
+    }
+    std::string jsonStr = SerializeToJson();
+    std::fstream output;
+    output.open(path, std::ios::out | std::ios::trunc);
+    output << jsonStr << std::endl;
+    output.close();
 }
 
 std::string KritiaEngine::Mesh::SubmeshSerialize(int index) {
@@ -169,6 +185,7 @@ std::shared_ptr<Mesh> KritiaEngine::Mesh::DeserializeFromJson(const json& json) 
     std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(Mesh());
     assert(json["Type"] == "Mesh");
     mesh->name = json["Name"];
+    mesh->guid = json["Guid"];
     mesh->path = json["Path"];
     mesh->isPrimitive = json["IsPrimitive"];
     mesh->submeshSize = json["Number of Submeshes"];
@@ -185,25 +202,6 @@ std::shared_ptr<Mesh> KritiaEngine::Mesh::DeserializeFromJson(const json& json) 
         Editor::AssetDatabase::ImportModel(json["Path"], mesh);
     }
     return mesh;
-}
-
-void KritiaEngine::Mesh::SerializeToFile() {
-    std::string path = ImguiAlias::OpenSaveResourceWindow("Mesh", KritiaEngine::Editor::meshFilePostfix, name.c_str());
-    if (!path.ends_with(KritiaEngine::Editor::meshFilePostfix)) {
-        path += ("/" + (std::string)KritiaEngine::Editor::meshFilePostfix);
-    }
-    std::string jsonStr = SerializeToJson();
-    std::fstream output;
-    output.open(path, std::ios::out | std::ios::trunc);
-    output << jsonStr << std::endl;
-    output.close();
-}
-
-std::shared_ptr<Mesh> KritiaEngine::Mesh::DeserializeFromPath(const std::string& path) {
-    std::ifstream instream(path);
-    json json = json::parse(instream);    
-    instream.close();
-    return  DeserializeFromJson(json);
 }
 
 void KritiaEngine::Mesh::SubmeshDeserialize(const json& json, int index) {

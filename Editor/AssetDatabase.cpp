@@ -20,7 +20,7 @@ void KritiaEngine::Editor::AssetDatabase::ImportAsset(const std::string& path) {
         mesh->isPrimitive = false;
         mesh->submeshSize = mesh->submeshVertices.size();
         mesh->SerializeToFile();
-        ResourceManager::meshes.push_back(mesh);
+        ResourceManager::meshes[mesh->guid] = mesh;
     } 
     // Textures
     else if (path.ends_with(".jpg") || path.ends_with(".png")) {
@@ -29,7 +29,7 @@ void KritiaEngine::Editor::AssetDatabase::ImportAsset(const std::string& path) {
         tex->name = name;
         tex->path = path;
         tex->SerializeToFile();
-        ResourceManager::textures.push_back(tex);
+        ResourceManager::textures[tex->guid] = tex;
     }
 }
 

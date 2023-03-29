@@ -105,6 +105,10 @@ std::string KritiaEngine::Material::SerializeToJson() {
 	json json;
 	json["Type"] = "Material";
 	json["Name"] = name;
+	if (guid == "") {
+		GenerateGuid();
+	}
+	json["Guid"] = guid;
 	if (renderMode == RenderMode::Opaque) {
 		json["RenderMode"] = "Opaque";
 	} else if( renderMode == RenderMode::Transparent) {
@@ -131,6 +135,7 @@ std::shared_ptr<Material> KritiaEngine::Material::DeserializeFromJson(const json
 		mat->renderMode = RenderMode::Transparent;
 	}
 	mat->name = json["Name"];
+	mat->guid = json["Guid"];
 	mat->path = json["Path"];
 	mat->albedo = Color(json["Albedo"][0], json["Albedo"][1], json["Albedo"][2], 1);
 	mat->shininess = json["Shininess"];
@@ -152,13 +157,6 @@ std::shared_ptr<Material> KritiaEngine::Material::DeserializeFromJson(const json
 		mat->parallaxMap = ResourceManager::GetTexture(paraJson);
 	}
 	return mat;
-}
-
-std::shared_ptr<Material> KritiaEngine::Material::DeserializeFromPath(const std::string& path) {
-	std::ifstream instream(path);
-	json json = json::parse(instream);
-	instream.close();
-	return DeserializeFromJson(json);
 }
 
 void KritiaEngine::Material::SerializeToFile() {

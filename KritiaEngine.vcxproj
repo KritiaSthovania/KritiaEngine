@@ -71,7 +71,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(MSBuildProjectDirectory)\includes</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(MSBuildProjectDirectory)\includes;D:\boost_1_81_0</IncludePath>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>false</VcpkgEnableManifest>
@@ -230,6 +230,7 @@
     <ClInclude Include="includes\imgui\imstb_rectpack.h" />
     <ClInclude Include="includes\imgui\imstb_textedit.h" />
     <ClInclude Include="includes\imgui\imstb_truetype.h" />
+    <ClInclude Include="includes\json\json.hpp" />
     <ClInclude Include="includes\nfd\nfd.h" />
     <ClInclude Include="includes\nfd\nfd.hpp" />
     <ClInclude Include="includes\pch.h" />

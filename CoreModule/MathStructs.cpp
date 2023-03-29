@@ -2,6 +2,7 @@
 #include "Settings.h"
 #include "Utilities.h"
 #include "Mathf.h"
+
 using namespace KritiaEngine;
 
 constexpr float epsilon = 1e-6;

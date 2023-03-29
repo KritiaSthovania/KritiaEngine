@@ -63,7 +63,7 @@ namespace KritiaEngine {
 		virtual std::string SerializeToJson() override;
 		static GameObject* DeserializeFromJson(const json& json);
 		static GameObject* DeserializeFromPath(const std::string& path);
-		static GameObject* DeserializeAsPrefab(const std::string& path);
+		static GameObject* DeserializeAsPrefab(const json& json);
 		void AddComponentFromJson(const json& json);
 		void ShowAddComponentPopup();
 		// Í¨¹ý FileSerializable ¼Ì³Ð

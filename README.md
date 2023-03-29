@@ -9,13 +9,13 @@
 - 已包含：
 [stb_image.h](https://github.com/nothings/stb/blob/master/stb_image.h), [imgui-docking](https://github.com/ocornut/imgui/tree/docking), [nlohmann json](https://github.com/nlohmann/json), [NativeFileDialog-Extended](https://github.com/btzy/nativefiledialog-extended)
 - 未包含：
-[glfw](https://www.glfw.org/), [glm](https://github.com/g-truc/glm), [glad](https://glad.dav1d.de/), [assimp](https://github.com/assimp/assimp)
+[glfw](https://www.glfw.org/), [glm](https://github.com/g-truc/glm), [glad](https://glad.dav1d.de/), [assimp](https://github.com/assimp/assimp), [boost](https://www.boost.org/)
 - 未包含的第三方库推荐直接使用[vcpkg](git@github.com:microsoft/vcpkg.git)安装。
   
 ## Roadmap
 - [x] 基于OpenGL的基本渲染功能
-- [ ] GUI
-- [ ] 资源管理
+- [x] GUI
+- [x] 资源管理
 - [ ] 物理引擎
 - [ ] CPU渲染器
 - [ ] Play In Editor

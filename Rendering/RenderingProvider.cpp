@@ -80,11 +80,6 @@ void KritiaEngine::Rendering::RenderingProvider::RenderSkybox(Matrix4x4 projecti
 }
 
 void KritiaEngine::Rendering::RenderingProvider::SetupMesh(const std::shared_ptr<Mesh>& mesh) {
-	mesh->isSetup = true;
-	mesh->submeshSize = mesh->submeshIndices.size();
-	mesh->VAOs.resize(mesh->submeshSize);
-	mesh->VBOs.resize(mesh->submeshSize);
-	mesh->EBOs.resize(mesh->submeshSize);
 	if (Settings::UseOpenGL) {
 		OpenGLRendering::SetupMesh(mesh);
 	}

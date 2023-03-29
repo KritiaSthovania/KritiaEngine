@@ -11,12 +11,13 @@ KritiaEngine::MeshFilter::MeshFilter(GameObject* gameObject) {
 
 void KritiaEngine::MeshFilter::SetupMesh() {
 	if (mesh != nullptr && !mesh->isSetup) {
+		mesh->isSetup = true;
+		mesh->submeshSize = mesh->submeshIndices.size();
+		mesh->VAOs.resize(mesh->submeshSize);
+		mesh->VBOs.resize(mesh->submeshSize);
+		mesh->EBOs.resize(mesh->submeshSize);
 		RenderingProvider::SetupMesh(mesh);
 	}
-}
-
-bool KritiaEngine::MeshFilter::IsMeshSetup() {
-	return mesh->isSetup;
 }
 
 void KritiaEngine::MeshFilter::OnInspector() {
@@ -27,6 +28,7 @@ void KritiaEngine::MeshFilter::OnInspector() {
 			std::string path = ImguiAlias::OpenFindResourceWindow("Mesh", KritiaEngine::Editor::meshFilePostfix);
 			if (path != "") {
 				mesh = Manager::ResourceManager::GetMesh(path);
+				isMeshChanged = true;
 			}
 		}
 	} else {
@@ -34,6 +36,7 @@ void KritiaEngine::MeshFilter::OnInspector() {
 			std::string path = ImguiAlias::OpenFindResourceWindow("Mesh", KritiaEngine::Editor::meshFilePostfix);
 			if (path != "") {
 				mesh = Manager::ResourceManager::GetMesh(path);
+				isMeshChanged = true;
 			}
 		}
 	}

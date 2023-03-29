@@ -4,7 +4,6 @@
 #include "../GameObject.h"
 #include <json/json.hpp>
 #include <pch.h>
-#include <list>
 
 namespace KritiaEngine::Editor {
 	class AssetDatabase;
@@ -27,12 +26,14 @@ namespace KritiaEngine::Manager {
 		static std::shared_ptr<Texture> GetTexture(const std::string& path);
 		static std::shared_ptr<Texture> GetTexture(const nlohmann::ordered_json& json);
 		static GameObject* GetPrefab(const std::string& path);
+		static GameObject* GetPrefab(const json& json);
 	private:
+		static json GetJsonFromPath(const std::string& path);
 		static std::shared_ptr<Mesh> cube;
-		static std::list<std::shared_ptr<Mesh>> meshes;
-		static std::list<std::shared_ptr<Material>> materials;
-		static std::list<std::shared_ptr<Texture>> textures;
-		static std::list<GameObject*> prefabs;
+		static std::map<std::string, std::shared_ptr<Mesh>> meshes;
+		static std::map<std::string, std::shared_ptr<Material>> materials;
+		static std::map<std::string, std::shared_ptr<Texture>> textures;
+		static std::map<std::string, GameObject*> prefabs;
 	};
 }
 
