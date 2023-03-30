@@ -27,6 +27,10 @@ namespace KritiaEngine::Manager {
 		static std::shared_ptr<Texture> GetTexture(const nlohmann::ordered_json& json);
 		static GameObject* GetPrefab(const std::string& path);
 		static GameObject* GetPrefab(const json& json);
+		/// <summary>
+		/// Collect garbages by Reference Counting mechanism
+		/// </summary>
+		static void CollectGarbage();
 	private:
 		static json GetJsonFromPath(const std::string& path);
 		static std::shared_ptr<Mesh> cube;
@@ -34,6 +38,9 @@ namespace KritiaEngine::Manager {
 		static std::map<std::string, std::shared_ptr<Material>> materials;
 		static std::map<std::string, std::shared_ptr<Texture>> textures;
 		static std::map<std::string, GameObject*> prefabs;
+		// Timer in seconds
+		static float gcTimer;
+		static float gcTimerThreshold;
 	};
 }
 

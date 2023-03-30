@@ -5,6 +5,10 @@
 #include "EditorWindows/ProjectFileExplorer.h"
 #include "MainMenuBarFunction.h"
 #include "../CoreModule/Settings.h"
+#include "../CoreModule/Input.h"
+#include "../Component/Camera.h"
+#include "../Component/Transform.h"
+#include "../Rendering/RenderingProvider.h"
 #include <nfd/nfd.h>
 
 using namespace KritiaEngine::Editor::GUI;
@@ -15,6 +19,9 @@ bool ImguiManager::inEditor = true;
 float ImguiManager::UIScaleFactor = 2;
 KritiaEngine::IInspectable* ImguiManager::currentSelectedInspectable;
 std::list<std::shared_ptr<EditorWindow>> ImguiManager::editorWindows = std::list<std::shared_ptr<EditorWindow>>();
+ImGuizmo::OPERATION ImguiManager::operation = ImGuizmo::OPERATION::TRANSLATE;
+ImGuizmo::MODE ImguiManager::mode = ImGuizmo::MODE::WORLD;
+
 //////////////////// window opened  ////////////////////
 bool ImguiManager::settingWindowOpened = false;
 
@@ -38,6 +45,7 @@ void KritiaEngine::Editor::GUI::ImguiManager::RenderGUI() {
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 	ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
+	ImGuizmo::BeginFrame();
 	if (inEditor) {
 		RenderMainMenuBar();
 		RenderWindowOpenedFromMainMenuBar();
@@ -48,6 +56,15 @@ void KritiaEngine::Editor::GUI::ImguiManager::RenderGUI() {
 			window->OnGUI();
 			ImGui::End();
 		}
+
+		// Not Working
+		GameObject* go = dynamic_cast<GameObject*>(currentSelectedInspectable);
+		if (go != nullptr) {
+			ShowImGuizmo(go);
+		} else {
+			ImGuizmo::Enable(false);
+		}
+
 	}
 
     ImGui::Render();
@@ -90,4 +107,32 @@ void KritiaEngine::Editor::GUI::ImguiManager::RenderMainMenuBar() {
 		MainMenuBarFunction::OpenImportAssetWindow();
 	}
 	ImGui::EndMainMenuBar();
+}
+
+// Not Working
+void KritiaEngine::Editor::GUI::ImguiManager::ShowImGuizmo(GameObject* go) {
+	ImGuizmo::Enable(true);
+	if (Input::GetKeyDown(GLFW_KEY_W)) {
+		operation = ImGuizmo::TRANSLATE;
+	}
+	if (Input::GetKeyDown(GLFW_KEY_E)) {
+		operation = ImGuizmo::ROTATE;
+	}
+	if (Input::GetKeyDown(GLFW_KEY_R)) {
+		operation = ImGuizmo::SCALE;
+	}
+
+	Matrix4x4 model = Matrix4x4::Identity();
+	model = Mathf::Translate(model, go->Transform()->position);
+	model *= Quaternion::ToRotationMatrix(go->Transform()->rotation);
+	model = Mathf::Scale(model, go->Transform()->scale);
+	if(ImGuizmo::IsUsing()) {
+		std::cout << "IsUsing";
+	}
+	ImGuizmo::AllowAxisFlip(false);
+	ImGuizmo::SetRect(0, 0, Settings::ScreenWidth, Settings::ScreenHeight);
+	ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
+	ImGuizmo::RecomposeMatrixFromComponents(&(go->Transform()->position.x), &(go->Transform()->rotationEuler.x), &(go->Transform()->scale.x), model.GetPtr());
+	ImGuizmo::Manipulate(Camera::current->GetViewMatrix().GetPtr(), Rendering::RenderingProvider::projection.GetPtr(), operation, mode, model.GetPtr());
+	ImGuizmo::DecomposeMatrixToComponents(model.GetPtr(), &(go->Transform()->position.x), &(go->Transform()->rotationEuler.x), &(go->Transform()->scale.x));
 }

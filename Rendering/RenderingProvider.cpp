@@ -17,6 +17,7 @@ bool RenderingProvider::msaaEnabled = true;
 bool RenderingProvider::gammaCorrectionEnabled = true;
 bool RenderingProvider::shadowEnabled = true;
 std::vector<Texture> RenderingProvider::skyboxTextures = std::vector<Texture>();
+Matrix4x4 RenderingProvider::projection;
 
 void KritiaEngine::Rendering::RenderingProvider::Initialize() {
 	if (Settings::UseOpenGL) {
@@ -98,6 +99,7 @@ void KritiaEngine::Rendering::RenderingProvider::RenderShadowMap(const std::shar
 }
 
 void KritiaEngine::Rendering::RenderingProvider::UpdateUniformBufferMatricesVP(const Matrix4x4& view, const Matrix4x4& projection) {
+	RenderingProvider::projection = projection;
 	if (Settings::UseOpenGL) {
 		OpenGLRendering::UpdateUniformBufferMatricesVP(view, projection);
 	}

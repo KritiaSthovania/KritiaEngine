@@ -2,6 +2,7 @@
 #include "RendererManager.h"
 #include "BehaviourManager.h"
 #include "../../Component/Renderer/MeshRenderer.h"
+#include "../../CoreModule/Time.h"
 using namespace KritiaEngine;
 using namespace KritiaEngine::Manager;
 
@@ -10,6 +11,8 @@ std::map<std::string, std::shared_ptr<Mesh>> ResourceManager::meshes;
 std::map<std::string, std::shared_ptr<Material>> ResourceManager::materials;
 std::map<std::string, std::shared_ptr<Texture>> ResourceManager::textures;
 std::map<std::string, GameObject*> ResourceManager::prefabs;
+float ResourceManager::gcTimer = 0;
+float ResourceManager::gcTimerThreshold = 300;
 
 std::shared_ptr<Mesh> KritiaEngine::Manager::ResourceManager::GetMeshPrimitive(MeshPrimitive type) {
 	switch (type) {
@@ -93,6 +96,29 @@ GameObject* KritiaEngine::Manager::ResourceManager::GetPrefab(const json& json) 
 			}
 		}
 		return gameObject;
+	}
+}
+
+void KritiaEngine::Manager::ResourceManager::CollectGarbage() {
+	if (gcTimer < gcTimerThreshold) {
+		gcTimer += Time::deltaTime;
+	} else {
+		gcTimer = 0;
+		for (std::map<std::string, std::shared_ptr<Mesh>>::iterator iter = meshes.begin(); iter != meshes.end(); ) {
+			if (iter->second.use_count() == 1) {
+				iter = meshes.erase(iter);
+			}
+		}
+		for (std::map<std::string, std::shared_ptr<Texture>>::iterator iter = textures.begin(); iter != textures.end(); ) {
+			if (iter->second.use_count() == 1) {
+				iter = textures.erase(iter);
+			}
+		}
+		for (std::map<std::string, std::shared_ptr<Material>>::iterator iter = materials.begin(); iter != materials.end(); ) {
+			if (iter->second.use_count() == 1) {
+				iter = materials.erase(iter);
+			}
+		}
 	}
 }
 

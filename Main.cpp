@@ -6,6 +6,7 @@
 #include "CoreModule/Manager/RendererManager.h"
 #include "CoreModule/Settings.h"
 #include "Editor/ImguiManager.h"
+#include "CoreModule/Manager/ResourceManager.h"
 
 using namespace KritiaEngine;
 using namespace KritiaEngine::SceneManagement;
@@ -33,6 +34,7 @@ int main()
         Update();
         //渲染
         Render();
+        ResourceManager::CollectGarbage();
     }
     Settings::Serialize();
     glfwDestroyWindow(window);

@@ -24,7 +24,7 @@ namespace KritiaEngine::Manager {
 namespace KritiaEngine {
 	class Transform;
 	class Component;
-	class GameObject : public Object, IJsonSerializable, IFileSerializable, IInspectable{
+	class GameObject : public Object, public IInspectable, IJsonSerializable, IFileSerializable{
 		friend class KritiaEngine::Editor::GUI::InspectorWindow;
 		friend class KritiaEngine::Editor::GUI::HierachyWindow;
 		friend class KritiaEngine::Editor::GUI::ProjectFileExplorer;
@@ -53,6 +53,7 @@ namespace KritiaEngine {
 		bool isActive = true;
 	private:
 		std::list<std::shared_ptr<Component>> components;
+		std::vector<std::shared_ptr<Component>> componentToDestroy;
 		std::vector<std::shared_ptr<Component>> componentToDelete;
 		std::string path = "";
 		bool hasPrefab = false;

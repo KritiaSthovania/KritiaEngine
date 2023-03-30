@@ -16,13 +16,14 @@ namespace KritiaEngine{
 		Vector3 up;
 		Vector3 right;
 		std::shared_ptr<Transform> parent;
+		Vector3 rotationEuler;
 	private:
 		// The rotation-ralated fields are cached.
 		Vector3 cachedForward;
 		Vector3 cachedUp;
 		Vector3 cachedRight;
 		Quaternion cachedRotation;
-		Vector3 rotationEuler;
+
 		Vector3 cachedRotationEuler;
 		void ComponentUpdate();
 		std::list<std::shared_ptr<Transform>> children;

@@ -109,6 +109,7 @@ void KritiaEngine::GameObject::OnObjectDestroy() {
 		Destroy(comp.get());
 	}
 	SceneManagement::SceneManager::GetActiveScene()->GetRootGameObjects().remove(this);
+	delete this;
 }
 
 void KritiaEngine::GameObject::OnInspector() {
@@ -124,7 +125,7 @@ void KritiaEngine::GameObject::OnInspector() {
 		}
 		if (ImGui::BeginPopup(std::format("DeleteComponent{}", std::to_string(componentIndex)).c_str())) {
 			if (ImGui::Selectable("Delete")) {
-				componentToDelete.push_back(comp);
+				componentToDestroy.push_back(comp);
 			}
 			ImGui::EndPopup();
 		}
@@ -134,9 +135,13 @@ void KritiaEngine::GameObject::OnInspector() {
 		}
 		componentIndex++;
 	}
-	for (std::shared_ptr<Component> comp : componentToDelete) {
+	for (std::shared_ptr<Component> comp : componentToDestroy) {
 		Destroy((Object*)comp.get());
 	}
+	for (std::shared_ptr<Component> comp : componentToDelete) {
+		components.remove(comp);
+	}
+	componentToDelete.clear();
 	if (hasPrefab) {
 		if (ImGui::Button("Save To Prefab", ImVec2(ImGui::GetWindowContentRegionWidth(), 50))) {
 			SerializeToFile();

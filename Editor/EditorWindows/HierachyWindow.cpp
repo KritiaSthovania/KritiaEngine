@@ -15,16 +15,15 @@ void KritiaEngine::Editor::GUI::HierachyWindow::OnGUI() {
 		for (GameObject* gameObject : SceneManager::GetActiveScene()->GetRootGameObjects()) {
 			if (ImGui::TreeNodeEx(gameObject->name.c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth)) {
 				if (ImGui::IsItemToggledOpen() || ImGui::IsItemClicked()) {
-					ImguiManager::currentSelectedInspectable = (IInspectable*)gameObject;
+					ImguiManager::currentSelectedInspectable = gameObject;
 				}
 				ImGui::TreePop();
 			} else {
 				if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
-					ImguiManager::currentSelectedInspectable = (IInspectable*)gameObject;
+					ImguiManager::currentSelectedInspectable = gameObject;
 				} else if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
 					ImGui::OpenPopup("RightClickMenuHierachyObject" + objecIndex);
 					objClicked = true;
-
 				}
 			}
 			if (ImGui::BeginPopup("RightClickMenuHierachyObject" + objecIndex)) {
@@ -55,7 +54,6 @@ void KritiaEngine::Editor::GUI::HierachyWindow::OnGUI() {
 			ImGui::EndPopup();
 		}
 	}
-
 }
 
 void KritiaEngine::Editor::GUI::HierachyWindow::Config() {

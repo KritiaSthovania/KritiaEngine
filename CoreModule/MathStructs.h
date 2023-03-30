@@ -159,6 +159,7 @@ namespace KritiaEngine {
 		/// </summary>
 		void SetEntry(int row, int column, int newEntry);
 
+		float* GetPtr();
 
 		// operators
 		Matrix4x4 operator* (const Matrix4x4& mat);

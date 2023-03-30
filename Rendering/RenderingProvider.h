@@ -49,6 +49,7 @@ namespace KritiaEngine::Rendering{
 		static bool msaaEnabled;
 		static bool gammaCorrectionEnabled;
 		static bool shadowEnabled;
+		static Matrix4x4 projection;
 	private:
 		static void CreateSkybox();
 		static float skyboxVertices[108];

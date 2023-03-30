@@ -455,6 +455,10 @@ void KritiaEngine::Matrix4x4::SetEntry(int row, int column, int newEntry)
 	entries[column][row] = newEntry;
 }
 
+float* KritiaEngine::Matrix4x4::GetPtr() {
+	return entries[0];
+}
+
 Matrix4x4 KritiaEngine::Matrix4x4::Perspective(float fovy, float aspect, float near, float far)
 {
 	if (Settings::UseGLM) {
