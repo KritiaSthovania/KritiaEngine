@@ -1,7 +1,23 @@
 #pragma once
+
 #include "MathStructs.h"
+#include <sstream>
+
+namespace KritiaEngine::Editor::GUI {
+	class ConsoleWindow;
+}
 
 namespace KritiaEngine {
+	class Debug {
+		friend class KritiaEngine::Editor::GUI::ConsoleWindow;
+	public:
+		template <typename T> static void Log(const T& message) {
+			logStream << message << std::endl;
+		}
+	private:
+		static std::ostringstream logStream;
+	};
+
 	struct Color {
 		friend std::ostream& operator<<(std::ostream& cout, Color& color);
 

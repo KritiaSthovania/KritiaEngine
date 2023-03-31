@@ -29,7 +29,7 @@ KritiaEngine::Vector2::operator glm::vec2() const {
 	return glm::vec2(x, y);
 }
 
-std::ostream& KritiaEngine::operator<<(std::ostream& cout, const Vector2& vec) {
+std::ostringstream& KritiaEngine::operator<<(std::ostringstream& cout, const Vector2& vec) {
 	cout << "(" << vec.x << ", " << vec.y << ")";
 	return cout;
 }
@@ -155,7 +155,7 @@ KritiaEngine::Vector3::operator std::vector<float>() const {
 	return std::vector<float>({ x,y,z });
 }
 
-std::ostream& KritiaEngine::operator<<(std::ostream& cout, const Vector3& vec) {
+std::ostringstream& KritiaEngine::operator<<(std::ostringstream& cout, const Vector3& vec) {
 	cout << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
 	return cout;
 }
@@ -268,7 +268,7 @@ KritiaEngine::Vector4::operator std::vector<float>() const {
 	return std::vector<float>({ x, y, z, w });
 }
 
-std::ostream& KritiaEngine::operator<<(std::ostream& cout, const Vector4& vec) {
+std::ostringstream& KritiaEngine::operator<<(std::ostringstream& cout, const Vector4& vec) {
 	cout << "(" << vec.x << ", " << vec.y << ", " << vec.z << ", " << vec.w << ")";
 	return cout;
 }
@@ -660,7 +660,7 @@ bool KritiaEngine::Quaternion::operator!=(const Quaternion& quat) {
 	return !(*this == quat);
 }
 
-std::ostream& KritiaEngine::operator<<(std::ostream& cout, const Quaternion& quat) {
+std::ostringstream& KritiaEngine::operator<<(std::ostringstream& cout, const Quaternion& quat) {
 	cout << "(" << quat.x << ", " << quat.y << ", " << quat.z << ", " << quat.w << ")";
 	return cout;
 }

@@ -22,7 +22,7 @@ namespace KritiaEngine::Editor {
 		}
 		const char* title;
 	protected:
-		virtual void OnGUI();
+		virtual void OnGUI() = 0;
 		/// <summary>
 		/// Define defualt configuration here, e.g. size, pos
 		/// </summary>

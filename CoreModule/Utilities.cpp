@@ -98,3 +98,6 @@ Color KritiaEngine::operator*(float a, const Color& color)
 	return Color(a * color.r, a * color.g, a * color.b, a * color.a);
 }
 
+//----------------------Debug---------------------
+std::ostringstream KritiaEngine::Debug::logStream = std::ostringstream();
+

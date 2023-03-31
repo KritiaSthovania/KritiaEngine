@@ -1,9 +1,10 @@
 #pragma once
 #include <pch.h>
+#include <sstream>
 
 namespace KritiaEngine {
 	struct Vector2 {
-		friend std::ostream& operator<<(std::ostream& cout, const Vector2& vec);
+		friend std::ostringstream& operator<<(std::ostringstream& cout, const Vector2& vec);
 	public:
 		Vector2(float x, float y);
 		Vector2(const glm::vec2& vec);
@@ -14,7 +15,7 @@ namespace KritiaEngine {
 	};
 
 	struct Vector3 {
-		friend std::ostream& operator<<(std::ostream& cout, const Vector3& vec);
+		friend std::ostringstream& operator<<(std::ostringstream& cout, const Vector3& vec);
 	public:
 		Vector3(float x, float y, float z);
 		Vector3(const glm::vec3 &vec);
@@ -46,7 +47,7 @@ namespace KritiaEngine {
 
 	};
 	struct Vector4 {
-		friend std::ostream& operator<<(std::ostream& cout, const Vector4& vec);
+		friend std::ostringstream& operator<<(std::ostringstream& cout, const Vector4& vec);
 	public:
 		Vector4(float x, float y, float z, float w);
 		Vector4();
@@ -176,7 +177,7 @@ namespace KritiaEngine {
 
 
 	struct Quaternion {
-		friend std::ostream& operator<<(std::ostream& cout, const Quaternion& quat);
+		friend std::ostringstream& operator<<(std::ostringstream& cout, const Quaternion& quat);
 	public:
 		/// <summary>
 		/// The identity. Better use Quaternion::Identity()

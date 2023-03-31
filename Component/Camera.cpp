@@ -1,7 +1,6 @@
 #include "Camera.h"
 #include "../CoreModule/Input.h"
 #include "../CoreModule/Time.h"
-#include "../CoreModule/Debug.h"
 #include "../CoreModule/Mathf.h"
 #include "Transform.h"
 using namespace KritiaEngine;
@@ -12,13 +11,14 @@ std::shared_ptr<Camera> Camera::editorCamera = nullptr;
 
 // Editor-Only
 void Camera::EditorCameraUpdate() {
-    //控制视角和移动
-    GLFWwindow* window = Input::GetWindow();
-    float deltaTime = Time::deltaTime;
-    EditorProcessMouseScroll(Input::GetMouseScrollOffset());
-    EditorMove();
-    if (Input::GetMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
-        EditorProcessMouseMovement(Input::GetMouseXOffset(), Input::GetMouseYOffset(), true);
+    if (!(ImGui::GetIO().WantCaptureMouse)) {
+        GLFWwindow* window = Input::GetWindow();
+        float deltaTime = Time::deltaTime;
+        EditorProcessMouseScroll(Input::GetMouseScrollOffset());
+        EditorMove();
+        if (Input::GetMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
+            EditorProcessMouseMovement(Input::GetMouseXOffset(), Input::GetMouseYOffset(), true);
+        }
     }
 }
 
@@ -91,7 +91,7 @@ void Camera::EditorMove() {
     }
     if (Input::GetKeyDown(GLFW_KEY_D)) {
         Position += Right * velocity;
-    }   
+    }  
 }
 
 //only in editor
@@ -122,8 +122,8 @@ void Camera::EditorProcessMouseScroll(float yoffset) {
     if (Fovy < 1.0f) {
         Fovy = 1.0f;
     }
-    if (Fovy > 45.0f) {
-        Fovy = 45.0f;
+    if (Fovy > 90.0f) {
+        Fovy = 90.0f;
     }
 }
 

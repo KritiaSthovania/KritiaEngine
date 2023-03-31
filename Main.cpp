@@ -1,5 +1,4 @@
 ﻿#include "Main.h"
-#include "CoreModule/Debug.h"
 #include "Rendering/RenderingProvider.h"
 #include "CoreModule/Input.h"
 #include "CoreModule/SceneManager.h"

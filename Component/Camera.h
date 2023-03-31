@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "../Component/MonoBehaviour.h"
 #include "../CoreModule/MathStructs.h"
+#include <imgui/imgui.h>
 
 namespace KritiaEngine {
 	class Camera : public Behaviour{

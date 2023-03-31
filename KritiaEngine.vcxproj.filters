@@ -21,9 +21,6 @@
     <ClCompile Include="Rendering\Shader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="CoreModule\Debug.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="CoreModule\GameObject.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -162,15 +159,15 @@
     <ClCompile Include="CoreModule\Manager\ResourceManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Editor\EditorWindows\ConsoleWindow.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Shader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Debug.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CoreModule\GameObject.h">
@@ -336,6 +333,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="includes\json\json.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorWindows\ConsoleWindow.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -3,6 +3,7 @@
 #include "EditorWindows/HierachyWindow.h"
 #include "EditorWindows/InspectorWindow.h"
 #include "EditorWindows/ProjectFileExplorer.h"
+#include "EditorWindows/ConsoleWindow.h"
 #include "MainMenuBarFunction.h"
 #include "../CoreModule/Settings.h"
 #include "../CoreModule/Input.h"
@@ -52,7 +53,7 @@ void KritiaEngine::Editor::GUI::ImguiManager::RenderGUI() {
 		for (std::shared_ptr<EditorWindow> window : editorWindows) {
 			//window->Config();
 			ImGui::SetNextWindowBgAlpha(1);
-			ImGui::Begin(window->title, 0, window->GetFlags());
+			ImGui::Begin(window->title, 0, window->GetFlags() | ImGuiWindowFlags_AlwaysAutoResize);
 			window->OnGUI();
 			ImGui::End();
 		}
@@ -90,6 +91,7 @@ void KritiaEngine::Editor::GUI::ImguiManager::CreateEditorWindows() {
 	EditorWindow::GetWindow<HierachyWindow>("Hiearachy");
 	EditorWindow::GetWindow<InspectorWindow>("Inspector");
 	EditorWindow::GetWindow<ProjectFileExplorer>("Project");
+	EditorWindow::GetWindow<ConsoleWindow>("Console");
 }
 
 void KritiaEngine::Editor::GUI::ImguiManager::RenderMainMenuBar() {
@@ -131,7 +133,7 @@ void KritiaEngine::Editor::GUI::ImguiManager::ShowImGuizmo(GameObject* go) {
 	}
 	ImGuizmo::AllowAxisFlip(false);
 	ImGuizmo::SetRect(0, 0, Settings::ScreenWidth, Settings::ScreenHeight);
-	ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
+	//ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
 	ImGuizmo::RecomposeMatrixFromComponents(&(go->Transform()->position.x), &(go->Transform()->rotationEuler.x), &(go->Transform()->scale.x), model.GetPtr());
 	ImGuizmo::Manipulate(Camera::current->GetViewMatrix().GetPtr(), Rendering::RenderingProvider::projection.GetPtr(), operation, mode, model.GetPtr());
 	ImGuizmo::DecomposeMatrixToComponents(model.GetPtr(), &(go->Transform()->position.x), &(go->Transform()->rotationEuler.x), &(go->Transform()->scale.x));

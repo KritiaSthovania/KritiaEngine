@@ -137,6 +137,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Component\ComponentFactory.cpp" />
+    <ClCompile Include="Editor\EditorWindows\ConsoleWindow.cpp" />
     <ClCompile Include="CoreModule\Manager\BehaviourManager.cpp" />
     <ClCompile Include="Editor\EditorWindow.cpp" />
     <ClCompile Include="Editor\AssetDatabase.cpp" />
@@ -149,7 +150,6 @@
     <ClCompile Include="Component\Renderer\MeshRenderer.cpp" />
     <ClCompile Include="Component\Renderer\Renderer.cpp" />
     <ClCompile Include="Component\Transform.cpp" />
-    <ClCompile Include="CoreModule\Debug.cpp" />
     <ClCompile Include="CoreModule\GameObject.cpp" />
     <ClCompile Include="CoreModule\Input.cpp" />
     <ClCompile Include="CoreModule\Lighting.cpp" />
@@ -188,6 +188,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\ComponentFactory.h" />
+    <ClInclude Include="Editor\EditorWindows\ConsoleWindow.h" />
     <ClInclude Include="CoreModule\Interface\IInspectable.h" />
     <ClInclude Include="CoreModule\Interface\ISerializable.h" />
     <ClInclude Include="CoreModule\Manager\BehaviourManager.h" />
@@ -202,7 +203,6 @@
     <ClInclude Include="Component\Renderer\MeshRenderer.h" />
     <ClInclude Include="Component\Renderer\Renderer.h" />
     <ClInclude Include="Component\Transform.h" />
-    <ClInclude Include="CoreModule\Debug.h" />
     <ClInclude Include="CoreModule\GameObject.h" />
     <ClInclude Include="CoreModule\Input.h" />
     <ClInclude Include="CoreModule\Lighting.h" />

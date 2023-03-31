@@ -84,7 +84,7 @@ void KritiaEngine::Transform::ComponentUpdate() {
 void KritiaEngine::Transform::OnInspector() {
 	ImguiAlias::FloatField3("Position", &position.x);
 	ImguiAlias::FloatField3("Rotation", &rotationEuler.x);
-	ImguiAlias::FloatField3("Scale", &scale.x);
+	ImguiAlias::FloatField3("Scale   ", &scale.x);
 }
 
 std::string KritiaEngine::Transform::SerializeToJson() {
