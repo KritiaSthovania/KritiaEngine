@@ -31,7 +31,7 @@
 
 - [x] GUI
 - 基于ImGui-Docking
-- Hierachy, Inspector, AssetExplorer三个窗口以及MainMenuBar和Settings窗口
+- Hierachy, Inspector, AssetExplorer, Console四个窗口以及MainMenuBar和Settings窗口
 - __移动、旋转以及缩放的Widget目前无法使用__，并且ImGuizmo的实现和我现在的实现不太方便耦合，考虑之后自己写一个代替。
 
 - [x] 资源管理
