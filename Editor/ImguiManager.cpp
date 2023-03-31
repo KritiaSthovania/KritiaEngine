@@ -10,6 +10,7 @@
 #include "../Component/Camera.h"
 #include "../Component/Transform.h"
 #include "../Rendering/RenderingProvider.h"
+#include "../CoreModule/Manager/ResourceManager.h"
 #include <nfd/nfd.h>
 
 using namespace KritiaEngine::Editor::GUI;
@@ -60,7 +61,8 @@ void KritiaEngine::Editor::GUI::ImguiManager::RenderGUI() {
 
 		// Not Working
 		GameObject* go = dynamic_cast<GameObject*>(currentSelectedInspectable);
-		if (go != nullptr) {
+		// go is GameObject but not prefab
+		if (go != nullptr && (go->guid != "" ? Manager::ResourceManager::prefabs[go->guid] != go : false)) {
 			ShowImGuizmo(go);
 		} else {
 			ImGuizmo::Enable(false);

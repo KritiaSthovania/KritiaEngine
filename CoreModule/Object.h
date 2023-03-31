@@ -5,9 +5,15 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+
 namespace KritiaEngine{
+	namespace Editor::GUI {
+		class ImguiManager;
+	}
+
 	class Object
 	{
+		friend class KritiaEngine::Editor::GUI::ImguiManager;
 	public:
 		static void Destroy(Object* obj);
 		std::string name;

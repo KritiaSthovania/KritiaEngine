@@ -1,5 +1,7 @@
 # KritiaEngine
 一个十分简陋迷你游戏引擎，用于锻炼C++能力以及检验自身所学。在API上尽量模仿了Unity，原因是我个人有Unity使用经验。
+![截图](/Image/ScreenShot_Engine.png)
+
 ## 环境
 - Visual Studio 2022
 - C++ 20

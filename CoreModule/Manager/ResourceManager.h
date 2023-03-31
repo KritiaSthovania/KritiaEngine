@@ -9,10 +9,15 @@ namespace KritiaEngine::Editor {
 	class AssetDatabase;
 }
 
+namespace KritiaEngine::Editor::GUI {
+	class ImguiManager;
+}
+
 namespace KritiaEngine::Manager {
 
 	class ResourceManager {
 		friend class KritiaEngine::Editor::AssetDatabase;
+		friend class KritiaEngine::Editor::GUI::ImguiManager;
 	public:
 		enum class MeshPrimitive {
 			Cube
