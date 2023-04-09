@@ -136,6 +136,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Component\Collider\BoxCollider.cpp" />
+    <ClCompile Include="Component\Collider\Collider.cpp" />
     <ClCompile Include="Component\ComponentFactory.cpp" />
     <ClCompile Include="Editor\EditorWindows\ConsoleWindow.cpp" />
     <ClCompile Include="CoreModule\Manager\BehaviourManager.cpp" />
@@ -180,6 +182,8 @@
     <ClCompile Include="CoreModule\Manager\RendererManager.cpp" />
     <ClCompile Include="Editor\MainMenuBarFunction.cpp" />
     <ClCompile Include="Editor\EditorWindows\ProjectFileExplorer.cpp" />
+    <ClCompile Include="CoreModule\Physics.cpp" />
+    <ClCompile Include="CoreModule\Manager\PhysicsManager.cpp" />
     <ClCompile Include="Rendering\OpenGLRendering.cpp" />
     <ClCompile Include="Rendering\Shader.cpp" />
     <ClCompile Include="Editor\EditorApplication.cpp" />
@@ -187,6 +191,8 @@
     <ClCompile Include="CoreModule\Manager\ResourceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Component\Collider\BoxCollider.h" />
+    <ClInclude Include="Component\Collider\Collider.h" />
     <ClInclude Include="Component\ComponentFactory.h" />
     <ClInclude Include="Editor\EditorWindows\ConsoleWindow.h" />
     <ClInclude Include="CoreModule\Interface\IInspectable.h" />
@@ -240,6 +246,8 @@
     <ClInclude Include="Component\MeshFilter.h" />
     <ClInclude Include="CoreModule\Manager\RendererManager.h" />
     <ClInclude Include="Editor\MainMenuBarFunction.h" />
+    <ClInclude Include="CoreModule\Physics.h" />
+    <ClInclude Include="CoreModule\Manager\PhysicsManager.h" />
     <ClInclude Include="Rendering\OpenGLRendering.h" />
     <ClInclude Include="Rendering\Shader.h" />
     <ClInclude Include="Editor\EditorApplication.h" />

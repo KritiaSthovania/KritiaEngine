@@ -8,6 +8,8 @@
 #include "../Editor/EditorApplication.h"
 #include <json/json.hpp>
 
+// #define Generate
+
 namespace KritiaEngine::SceneManagement {
 	class Scene : private IFileSerializable
 	{

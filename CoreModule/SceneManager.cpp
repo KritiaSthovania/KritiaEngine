@@ -21,12 +21,16 @@ bool SceneManager::inEditor = false;
 void KritiaEngine::SceneManagement::SceneManager::Initialize(bool inEditor)
 {
 	activeScene = CreateScene("New Scene");
+#ifdef  Generate
+	LoadScene(activeScene);
+#else
 	if (Settings::LastOpenedScenePath != "") {
 		activeScene->path = Settings::LastOpenedScenePath;
 		LoadScene(activeScene->path);
 	} else {
 		LoadScene(activeScene);
 	}
+#endif //  Generate
 	SceneManager::inEditor = inEditor;
 	if (inEditor) {
 		Camera::editorCamera = std::shared_ptr<Camera>(new Camera());

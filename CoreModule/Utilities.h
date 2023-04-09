@@ -19,7 +19,7 @@ namespace KritiaEngine {
 	};
 
 	struct Color {
-		friend std::ostream& operator<<(std::ostream& cout, Color& color);
+		friend std::ostream& operator<<(std::ostringstream& cout, Color& color);
 
 	public:
 		/// <summary>
@@ -49,5 +49,20 @@ namespace KritiaEngine {
 		void operator*= (float a);
 		void operator/= (float a);
 		operator std::vector<float>() const;
+	};
+
+	/// <summary>
+	/// An Axis-Aligned Bounding Box (AABB)
+	/// </summary>
+	struct Bound {
+		friend std::ostream& operator<<(std::ostringstream& cout, Bound& bound);
+	public:
+		Vector3 center;
+		// two times of the extent
+		Vector3 size;
+		// half of the size
+		Vector3 GetExtent();
+		Vector3 GetMin();
+		Vector3 GetMax();
 	};
 }

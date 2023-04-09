@@ -88,7 +88,7 @@ KritiaEngine::Color::operator std::vector<float>() const {
 	return std::vector<float>({ r,g,b,a });
 }
 
-std::ostream& KritiaEngine::operator<<(std::ostream& cout, Color& color) {
+std::ostream& KritiaEngine::operator<<(std::ostringstream& cout, Color& color) {
 	cout << "(" << color.r << ", " << color.g << ", " << color.b << ", " << color.a << ")";
 	return cout;
 }
@@ -101,3 +101,24 @@ Color KritiaEngine::operator*(float a, const Color& color)
 //----------------------Debug---------------------
 std::ostringstream KritiaEngine::Debug::logStream = std::ostringstream();
 
+Vector3 KritiaEngine::Bound::GetExtent() {
+	return 1.f / 2 * size;
+}
+
+Vector3 KritiaEngine::Bound::GetMin() {
+	return center - 1.f / 2 * size;
+}
+
+Vector3 KritiaEngine::Bound::GetMax() {
+	return center + 1.f / 2 * size;
+}
+
+
+//--------------------------Bound-------------------------------
+std::ostream& KritiaEngine::operator<<(std::ostringstream& cout, Bound& bound) {
+	cout << "Center: ";
+	cout << bound.center;
+	cout << "Size: ";
+	cout << bound.size;
+	return cout;
+}

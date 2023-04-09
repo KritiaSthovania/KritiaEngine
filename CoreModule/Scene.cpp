@@ -36,6 +36,21 @@ KritiaEngine::SceneManagement::Scene::~Scene() {
 }
 
 void KritiaEngine::SceneManagement::Scene::Initialize() {
+#ifdef  Generate
+    std::ifstream input(path);
+    if (input.good()) {
+        // An serialized scene
+        input.close();
+        DeserializeFromPath(path);
+
+    } else {
+        input.close();
+        // A new scene;
+        InitializeCamera();
+        InitializeLighting();
+        InitializeGameObjects();
+    }
+#else
     std::ifstream input(path);
     if (input.good()) {
         // An serialized scene
@@ -50,6 +65,7 @@ void KritiaEngine::SceneManagement::Scene::Initialize() {
         //InitializeGameObjects();
     }
     //InitializeGameObjects();
+#endif //  Generate
 }
 
 void KritiaEngine::SceneManagement::Scene::InitializeCamera()

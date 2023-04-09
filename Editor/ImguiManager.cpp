@@ -16,7 +16,7 @@
 using namespace KritiaEngine::Editor::GUI;
 using namespace KritiaEngine::Editor;
 
-const char* ImguiManager::GlslVersion = "#version 130";
+const char* ImguiManager::GlslVersion = "#version 330";
 bool ImguiManager::inEditor = true;
 float ImguiManager::UIScaleFactor = 2;
 KritiaEngine::IInspectable* ImguiManager::currentSelectedInspectable;
@@ -130,9 +130,6 @@ void KritiaEngine::Editor::GUI::ImguiManager::ShowImGuizmo(GameObject* go) {
 	model = Mathf::Translate(model, go->Transform()->position);
 	model *= Quaternion::ToRotationMatrix(go->Transform()->rotation);
 	model = Mathf::Scale(model, go->Transform()->scale);
-	if(ImGuizmo::IsUsing()) {
-		std::cout << "IsUsing";
-	}
 	ImGuizmo::AllowAxisFlip(false);
 	ImGuizmo::SetRect(0, 0, Settings::ScreenWidth, Settings::ScreenHeight);
 	//ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());

@@ -6,6 +6,7 @@
 #include "CoreModule/Settings.h"
 #include "Editor/ImguiManager.h"
 #include "CoreModule/Manager/ResourceManager.h"
+#include "CoreModule/Manager/PhysicsManager.h"
 
 using namespace KritiaEngine;
 using namespace KritiaEngine::SceneManagement;
@@ -54,6 +55,7 @@ void Update() {
     if (editor) {
         Camera::editorCamera->EditorCameraUpdate();
     }
+    PhysicsManager::PhysicsUpdate();
 }
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
@@ -109,5 +111,6 @@ void InitializeCoreModules() {
     Input::Initialize(window);
     SceneManager::Initialize(editor);
     RenderingProvider::Initialize();
+    PhysicsManager::Initialize();
 }
 

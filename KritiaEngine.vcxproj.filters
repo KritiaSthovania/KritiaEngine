@@ -162,6 +162,18 @@
     <ClCompile Include="Editor\EditorWindows\ConsoleWindow.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="CoreModule\Physics.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\Collider\Collider.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\Collider\BoxCollider.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Manager\PhysicsManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h">
@@ -336,6 +348,18 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Editor\EditorWindows\ConsoleWindow.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Physics.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\Collider\Collider.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\Collider\BoxCollider.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Manager\PhysicsManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
