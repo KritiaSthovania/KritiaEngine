@@ -5,11 +5,12 @@ namespace KritiaEngine {
 	public:
 		BoxCollider(GameObject* gameObject);
 		// center in local space, alias for bound.center
-		Vector3& Center();
+		Vector3 center;
 		// size in local space, alias for bound.size (relative to Transform.scale) 
-		Vector3& Size();
+		Vector3 size;
 	private:
 		// Í¨¹ý Collider ¼Ì³Ð
+		virtual void ComponentUpdate() override;
 		virtual void OnInspector() override;
 		virtual std::string SerializeToJson() override;
 		virtual void DeserializeFromJson(const json& json) override;

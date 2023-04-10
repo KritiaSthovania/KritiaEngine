@@ -5,10 +5,12 @@
 namespace KritiaEngine {
 	class Collider : public Behaviour {
 	public:
-		Bound bound;
+		const Bound& GetBound() const;
 		//virtual void OnCollisionEnter() = 0;
 		//virtual void OnCollisionStay() = 0;
 		//virtual void OnCollisionExit() = 0;
+	protected:
+		Bound bound;
 	private:
 		virtual void OnObjectDestroy() override;
 	};

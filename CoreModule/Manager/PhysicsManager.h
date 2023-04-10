@@ -13,6 +13,7 @@ namespace KritiaEngine::Manager {
 			Min = 0,
 			Max = 1
 		};
+
 		struct AABBPoint {
 			Collider* collider;
 			MinMax pos;

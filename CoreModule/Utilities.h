@@ -61,8 +61,8 @@ namespace KritiaEngine {
 		// two times of the extent
 		Vector3 size;
 		// half of the size
-		Vector3 GetExtent();
-		Vector3 GetMin();
-		Vector3 GetMax();
+		Vector3 GetExtent() const;
+		Vector3 GetMin() const;
+		Vector3 GetMax() const;
 	};
 }

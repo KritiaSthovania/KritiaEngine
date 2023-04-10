@@ -4,11 +4,15 @@ using namespace KritiaEngine;
 
 void KritiaEngine::Editor::GUI::ConsoleWindow::OnGUI() {
 	if (Debug::logStream.str() != "") {
-		logStrings.push_back(Debug::logStream.str());
+		std::stringstream ss(Debug::logStream.str());
+		std::string item;
+		while (std::getline(ss, item, '\n')) {
+			logStrings.push_back(item);
+		}		
 		Debug::logStream.str("");
 	}
 	ImGui::BeginMenuBar();
-	ImGui::Selectable(std::format("Log: {}", std::to_string(logStrings.size())).c_str());
+	ImGui::Text(std::format("Log: {}", std::to_string(logStrings.size())).c_str());
 	if (ImGui::Button("Clear")) {
 		logStrings.clear();
 	}

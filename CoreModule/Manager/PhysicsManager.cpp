@@ -1,6 +1,7 @@
 #include "PhysicsManager.h"
 #include "../../Component/Collider/Collider.h"
 #include "../Time.h"
+#include "../../Component/Transform.h"
 #include <algorithm>
 using namespace KritiaEngine;
 using namespace KritiaEngine::Manager;
@@ -16,13 +17,13 @@ std::vector<AABBPoint> PhysicsManager::pointsY = std::vector<AABBPoint>();
 std::vector<AABBPoint> PhysicsManager::pointsZ = std::vector<AABBPoint>();
 
 void KritiaEngine::Manager::PhysicsManager::AddCollider(Collider* collider) {
-		colliders.push_back(collider);
-		pointsX.push_back(AABBPoint(collider, MinMax::Min, collider->bound.GetMin().x));
-		pointsX.push_back(AABBPoint(collider, MinMax::Max, collider->bound.GetMax().x));
-		pointsY.push_back(AABBPoint(collider, MinMax::Min, collider->bound.GetMin().y));
-		pointsY.push_back(AABBPoint(collider, MinMax::Max, collider->bound.GetMax().y));
-		pointsZ.push_back(AABBPoint(collider, MinMax::Min, collider->bound.GetMin().z));
-		pointsZ.push_back(AABBPoint(collider, MinMax::Max, collider->bound.GetMax().z));
+	colliders.push_back(collider);
+	pointsX.push_back(AABBPoint(collider, MinMax::Min, collider->GetBound().GetMin().x));
+	pointsX.push_back(AABBPoint(collider, MinMax::Max, collider->GetBound().GetMax().x));
+	pointsY.push_back(AABBPoint(collider, MinMax::Min, collider->GetBound().GetMin().y));
+	pointsY.push_back(AABBPoint(collider, MinMax::Max, collider->GetBound().GetMax().y));
+	pointsZ.push_back(AABBPoint(collider, MinMax::Min, collider->GetBound().GetMin().z));
+	pointsZ.push_back(AABBPoint(collider, MinMax::Max, collider->GetBound().GetMax().z));
 }
 
 void KritiaEngine::Manager::PhysicsManager::RemoveCollider(Collider* collider) {
@@ -32,7 +33,7 @@ void KritiaEngine::Manager::PhysicsManager::RemoveCollider(Collider* collider) {
 
 void KritiaEngine::Manager::PhysicsManager::PhysicsUpdate() {
 	if (timer > stepSize) {
-
+		CheckCollision();
 	}
 	collisionPair.clear();
 	timer += Time::deltaTime;
@@ -99,13 +100,21 @@ void KritiaEngine::Manager::PhysicsManager::CheckCollision() {
 
 	// there is a collision iff it is observed on all three axes.
 	for (std::pair<Collider*, Collider*> collision : collisionX) {
-		if (std::find(collisionY.begin(), collisionY.end(), collision) != collisionY.end() && std::find(collisionZ.begin(), collisionZ.end(), collision) != collisionZ.end()) {
+		std::pair<Collider*, Collider*> collisionReversed = std::pair<Collider*, Collider*>(collision.second, collision.first);
+		if ((std::find(collisionY.begin(), collisionY.end(), collision) != collisionY.end() || std::find(collisionY.begin(), collisionY.end(), collisionReversed) != collisionY.end())
+		&& (std::find(collisionZ.begin(), collisionZ.end(), collision) != collisionZ.end() || std::find(collisionZ.begin(), collisionZ.end(), collisionReversed) != collisionZ.end())) {
 			collisionPair.push_back(collision);
-		}
+		} 
 	}
 }
 
 void KritiaEngine::Manager::PhysicsManager::SortAABB() {
+	// update value
+	for (int i = 0; i < pointsX.size(); i++) {
+		pointsX[i].value = pointsX[i].pos == Min ? pointsX[i].collider->GetBound().GetMin().x : pointsX[i].collider->GetBound().GetMax().x;
+		pointsY[i].value = pointsY[i].pos == Min ? pointsY[i].collider->GetBound().GetMin().y : pointsY[i].collider->GetBound().GetMax().y;
+		pointsZ[i].value = pointsZ[i].pos == Min ? pointsZ[i].collider->GetBound().GetMin().z : pointsZ[i].collider->GetBound().GetMax().z;
+	}
 	std::sort(pointsX.begin(), pointsX.end());
 	std::sort(pointsY.begin(), pointsY.end());
 	std::sort(pointsZ.begin(), pointsZ.end());
