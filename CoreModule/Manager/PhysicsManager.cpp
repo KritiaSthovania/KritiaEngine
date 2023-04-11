@@ -46,6 +46,10 @@ void KritiaEngine::Manager::PhysicsManager::Initialize() {
 // Sweep and Prune using AABB
 void KritiaEngine::Manager::PhysicsManager::CheckCollision() {
 	SortAABB();
+	SweepAndPrune();
+}
+
+void KritiaEngine::Manager::PhysicsManager::SweepAndPrune() {
 	std::list<AABBPoint> tempX = std::list<AABBPoint>();
 	std::list<AABBPoint> tempY = std::list<AABBPoint>();
 	std::list<AABBPoint> tempZ = std::list<AABBPoint>();
@@ -53,7 +57,7 @@ void KritiaEngine::Manager::PhysicsManager::CheckCollision() {
 	std::list<std::pair<Collider*, Collider*>> collisionY = std::list<std::pair<Collider*, Collider*>>();
 	std::list<std::pair<Collider*, Collider*>> collisionZ = std::list<std::pair<Collider*, Collider*>>();
 	// Three point lists have the same size, so we use only one loop
-    // #pragma omp parallel for
+	// #pragma omp parallel for
 	for (int i = 0; i < pointsX.size(); i++) {
 		if (pointsX[i].pos == Min) {
 			tempX.push_back(pointsX[i]);
@@ -102,9 +106,9 @@ void KritiaEngine::Manager::PhysicsManager::CheckCollision() {
 	for (std::pair<Collider*, Collider*> collision : collisionX) {
 		std::pair<Collider*, Collider*> collisionReversed = std::pair<Collider*, Collider*>(collision.second, collision.first);
 		if ((std::find(collisionY.begin(), collisionY.end(), collision) != collisionY.end() || std::find(collisionY.begin(), collisionY.end(), collisionReversed) != collisionY.end())
-		&& (std::find(collisionZ.begin(), collisionZ.end(), collision) != collisionZ.end() || std::find(collisionZ.begin(), collisionZ.end(), collisionReversed) != collisionZ.end())) {
+			&& (std::find(collisionZ.begin(), collisionZ.end(), collision) != collisionZ.end() || std::find(collisionZ.begin(), collisionZ.end(), collisionReversed) != collisionZ.end())) {
 			collisionPair.push_back(collision);
-		} 
+		}
 	}
 }
 

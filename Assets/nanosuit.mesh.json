@@ -1,1 +1,1 @@
-{"Type":"Mesh","Name":"nanosuit","Guid":"e0011cfe-f5a6-4ac5-8330-19e71161eb9a","IsPrimitive":false,"Path":"D:\\VSProject\\KritiaEngine\\Assets\\Models\\nanosuit.obj","Number of Submeshes":7}
+{"Type":"Mesh","Name":"nanosuit","Guid":"236aef79-587a-4501-947b-0cc045fbba6c","IsPrimitive":false,"Path":"D:\\VSProject\\KritiaEngine\\Assets\\Models\\nanosuit.obj","Number of Submeshes":7,"Bound Center":[-8.535385131835938e-05,7.706135272979736,0.00012153387069702148],"Bound Size":[7.988753318786621,15.41218090057373,3.4396328926086426]}

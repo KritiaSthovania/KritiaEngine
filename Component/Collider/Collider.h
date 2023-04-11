@@ -6,6 +6,7 @@ namespace KritiaEngine {
 	class Collider : public Behaviour {
 	public:
 		const Bound& GetBound() const;
+		bool isTrigger = false;
 		//virtual void OnCollisionEnter() = 0;
 		//virtual void OnCollisionStay() = 0;
 		//virtual void OnCollisionExit() = 0;

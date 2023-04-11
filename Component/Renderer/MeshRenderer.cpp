@@ -22,7 +22,7 @@ MeshRenderer::MeshRenderer(GameObject* gameObject) {
 void KritiaEngine::MeshRenderer::PreInitializeMaterial() {
 	materials.clear();
 	// In case there is already a MeshFilter on the object, check whether it should be in the transparent queue or opaque queue
-	if (this->gameObject->GetComponent<MeshFilter>() != nullptr && this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size() > 0) {
+	if (this->gameObject->GetComponent<MeshFilter>() != nullptr && this->gameObject->GetComponent<MeshFilter>()->mesh != nullptr && this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size() > 0) {
 		for (int i = 0; i < this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(); i++) {
 			materials.push_back(this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials[i]);
 			if (this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials[i]->renderMode == Material::RenderMode::Transparent) {
@@ -38,7 +38,7 @@ void MeshRenderer::InitializeMaterial() {
 	// At the moment the renderer was added, the mesh has not been added, so we must add the materials of the mesh first.
 	if (!preInitialized) {
 		materials.clear();
-		if (this->gameObject->GetComponent<MeshFilter>() != nullptr && this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size() > 0) {
+		if (this->gameObject->GetComponent<MeshFilter>() != nullptr && this->gameObject->GetComponent<MeshFilter>()->mesh != nullptr && this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size() > 0) {
 			for (int i = 0; i < this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(); i++) {
 				materials.push_back(this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials[i]);
 				if (this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials[i]->renderMode == Material::RenderMode::Transparent) {
@@ -128,7 +128,7 @@ void KritiaEngine::MeshRenderer::OnObjectDestroy() {
 }
 
 void MeshRenderer::Render(const std::shared_ptr<KritiaEngine::Camera>& camera) {
-	if (gameObject->GetComponent<MeshFilter>() != nullptr) {
+	if (gameObject->GetComponent<MeshFilter>() != nullptr && gameObject->GetComponent<MeshFilter>()->mesh != nullptr) {
 		if (!initialized) {
 			Initialize();
 		}
@@ -159,7 +159,7 @@ void MeshRenderer::Render(const std::shared_ptr<KritiaEngine::Camera>& camera) {
 
 
 void KritiaEngine::MeshRenderer::RenderShadowMap(Light* light) {
-	if (gameObject->GetComponent<MeshFilter>() != nullptr) {
+	if (gameObject->GetComponent<MeshFilter>() != nullptr && gameObject->GetComponent<MeshFilter>()->mesh != nullptr) {
 		if (light->castingShadow) {
 			if (!initialized) {
 				Initialize();

@@ -29,6 +29,7 @@ namespace KritiaEngine::Manager {
 	private:
 		// Check collisions using Sweep and Prune (Collider::bound)
 		static void CheckCollision();
+		static void SweepAndPrune();
 		static void SortAABB();
 		static float stepSize;
 		static float timer;

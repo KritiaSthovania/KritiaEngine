@@ -101,6 +101,11 @@ Color KritiaEngine::operator*(float a, const Color& color)
 //----------------------Debug---------------------
 std::ostringstream KritiaEngine::Debug::logStream = std::ostringstream();
 
+KritiaEngine::Bound::Bound() {
+	center = Vector3::Zero();
+	size = Vector3(1, 1, 1);
+}
+
 Vector3 KritiaEngine::Bound::GetExtent() const {
 	return 0.5 * size;
 }

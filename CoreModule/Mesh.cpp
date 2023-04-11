@@ -11,6 +11,8 @@ KritiaEngine::Mesh::Mesh(const std::vector<std::vector<Vertex>>& vertices, const
     this->submeshVertices = vertices;
     this->submeshIndices = indices;
     submeshMaterials = materials;
+    bound.center = Vector3(0, 0, 0);
+    bound.size = Vector3(1, 1, 1);
 }
 
 KritiaEngine::Mesh KritiaEngine::Mesh::Cube() {
@@ -139,6 +141,8 @@ std::string KritiaEngine::Mesh::SerializeToJson() {
     json["IsPrimitive"] = isPrimitive;
     json["Path"] = path;
     json["Number of Submeshes"] = submeshSize;
+    json["Bound Center"] = { bound.center.x, bound.center.y, bound.center.z };
+    json["Bound Size"] = { bound.size.x, bound.size.y, bound.size.z };
     if (isPrimitive) {
         for (int i = 0; i < submeshSize; i++) {
             json["Submesh" + std::to_string(i)] = SubmeshSerialize(i);
@@ -189,6 +193,8 @@ std::shared_ptr<Mesh> KritiaEngine::Mesh::DeserializeFromJson(const json& json) 
     mesh->path = json["Path"];
     mesh->isPrimitive = json["IsPrimitive"];
     mesh->submeshSize = json["Number of Submeshes"];
+    mesh->bound.center = Vector3(json["Bound Center"][0], json["Bound Center"][1], json["Bound Center"][2]);
+    mesh->bound.size = Vector3(json["Bound Size"][0], json["Bound Size"][1], json["Bound Size"][2]);
     if (mesh->isPrimitive) {
         mesh->submeshVertices.resize(mesh->submeshSize);
         mesh->submeshIndices.resize(mesh->submeshSize);

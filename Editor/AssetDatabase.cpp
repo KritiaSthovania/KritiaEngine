@@ -3,6 +3,7 @@
 #include "../CoreModule/Material.h"
 #include "../CoreModule/Manager/ResourceManager.h"
 #include "EditorApplication.h"
+#include "../CoreModule/Utilities.h"
 #include <fstream>
 using namespace KritiaEngine::Editor;
 using namespace KritiaEngine;
@@ -36,25 +37,55 @@ void KritiaEngine::Editor::AssetDatabase::ImportAsset(const std::string& path) {
 void KritiaEngine::Editor::AssetDatabase::ImportModel(const std::string& path, const std::shared_ptr<Mesh>& mesh) {
 	Assimp::Importer importer;
 	// Change primitive to triangles, flip UV coordinates, generate normals.
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals |  aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals |  aiProcess_CalcTangentSpace | aiProcess_GenBoundingBoxes);
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
         return;
     }
     std::string directory = path.substr(0, path.find_last_of('\\'));
-    ProcessNode(directory, scene->mRootNode, scene, mesh);
+    std::vector<Bound> submeshBounds = std::vector<Bound>();
+    ProcessNode(directory, scene->mRootNode, scene, mesh, submeshBounds);
+    float minx = FLT_MAX, miny = FLT_MAX, minz = FLT_MAX, maxx = FLT_MIN, maxy = FLT_MIN, maxz = FLT_MIN;
+    for (Bound& b : submeshBounds) {
+        if (b.GetMin().x < minx) {
+            minx = b.GetMin().x;
+        }
+        if (b.GetMax().x > maxx) {
+            maxx = b.GetMax().x;
+        }
+        if (b.GetMin().y < miny) {
+            miny = b.GetMin().y;
+        }
+        if (b.GetMax().y > maxy) {
+            maxy = b.GetMax().y;
+        }
+        if (b.GetMin().z < minz) {
+            minz = b.GetMin().z;
+        }
+        if (b.GetMax().z > maxz) {
+            maxz = b.GetMax().z;
+        }
+    }
+    Vector3 min = Vector3(minx, miny, minz);
+    Vector3 max = Vector3(maxx, maxy, maxz);
+    mesh->bound.center = 0.5 * (min + max);
+    mesh->bound.size = max - min;
     mesh->submeshSize = mesh->submeshVertices.size();
 }
 
-void KritiaEngine::Editor::AssetDatabase::ProcessNode(const std::string& directory, aiNode* node, const aiScene* scene, const std::shared_ptr<Mesh>& mesh) {
+void KritiaEngine::Editor::AssetDatabase::ProcessNode(const std::string& directory, aiNode* node, const aiScene* scene, const std::shared_ptr<Mesh>& mesh, std::vector<Bound>& submeshBounds) {
     // 处理节点所有的网格（如果有的话）
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
         aiMesh* aiMesh = scene->mMeshes[node->mMeshes[i]];
+        Bound bound;
+        bound.center = 0.5 * Vector3((aiMesh->mAABB.mMin + aiMesh->mAABB.mMax).x, (aiMesh->mAABB.mMin + aiMesh->mAABB.mMax).y, (aiMesh->mAABB.mMin + aiMesh->mAABB.mMax).z);
+        bound.size = Vector3((aiMesh->mAABB.mMax - aiMesh->mAABB.mMin).x, (aiMesh->mAABB.mMax - aiMesh->mAABB.mMin).y, (aiMesh->mAABB.mMax - aiMesh->mAABB.mMin).z);
+        submeshBounds.push_back(bound);
         ProcessMesh(directory, aiMesh, scene, mesh);
     }
     // 接下来对它的子节点重复这一过程
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
-        ProcessNode(directory, node->mChildren[i], scene, mesh);
+        ProcessNode(directory, node->mChildren[i], scene, mesh, submeshBounds);
     }
 }
 

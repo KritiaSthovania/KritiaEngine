@@ -3,6 +3,7 @@
 #include "Object.h"
 #include "MathStructs.h"
 #include "Material.h"
+#include "Utilities.h"
 #include "Interface/ISerializable.h"
 #include "Interface/IInspectable.h"
 #include <json/json.hpp>
@@ -30,6 +31,8 @@ namespace KritiaEngine {
 			Vector3 Tangent;
 			Vector2 TexCoord;
 		};
+		// The bound in local space
+		Bound bound;
 		Mesh() = default;
 		Mesh(const std::vector<std::vector<Vertex>>& vertices, const std::vector<std::vector<unsigned int>>& indices, const std::vector<std::shared_ptr<Material>>& materials);
 		std::vector<std::vector<Vertex>> submeshVertices;

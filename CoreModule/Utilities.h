@@ -57,6 +57,7 @@ namespace KritiaEngine {
 	struct Bound {
 		friend std::ostream& operator<<(std::ostringstream& cout, Bound& bound);
 	public:
+		Bound();
 		Vector3 center;
 		// two times of the extent
 		Vector3 size;
