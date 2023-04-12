@@ -43,12 +43,14 @@ void KritiaEngine::Manager::PhysicsManager::Initialize() {
 	SortAABB();
 }
 
-// Sweep and Prune using AABB
+
 void KritiaEngine::Manager::PhysicsManager::CheckCollision() {
 	SortAABB();
 	SweepAndPrune();
+
 }
 
+// Sweep and Prune using AABB (collider.bound)
 void KritiaEngine::Manager::PhysicsManager::SweepAndPrune() {
 	std::list<AABBPoint> tempX = std::list<AABBPoint>();
 	std::list<AABBPoint> tempY = std::list<AABBPoint>();

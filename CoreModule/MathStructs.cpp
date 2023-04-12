@@ -105,6 +105,10 @@ Vector3 KritiaEngine::Vector3::operator*(float a)
 	return Vector3(this->x * a, this->y * a, this->z * a);
 }
 
+Vector3 KritiaEngine::Vector3::operator*(const Vector3& vec) {
+	return Vector3(this->x * vec.x, this->y * vec.y, this->z * vec.z);
+}
+
 Vector3 KritiaEngine::Vector3::operator/(float a)
 {
 	return Vector3(this->x / a, this->y / a, this->z / a);

@@ -24,7 +24,7 @@ namespace KritiaEngine {
 		};
 		BoxCollider(GameObject* gameObject);
 		// Get the points in world space
-		Vector3 GetPoint(PointPos pos);
+		Vector3 GetExtremePoint(PointPos pos);
 		// center in local space, alias for bound.center
 		Vector3 center;
 		// size in local space, alias for bound.size (relative to Transform.scale) 
@@ -36,6 +36,9 @@ namespace KritiaEngine {
 		virtual std::string SerializeToJson() override;
 		virtual void DeserializeFromJson(const json& json) override;
 		virtual std::string GetInspectorLabel() override;
+
+		// Í¨¹ý Collider ¼Ì³Ð
+		virtual void UpdateBound() override;
 	};
 
 }

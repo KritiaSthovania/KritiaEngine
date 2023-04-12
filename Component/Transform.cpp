@@ -15,7 +15,16 @@ Transform::Transform(GameObject* gameObject) {
 	cachedRight = right;
 	cachedUp = up;
 	cachedRotationEuler = rotationEuler;
+	UpdateTransformMatrix();
+	rotationMatrix = (Matrix3x3)Quaternion::ToRotationMatrix(rotation);
 	KritiaEngine::Manager::BehaviourManager::AddUpdatableComponents(this);
+}
+
+void KritiaEngine::Transform::UpdateTransformMatrix() {
+	transformMatrix = Matrix4x4::Identity();
+	transformMatrix = Mathf::Translate(transformMatrix, position);
+	transformMatrix *= Quaternion::ToRotationMatrix(rotation);
+	transformMatrix = Mathf::Scale(transformMatrix, scale);
 }
 
 void KritiaEngine::Transform::ComponentUpdate() {
@@ -24,24 +33,26 @@ void KritiaEngine::Transform::ComponentUpdate() {
 		cachedRotationEuler = rotationEuler;
 		rotation = Quaternion::FromEuler(rotationEuler.x, rotationEuler.y, rotationEuler.z);
 		cachedRotation = rotation;
-		Matrix3x3 rotationMatrix = (Matrix3x3)Quaternion::ToRotationMatrix(rotation);
+		rotationMatrix = (Matrix3x3)Quaternion::ToRotationMatrix(rotation);
 		up = Vector3::Normalize(rotationMatrix * Vector3(0, 1, 0));
 		cachedUp = up;
 		forward = Vector3::Normalize(rotationMatrix * Vector3(0, 0, 1));
 		cachedForward = forward;
 		right = Vector3::Normalize(rotationMatrix * Vector3(1, 0, 0));
 		cachedRight = right;
+		UpdateTransformMatrix();
 	}else if (cachedRotation != rotation) {
 		cachedRotation = rotation;
 		rotationEuler = Quaternion::ToEuler(rotation);
 		cachedRotationEuler = rotationEuler;
-		Matrix3x3 rotationMatrix = (Matrix3x3)Quaternion::ToRotationMatrix(rotation);
+		rotationMatrix = (Matrix3x3)Quaternion::ToRotationMatrix(rotation);
 		up = Vector3::Normalize(rotationMatrix * Vector3(0, 1, 0));
 		cachedUp = up;
 		forward = Vector3::Normalize(rotationMatrix * Vector3(0, 0, 1));
 		cachedForward = forward;
 		right = Vector3::Normalize(rotationMatrix * Vector3(1, 0, 0));
 		cachedRight = right;
+		UpdateTransformMatrix();
 	} else if (cachedUp != up) {
 		rotation = Quaternion::FromTwoVectors(cachedUp, up);
 		cachedRotation = rotation;
@@ -49,11 +60,12 @@ void KritiaEngine::Transform::ComponentUpdate() {
 		cachedRotationEuler = rotationEuler;
 		up = Vector3::Normalize(up);
 		cachedUp = up;
-		Matrix3x3 rotationMatrix = (Matrix3x3)Quaternion::ToRotationMatrix(rotation);
+		rotationMatrix = (Matrix3x3)Quaternion::ToRotationMatrix(rotation);
 		forward = Vector3::Normalize(rotationMatrix * Vector3(0, 0, 1));
 		cachedForward = forward;
 		right = Vector3::Normalize(rotationMatrix * Vector3(1, 0, 0));
 		cachedRight = right;
+		UpdateTransformMatrix();
 	} else if (cachedForward != forward) {
 		rotation = Quaternion::FromTwoVectors(cachedForward, forward);
 		cachedRotation = rotation;
@@ -61,11 +73,12 @@ void KritiaEngine::Transform::ComponentUpdate() {
 		cachedRotationEuler = rotationEuler;
 		forward = Vector3::Normalize(forward);
 		cachedForward = forward;
-		Matrix3x3 rotationMatrix = (Matrix3x3)Quaternion::ToRotationMatrix(rotation);
+		rotationMatrix = (Matrix3x3)Quaternion::ToRotationMatrix(rotation);
 		up = Vector3::Normalize(rotationMatrix * Vector3(0, 1, 0));
 		cachedUp = up;
 		right = Vector3::Normalize(rotationMatrix * Vector3(1, 0, 0));
 		cachedRight = right;
+		UpdateTransformMatrix();
 	} else if (cachedRight != right) {
 		rotation = Quaternion::FromTwoVectors(cachedRight, right);
 		cachedRotation = rotation;
@@ -73,11 +86,12 @@ void KritiaEngine::Transform::ComponentUpdate() {
 		cachedRotationEuler = rotationEuler;
 		right = Vector3::Normalize(right);
 		cachedRight = right;
-		Matrix3x3 rotationMatrix = (Matrix3x3)Quaternion::ToRotationMatrix(rotation);
+		rotationMatrix = (Matrix3x3)Quaternion::ToRotationMatrix(rotation);
 		up = Vector3::Normalize(rotationMatrix * Vector3(0, 1, 0));
 		cachedUp = up;
 		forward = Vector3::Normalize(rotationMatrix * Vector3(0, 0, 1));
 		cachedForward = forward;
+		UpdateTransformMatrix();
 	}
 }
 

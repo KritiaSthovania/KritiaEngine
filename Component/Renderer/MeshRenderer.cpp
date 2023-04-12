@@ -141,16 +141,12 @@ void MeshRenderer::Render(const std::shared_ptr<KritiaEngine::Camera>& camera) {
 		if (materialSize != materials.size()) {
 			UpdateMaterial();
 		}
-		Matrix4x4 model = Matrix4x4::Identity();
-		model = Mathf::Translate(model, Transform()->position);
-		model *= Quaternion::ToRotationMatrix(Transform()->rotation);
-		model = Mathf::Scale(model, Transform()->scale);
 		for (int i = 0; i < meshFilter->mesh->submeshSize; i++) {
-			RenderingProvider::RenderSubmesh(meshFilter, materials[i], i, model, camera->GetPosition(), Transform()->position);
+			RenderingProvider::RenderSubmesh(meshFilter, materials[i], i, Transform()->transformMatrix, camera->GetPosition(), Transform()->position);
 		}
 		// 如果材质数大于Submesh数
 		for (int i = this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(); i < materials.size(); i++) {
-			RenderingProvider::RenderSubmesh(meshFilter, materials[i], i - this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(), model, camera->GetPosition(), Transform()->position);
+			RenderingProvider::RenderSubmesh(meshFilter, materials[i], i - this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials.size(), Transform()->transformMatrix, camera->GetPosition(), Transform()->position);
 		}
 	} else {
 		meshFilter = nullptr;
@@ -173,12 +169,8 @@ void KritiaEngine::MeshRenderer::RenderShadowMap(Light* light) {
 			if (materialSize != materials.size() || materialSize != meshFilter->mesh->submeshMaterials.size()) {
 				UpdateMaterial();
 			}
-			Matrix4x4 model = Matrix4x4::Identity();
-			model = Mathf::Translate(model, Transform()->position);
-			model *= Quaternion::ToRotationMatrix(Transform()->rotation);
-			model = Mathf::Scale(model, Transform()->scale);
 			for (int i = 0; i < meshFilter->mesh->submeshSize; i++) {
-				RenderingProvider::RenderShadowMap(meshFilter, i, model, light);
+				RenderingProvider::RenderShadowMap(meshFilter, i, Transform()->transformMatrix, light);
 			}
 		}
 	} else {

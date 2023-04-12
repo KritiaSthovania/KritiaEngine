@@ -34,6 +34,8 @@ namespace KritiaEngine {
 		Vector3 operator+ (const Vector3 &vec);
 		Vector3 operator- (const Vector3 &vec);
 		Vector3 operator* (float a);
+		// component-wise multiply
+		Vector3 operator* (const Vector3& vec);
 		Vector3 operator/ (float a);
 		void operator+= (const Vector3 &vec);
 		void operator-= (const Vector3 &vec);
