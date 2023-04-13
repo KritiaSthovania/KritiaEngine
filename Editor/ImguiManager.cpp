@@ -90,7 +90,7 @@ void KritiaEngine::Editor::GUI::ImguiManager::RenderWindowOpenedFromMainMenuBar(
 }
 
 void KritiaEngine::Editor::GUI::ImguiManager::CreateEditorWindows() {
-	EditorWindow::GetWindow<HierachyWindow>("Hiearachy");
+	EditorWindow::GetWindow<HierachyWindow>("Hierarchy");
 	EditorWindow::GetWindow<InspectorWindow>("Inspector");
 	EditorWindow::GetWindow<ProjectFileExplorer>("Project");
 	EditorWindow::GetWindow<ConsoleWindow>("Console");

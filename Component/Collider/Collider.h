@@ -15,6 +15,7 @@ namespace KritiaEngine {
 	private:
 		virtual void OnObjectDestroy() override;
 		virtual void UpdateBound() = 0;
+		virtual void UpdateBoundingVolume() = 0;
 	};
 }
 
