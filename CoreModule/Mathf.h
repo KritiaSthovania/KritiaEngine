@@ -11,7 +11,7 @@ namespace KritiaEngine {
 		static float Tan(float degrees);
 		static float Radians(float degrees);
 		static float Sqrt(float number);
-
+		static float Sign(float value);
 		/// <summary>
 		/// Translate a matrix by a given vector
 		/// </summary>

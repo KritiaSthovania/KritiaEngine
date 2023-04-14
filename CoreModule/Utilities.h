@@ -66,4 +66,21 @@ namespace KritiaEngine {
 		Vector3 GetMin() const;
 		Vector3 GetMax() const;
 	};
+
+	class Collider;
+	class GameObject;
+	class RigidBody;
+
+	struct Collision {
+		Collision() {
+			collider = nullptr;
+			rigidBody = nullptr;
+			gameObject = nullptr;
+			contactPoints = std::vector<Vector3>();
+		}
+		std::shared_ptr<Collider> collider;
+		std::shared_ptr<RigidBody> rigidBody;
+		GameObject* gameObject;
+		std::vector<Vector3> contactPoints;
+	};
 }

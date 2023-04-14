@@ -77,6 +77,11 @@ Vector3 KritiaEngine::Vector3::Cross(const Vector3 &vec1, const Vector3 &vec2)
 	}
 }
 
+Vector3 KritiaEngine::Vector3::Project(const Vector3& point, const Vector3& axis) {
+	Vector3 dir = Vector3::Normalize(axis);
+	return Vector3::Dot(point, dir) * dir;
+}
+
 float KritiaEngine::Vector3::Dot(const Vector3& vec1, const Vector3& vec2) {
 	return glm::dot((glm::vec3)vec1, (glm::vec3)vec2);
 }

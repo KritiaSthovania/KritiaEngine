@@ -136,6 +136,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Component\Collider\BoundingVolume.cpp" />
     <ClCompile Include="Component\Collider\BoxCollider.cpp" />
     <ClCompile Include="Component\Collider\Collider.cpp" />
     <ClCompile Include="Component\ComponentFactory.cpp" />
@@ -189,8 +190,10 @@
     <ClCompile Include="Editor\EditorApplication.cpp" />
     <ClCompile Include="Rendering\RenderingProvider.cpp" />
     <ClCompile Include="CoreModule\Manager\ResourceManager.cpp" />
+    <ClCompile Include="Component\RigidBody.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Component\Collider\BoundingVolume.h" />
     <ClInclude Include="Component\Collider\BoxCollider.h" />
     <ClInclude Include="Component\Collider\Collider.h" />
     <ClInclude Include="Component\ComponentFactory.h" />
@@ -253,6 +256,7 @@
     <ClInclude Include="Editor\EditorApplication.h" />
     <ClInclude Include="Rendering\RenderingProvider.h" />
     <ClInclude Include="CoreModule\Manager\ResourceManager.h" />
+    <ClInclude Include="Component\RigidBody.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

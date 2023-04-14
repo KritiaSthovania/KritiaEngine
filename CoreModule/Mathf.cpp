@@ -28,6 +28,16 @@ float KritiaEngine::Mathf::Sqrt(float number) {
 	return glm::sqrt(number);
 }
 
+float KritiaEngine::Mathf::Sign(float value) {
+	if (value > 0) {
+		return 1;
+	} else if (value < 0) {
+		return -1;
+	} else {
+		return 0;
+	}
+}
+
 Matrix4x4 KritiaEngine::Mathf::Translate(const Matrix4x4& mat4, const Vector3& vec3)
 {
 	if (Settings::UseGLM) {

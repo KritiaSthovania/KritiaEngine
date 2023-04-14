@@ -104,52 +104,30 @@ void KritiaEngine::BoxCollider::UpdateBound() {
 void KritiaEngine::BoxCollider::UpdateBoundingVolume() {
     // split direction: current depth is even: top-bottom, current depth is odd: left-right
     // we have here depth 0, so child1 is top, child2 is bottom
-    if (boundingVolume1 == nullptr) {
+    if (boundingVolume == nullptr) {
         // Order:  ForwardBottomLeft, ForwardBottomRight, ForwardTopLeft, ForwardTopRight, BackBottomLeft, BackBottomRight, BackTopLeft, BackTopRight
-        // top
-        boundingVolume1 = std::make_unique<BoundingVolumeOBB>(BoundingVolumeOBB());
-        boundingVolume1->vertices.push_back(0.5 * Vector3(GetVertex(ForwardBottomLeft) + GetVertex(ForwardTopLeft)));
-        boundingVolume1->vertices.push_back(0.5 * Vector3(GetVertex(ForwardBottomRight) + GetVertex(ForwardTopRight)));
-        boundingVolume1->vertices.push_back(Vector3(GetVertex(ForwardTopLeft)));
-        boundingVolume1->vertices.push_back(Vector3(GetVertex(ForwardTopRight)));
-        boundingVolume1->vertices.push_back(0.5 * Vector3(GetVertex(BackBottomLeft) + GetVertex(BackTopLeft)));
-        boundingVolume1->vertices.push_back(0.5 * Vector3(GetVertex(BackBottomRight) + GetVertex(BackTopRight)));
-        boundingVolume1->vertices.push_back(Vector3(GetVertex(BackTopLeft)));
-        boundingVolume1->vertices.push_back(Vector3(GetVertex(BackTopRight)));
-        boundingVolume1->CreateChildren(boundingVolumeDepth, 1);
-    }
-    if (boundingVolume2 == nullptr) {
-        // bottom
-        boundingVolume2 = std::make_unique<BoundingVolumeOBB>(BoundingVolumeOBB());
-        boundingVolume2->vertices.push_back(Vector3(GetVertex(ForwardBottomLeft)));
-        boundingVolume2->vertices.push_back(Vector3(GetVertex(ForwardBottomRight)));
-        boundingVolume2->vertices.push_back(0.5 * Vector3(GetVertex(ForwardTopLeft)) + Vector3(GetVertex(ForwardBottomLeft)));
-        boundingVolume2->vertices.push_back(0.5 * Vector3(GetVertex(ForwardTopRight)) + Vector3(GetVertex(ForwardBottomRight)));
-        boundingVolume2->vertices.push_back(Vector3(GetVertex(BackBottomLeft)));
-        boundingVolume2->vertices.push_back(Vector3(GetVertex(BackBottomRight)));
-        boundingVolume2->vertices.push_back(0.5 * Vector3(GetVertex(BackTopLeft)) + Vector3(GetVertex(BackBottomLeft)));
-        boundingVolume2->vertices.push_back(0.5 * Vector3(GetVertex(BackTopRight)) + Vector3(GetVertex(BackBottomRight)));
-        boundingVolume2->CreateChildren(boundingVolumeDepth, 1);
+        boundingVolume = std::make_unique<BoundingVolumeOBB>(BoundingVolumeOBB());
+        boundingVolume->vertices.push_back(GetVertex(ForwardBottomLeft));
+        boundingVolume->vertices.push_back(GetVertex(ForwardBottomRight));
+        boundingVolume->vertices.push_back(GetVertex(ForwardTopLeft));
+        boundingVolume->vertices.push_back(GetVertex(ForwardTopRight));
+        boundingVolume->vertices.push_back(GetVertex(BackBottomLeft));
+        boundingVolume->vertices.push_back(GetVertex(BackBottomRight));
+        boundingVolume->vertices.push_back(GetVertex(BackTopLeft));
+        boundingVolume->vertices.push_back(GetVertex(BackTopRight));
+        boundingVolume->CreateChildren(boundingVolumeDepth, 0);
     } else {
-        boundingVolume1->vertices[0] = 0.5 * Vector3(GetVertex(ForwardBottomLeft) + GetVertex(ForwardTopLeft));
-        boundingVolume1->vertices[1] = 0.5 * Vector3(GetVertex(ForwardBottomRight) + GetVertex(ForwardTopRight));
-        boundingVolume1->vertices[2] = Vector3(GetVertex(ForwardTopLeft));
-        boundingVolume1->vertices[3] = Vector3(GetVertex(ForwardTopRight));
-        boundingVolume1->vertices[4] = 0.5 * Vector3(GetVertex(BackBottomLeft) + GetVertex(BackTopLeft));
-        boundingVolume1->vertices[5] = 0.5 * Vector3(GetVertex(BackBottomRight) + GetVertex(BackTopRight));
-        boundingVolume1->vertices[6] = Vector3(GetVertex(BackTopLeft));
-        boundingVolume1->vertices[7] = Vector3(GetVertex(BackTopRight));
-        boundingVolume1->UpdateChildren(boundingVolumeDepth, 1);
-
-        boundingVolume2->vertices[0] = Vector3(GetVertex(ForwardBottomLeft));
-        boundingVolume2->vertices[1] = Vector3(GetVertex(ForwardBottomRight));
-        boundingVolume2->vertices[2] = 0.5 * Vector3(GetVertex(ForwardTopLeft)) + Vector3(GetVertex(ForwardBottomLeft));
-        boundingVolume2->vertices[3] = 0.5 * Vector3(GetVertex(ForwardTopRight)) + Vector3(GetVertex(ForwardBottomRight));
-        boundingVolume2->vertices[4] = Vector3(GetVertex(BackBottomLeft));
-        boundingVolume2->vertices[5] = Vector3(GetVertex(BackBottomRight));
-        boundingVolume2->vertices[6] = 0.5 * Vector3(GetVertex(BackTopLeft)) + Vector3(GetVertex(BackBottomLeft));
-        boundingVolume2->vertices[7] = 0.5 * Vector3(GetVertex(BackTopRight)) + Vector3(GetVertex(BackBottomRight));
-        boundingVolume2->UpdateChildren(boundingVolumeDepth, 1);
+        boundingVolume->vertices[0] = GetVertex(ForwardBottomLeft);
+        boundingVolume->vertices[1] = GetVertex(ForwardBottomRight);
+        boundingVolume->vertices[2] = GetVertex(ForwardTopLeft);
+        boundingVolume->vertices[3] = GetVertex(ForwardTopRight);
+        boundingVolume->vertices[4] = GetVertex(BackBottomLeft);
+        boundingVolume->vertices[5] = GetVertex(BackBottomRight);
+        boundingVolume->vertices[6] = GetVertex(BackTopLeft);
+        boundingVolume->vertices[7] = GetVertex(BackTopRight);
+        boundingVolume->UpdateChildren(boundingVolumeDepth, 0);
     }
     
 }
+
+

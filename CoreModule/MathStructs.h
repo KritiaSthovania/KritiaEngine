@@ -23,6 +23,7 @@ namespace KritiaEngine {
 		static Vector3 Zero();
 		static Vector3 Normalize(const Vector3 &vec);
 		static Vector3 Cross(const Vector3 &vec1, const Vector3 &vec2);
+		static Vector3 Project(const Vector3& point, const Vector3& axis);
 		static float Dot(const Vector3& vec1, const Vector3& vec2);
 		static float Magnitude(const Vector3& vec);
 		static glm::vec3 ToGlmVec3(const Vector3 &vec);
