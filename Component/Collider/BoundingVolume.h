@@ -12,15 +12,15 @@ namespace KritiaEngine {
 		std::vector<Vector3> vertices = std::vector<Vector3>();
 		virtual void CreateChildren(int maximumDepth, int currentDepth) = 0;
 		virtual void UpdateChildren(int maximumDepth, int currentDepth) = 0;
-		virtual Collision CheckCollision(Collision* collision, BoundingVolume* other, const std::shared_ptr<Transform>& selfTransform, const std::shared_ptr<Transform>& otherTransform) = 0;
+		virtual void CheckCollision(Collision* collision, BoundingVolume* other, const std::shared_ptr<Transform>& selfTransform, const std::shared_ptr<Transform>& otherTransform) = 0;
 	};
 
 	class BoundingVolumeOBB : public BoundingVolume {
 	public:
-		Collision CheckCollision(Collision* collision, BoundingVolumeOBB* other, const std::shared_ptr<Transform>& selfTransform, const std::shared_ptr<Transform>& otherTransform);
+		void CheckCollision(Collision* collision, BoundingVolumeOBB* other, const std::shared_ptr<Transform>& selfTransform, const std::shared_ptr<Transform>& otherTransform);
 		virtual void CreateChildren(int maximumDepth, int currentDepth) override;
 		virtual void UpdateChildren(int maximumDepth, int currentDepth) override;
-		virtual Collision CheckCollision(Collision* collision, BoundingVolume* other, const std::shared_ptr<Transform>& selfTransform, const std::shared_ptr<Transform>& otherTransform) override;
+		virtual void CheckCollision(Collision* collision, BoundingVolume* other, const std::shared_ptr<Transform>& selfTransform, const std::shared_ptr<Transform>& otherTransform) override;
 	private:
 		// Functions for Separating Axis Test
 		float ProjectPoint(const Vector3& point, const Vector3& axis);

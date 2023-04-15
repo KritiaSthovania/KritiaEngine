@@ -10,7 +10,8 @@ const Bound& KritiaEngine::Collider::GetBound() const {
 
 Collision KritiaEngine::Collider::CheckCollision(Collider* other) {
 	Collision collision = Collision();
-	return boundingVolume->CheckCollision(&collision, other->boundingVolume.get(), Transform(), other->Transform());
+	boundingVolume->CheckCollision(&collision, other->boundingVolume.get(), Transform(), other->Transform());
+	return collision;
 }
 
 void KritiaEngine::Collider::OnObjectDestroy() {
