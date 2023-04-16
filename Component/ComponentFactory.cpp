@@ -6,9 +6,10 @@
 #include "MeshFilter.h"
 #include "Collider/BoxCollider.h"
 #include "Renderer/MeshRenderer.h"
+#include "RigidBody.h"
 using json = nlohmann::ordered_json;
 using namespace KritiaEngine;
-std::vector<std::string> ComponentFactory::componentType = { "Transform", "Camera", "Light", "MeshFilter", "MeshRenderer", "BoxCollider"};
+std::vector<std::string> ComponentFactory::componentType = { "Transform", "Camera", "Light", "MeshFilter", "MeshRenderer", "BoxCollider", "RigidBody"};
 
 void KritiaEngine::ComponentFactory::AddComponent(const json& json, GameObject* gameObject) {
 	if (json["Type"] == "Transform") {
@@ -23,6 +24,8 @@ void KritiaEngine::ComponentFactory::AddComponent(const json& json, GameObject* 
 		gameObject->AddComponent<MeshRenderer>();
 	} else if (json["Type"] == "BoxCollider") {
 		gameObject->AddComponent<BoxCollider>();
+	} else if (json["Type"] == "RigidBody") {
+		gameObject->AddComponent<RigidBody>();
 	}
 }
 
@@ -39,5 +42,7 @@ void KritiaEngine::ComponentFactory::AddComponent(const std::string& name, GameO
 		gameObject->AddComponent<MeshRenderer>();
 	} else if (name == "BoxCollider") {
 		gameObject->AddComponent<BoxCollider>();
+	} else if (name == "RigidBody") {
+		gameObject->AddComponent<RigidBody>();
 	}
 }

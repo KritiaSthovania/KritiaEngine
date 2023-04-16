@@ -110,6 +110,10 @@ void KritiaEngine::Editor::GUI::ImguiManager::RenderMainMenuBar() {
 	if (ImGui::MenuItem("Import Asset")) {
 		MainMenuBarFunction::OpenImportAssetWindow();
 	}
+	const char* playButtonTitle = EditorApplication::isPlaying ? "Pause" : "Play";
+	if (ImGui::MenuItem(playButtonTitle)) {
+		MainMenuBarFunction::PlayInEditor();
+	}
 	ImGui::EndMainMenuBar();
 }
 
@@ -135,5 +139,5 @@ void KritiaEngine::Editor::GUI::ImguiManager::ShowImGuizmo(GameObject* go) {
 	//ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
 	ImGuizmo::RecomposeMatrixFromComponents(&(go->Transform()->position.x), &(go->Transform()->rotationEuler.x), &(go->Transform()->scale.x), model.GetPtr());
 	ImGuizmo::Manipulate(Camera::current->GetViewMatrix().GetPtr(), Rendering::RenderingProvider::projection.GetPtr(), operation, mode, model.GetPtr());
-	ImGuizmo::DecomposeMatrixToComponents(model.GetPtr(), &(go->Transform()->position.x), &(go->Transform()->rotationEuler.x), &(go->Transform()->scale.x));
+	//ImGuizmo::DecomposeMatrixToComponents(model.GetPtr(), &(go->Transform()->position.x), &(go->Transform()->rotationEuler.x), &(go->Transform()->scale.x));
 }

@@ -56,11 +56,14 @@ void KritiaEngine::Manager::BehaviourManager::BehaviourUpdate() {
 			}
 		}
 	}
-	for (Component* component : updatableComponents) {
-		component->ComponentUpdate();
-	}
 	for (MonoBehaviour* behaviour : monoBehaviours) {
 		behaviour->BehaviourUpdate();
+	}
+}
+
+void KritiaEngine::Manager::BehaviourManager::ComponentUpdate() {
+	for (Component* component : updatableComponents) {
+		component->ComponentUpdate();
 	}
 }
 

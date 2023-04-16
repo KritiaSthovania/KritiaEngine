@@ -7,6 +7,7 @@ namespace KritiaEngine::Editor::GUI {
 		static void SaveScene();
 		static void OpenSettingWindow(bool* opened);
 		static void OpenImportAssetWindow();
+		static void PlayInEditor();
 	};
 
 }

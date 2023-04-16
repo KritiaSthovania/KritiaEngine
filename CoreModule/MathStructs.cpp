@@ -174,6 +174,15 @@ Vector3 KritiaEngine::operator*(float a, const Vector3& vec)
 	return Vector3(a * vec.x, a * vec.y, a * vec.z);
 }
 
+Vector3 KritiaEngine::operator+(const Vector3& vec1, const Vector3& vec2) {
+	return Vector3(vec1.x + vec2.x, vec1.y + vec2.y, vec1.z + vec2.z);
+}
+
+Vector3 KritiaEngine::operator-(const Vector3& vec1, const Vector3& vec2) {
+	return Vector3(vec1.x - vec2.x, vec1.y - vec2.y, vec1.z - vec2.z);
+}
+
+
 //----------------Vector4--------------------------
 
 KritiaEngine::Vector4::Vector4(float x, float y, float z, float w)
@@ -547,6 +556,12 @@ Vector3 KritiaEngine::Matrix3x3::operator*(const Vector3& vec3) {
 	return (glm::mat3)*this * (glm::vec3)vec3;
 }
 
+Matrix3x3 KritiaEngine::Matrix3x3::operator*(const Matrix3x3& mat) {
+	return (glm::mat3)*this * glm::mat3(mat);
+}
+
+
+
 KritiaEngine::Quaternion::Quaternion() {
 	x = y = z = 0;
 	w = 1;
@@ -639,6 +654,14 @@ Quaternion KritiaEngine::Quaternion::FromRoationMatrix(const Matrix4x4& mat) {
 	return glm::quat((glm::mat4)mat);
 }
 
+Quaternion KritiaEngine::Quaternion::operator+(const Quaternion& quat) {
+	return glm::quat(*this) + glm::quat(quat);
+}
+
+Quaternion KritiaEngine::Quaternion::operator*(float a) {
+	return a * glm::quat(*this);
+}
+
 Quaternion KritiaEngine::Quaternion::operator*(const Quaternion& quat) {
 	Quaternion res;
 	float tempx = x, tempy = y, tempz = z, tempw = w;
@@ -647,6 +670,10 @@ Quaternion KritiaEngine::Quaternion::operator*(const Quaternion& quat) {
 	res.z = tempw * quat.z + tempz * quat.w + tempx * quat.y - tempy * quat.x;
 	res.w = tempw * quat.w - tempx * quat.x - tempy * quat.y - tempz * quat.z;
 	return res;
+}
+
+void KritiaEngine::Quaternion::operator+=(const Quaternion& quat) {
+	*this = *this + quat;
 }
 
 void KritiaEngine::Quaternion::operator*=(const Quaternion& quat) {
@@ -672,6 +699,10 @@ bool KritiaEngine::Quaternion::operator!=(const Quaternion& quat) {
 std::ostringstream& KritiaEngine::operator<<(std::ostringstream& cout, const Quaternion& quat) {
 	cout << "(" << quat.x << ", " << quat.y << ", " << quat.z << ", " << quat.w << ")";
 	return cout;
+}
+
+Quaternion KritiaEngine::operator*(float a, const Quaternion& quat) {
+	return a * glm::quat(quat);
 }
 
 

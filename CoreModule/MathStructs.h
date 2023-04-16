@@ -32,6 +32,8 @@ namespace KritiaEngine {
 		float z;
 		//operators
 		friend Vector3 operator*(float a, const Vector3& vec);
+		friend Vector3 operator+(const Vector3& vec1, const Vector3& vec2);
+		friend Vector3 operator-(const Vector3& vec1, const Vector3& vec2);
 		Vector3 operator+ (const Vector3 &vec);
 		Vector3 operator- (const Vector3 &vec);
 		Vector3 operator* (float a);
@@ -92,6 +94,7 @@ namespace KritiaEngine {
 		// operator
 		operator glm::mat3() const;
 		Vector3 operator* (const Vector3& vec3);
+		Matrix3x3 operator* (const Matrix3x3& mat);
 	private:
 		float entries[3][3];
 	};
@@ -216,7 +219,11 @@ namespace KritiaEngine {
 		static Quaternion FromTwoVectors(const Vector3& vec1, const Vector3& vec2);
 		static Quaternion FromRoationMatrix(const Matrix4x4& mat);
 
+		friend Quaternion operator* (float a, const Quaternion& quat);
+		Quaternion operator+ (const Quaternion& quat);
+		Quaternion operator* (float a);
 		Quaternion operator* (const Quaternion& quat);
+		void operator+= (const Quaternion& quat);
 		void operator*= (const Quaternion& quat);
 		bool operator== (const Quaternion& quat);
 		bool operator!= (const Quaternion& quat);

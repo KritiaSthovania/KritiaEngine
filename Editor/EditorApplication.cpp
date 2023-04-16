@@ -4,4 +4,5 @@
 using namespace KritiaEngine::Editor;
 const std::string EditorApplication::assetFolderRootPath = "./Assets/";
 std::string EditorApplication::currentProjectFolderPath = "D:/VSProject/KritiaEngine";
+bool EditorApplication::isPlaying = false;
 

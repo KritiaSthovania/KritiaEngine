@@ -21,7 +21,9 @@ namespace KritiaEngine{
 		Matrix3x3 rotationMatrix;
 	private:
 		void UpdateTransformMatrix();
-		// The rotation-ralated fields are cached.
+		// Cached 
+		Vector3 cachedPosition;
+		Vector3 cachedScale;
 		Vector3 cachedForward;
 		Vector3 cachedUp;
 		Vector3 cachedRight;

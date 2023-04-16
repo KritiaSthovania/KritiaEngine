@@ -71,3 +71,7 @@ void KritiaEngine::Editor::GUI::MainMenuBarFunction::OpenImportAssetWindow() {
     }
     NFD_Quit();
 }
+
+void KritiaEngine::Editor::GUI::MainMenuBarFunction::PlayInEditor() {
+    EditorApplication::isPlaying = !EditorApplication::isPlaying;
+}

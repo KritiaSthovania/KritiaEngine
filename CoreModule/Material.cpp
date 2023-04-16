@@ -202,46 +202,60 @@ void KritiaEngine::Material::OnInspector() {
 	ImGui::Text("Main Texture ");
 	ImGui::SameLine();
 	if(ImGui::Button(mainTexture == nullptr? "Null" : mainTexture->name.c_str())) {
-
+		KritiaEngine::Editor::GUI::ImguiManager::currentSelectedInspectable = mainTexture.get();
 	}
 	if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
 		std::string path = ImguiAlias::OpenFindResourceWindow("Texture", KritiaEngine::Editor::textureFilePostfix);
 		if (path != "") {
-			// mainTexture = Texture::DeserializeFromPath(path);
+			mainTexture = ResourceManager::GetTexture(path);
+			if (renderMode == RenderMode::Transparent) {
+				RenderingProvider::Load2DTexture(mainTexture, true);
+
+			} else if (renderMode == RenderMode::Opaque) {
+				RenderingProvider::Load2DTexture(mainTexture, false);
+			}
 		}
 	}
 	ImGui::Text("Specular Map ");
 	ImGui::SameLine();
 	if (ImGui::Button(specularMap == nullptr ? "Null" : specularMap->name.c_str())) {
-
+		KritiaEngine::Editor::GUI::ImguiManager::currentSelectedInspectable = specularMap.get();
 	}
 	if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
 		std::string path = ImguiAlias::OpenFindResourceWindow("Texture", KritiaEngine::Editor::textureFilePostfix);
 		if (path != "") {
-			// specularMap = Texture::DeserializeFromPath(path);
+			specularMap = ResourceManager::GetTexture(path);
+			if (renderMode == RenderMode::Transparent) {
+				RenderingProvider::Load2DTexture(specularMap, true);
+
+			} else if (renderMode == RenderMode::Opaque) {
+				RenderingProvider::Load2DTexture(specularMap, false);
+			}
 		}
 	}
 	ImGui::Text("Normal Map   ");
 	ImGui::SameLine();
 	if (ImGui::Button(normalMap == nullptr ? "Null" : normalMap->name.c_str())) {
-
+		KritiaEngine::Editor::GUI::ImguiManager::currentSelectedInspectable = normalMap.get();
 	}
 	if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
 		std::string path = ImguiAlias::OpenFindResourceWindow("Texture", KritiaEngine::Editor::textureFilePostfix);
 		if (path != "") {
-			// normalMap = Texture::DeserializeFromPath(path);
+			normalMap = ResourceManager::GetTexture(path);
+			RenderingProvider::Load2DTexture(normalMap, false);
 			shader->SetBool("hasNormalMap", true);
 		}
 	}
 	ImGui::Text("Parallax Map ");
 	ImGui::SameLine();
 	if (ImGui::Button(parallaxMap == nullptr ? "Null" : parallaxMap->name.c_str())) {
-
+		KritiaEngine::Editor::GUI::ImguiManager::currentSelectedInspectable = parallaxMap.get();
 	}
 	if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
 		std::string path = ImguiAlias::OpenFindResourceWindow("Texture", KritiaEngine::Editor::textureFilePostfix);
 		if (path != "") {
-			// parallaxMap = Texture::DeserializeFromPath(path);
+			parallaxMap = ResourceManager::GetTexture(path);
+			RenderingProvider::Load2DTexture(parallaxMap, false);
 			shader->SetBool("hasParallaxMap", true);
 			shader->SetFloat("heightScale", 0.1f);
 			shader->SetInt("depthLayers", 10);

@@ -24,21 +24,21 @@ Vector3 KritiaEngine::BoxCollider::GetVertex(PointPos pos) {
     } 
     switch (pos) {
     case ForwardBottomLeft:
-        return Transform()->position + center + rot * Vector3(-1, -1,  1) * bound.GetExtent();
+        return Transform()->position + center + rot * Vector3(-1, -1,  1) * bound.GetExtent() * size;
     case ForwardBottomRight:
-        return Transform()->position + center + rot * Vector3(1,  -1,  1) * bound.GetExtent();
+        return Transform()->position + center + rot * Vector3(1,  -1,  1) * bound.GetExtent() * size;
     case ForwardTopLeft: 
-        return Transform()->position + center + rot * Vector3(-1,  1,  1) * bound.GetExtent();
+        return Transform()->position + center + rot * Vector3(-1,  1,  1) * bound.GetExtent() * size;
     case ForwardTopRight:
-        return Transform()->position + center + rot * Vector3( 1,  1,  1) * bound.GetExtent();
+        return Transform()->position + center + rot * Vector3( 1,  1,  1) * bound.GetExtent() * size;
     case BackBottomLeft:
-        return Transform()->position + center + rot * Vector3(-1, -1, -1) * bound.GetExtent();
+        return Transform()->position + center + rot * Vector3(-1, -1, -1) * bound.GetExtent() * size;
     case BackBottomRight:
-        return Transform()->position + center + rot * Vector3( 1, -1, -1) * bound.GetExtent();
+        return Transform()->position + center + rot * Vector3( 1, -1, -1) * bound.GetExtent() * size;
     case BackTopLeft:
-        return Transform()->position + center + rot * Vector3(-1,  1, -1) * bound.GetExtent();
+        return Transform()->position + center + rot * Vector3(-1,  1, -1) * bound.GetExtent() * size;
     case BackTopRight:
-        return Transform()->position + center + rot * Vector3( 1,  1, -1) * bound.GetExtent();
+        return Transform()->position + center + rot * Vector3( 1,  1, -1) * bound.GetExtent() * size;
     }
 }
 

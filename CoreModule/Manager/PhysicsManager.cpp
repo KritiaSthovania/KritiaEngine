@@ -10,11 +10,21 @@ using MinMax = PhysicsManager::MinMax;
 
 float PhysicsManager::stepSize = 0.03f;
 float PhysicsManager::timer = 0;
+Vector3 PhysicsManager::gravityAccelaration = Vector3(0, -9.81, 0);
 std::list<Collider*> PhysicsManager::colliders = std::list<Collider*>();
+std::list<RigidBody*> PhysicsManager::rigidBodies = std::list<RigidBody*>();
 std::list<std::tuple<Collider*, Collider*>> PhysicsManager::collisionPair = std::list<std::tuple<Collider*, Collider*>>();
 std::vector<AABBPoint> PhysicsManager::pointsX = std::vector<AABBPoint>();
 std::vector<AABBPoint> PhysicsManager::pointsY = std::vector<AABBPoint>();
 std::vector<AABBPoint> PhysicsManager::pointsZ = std::vector<AABBPoint>();
+
+void KritiaEngine::Manager::PhysicsManager::AddRigidBody(RigidBody* rigidBody) {
+	rigidBodies.push_back(rigidBody);
+}
+
+void KritiaEngine::Manager::PhysicsManager::RemoveRigidBody(RigidBody* rigidBody) {
+	rigidBodies.remove(rigidBody);
+}
 
 void KritiaEngine::Manager::PhysicsManager::AddCollider(Collider* collider) {
 	colliders.push_back(collider);
@@ -34,6 +44,9 @@ void KritiaEngine::Manager::PhysicsManager::RemoveCollider(Collider* collider) {
 void KritiaEngine::Manager::PhysicsManager::PhysicsUpdate() {
 	if (timer > stepSize) {
 		CheckCollision();
+		for (RigidBody* rb : rigidBodies) {
+			rb->PhysicsUpdate();
+		}
 	}
 	collisionPair.clear();
 	timer += Time::deltaTime;

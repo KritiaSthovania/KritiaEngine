@@ -11,6 +11,7 @@ namespace KritiaEngine::Editor {
 	public:
 		static const std::string assetFolderRootPath;
 		static std::string currentProjectFolderPath;
+		static bool isPlaying;
 	};
 }
 

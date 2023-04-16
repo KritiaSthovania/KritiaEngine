@@ -1,5 +1,5 @@
 #include "Transform.h"
-
+#include "../CoreModule/Utilities.h"
 using namespace KritiaEngine;
 Transform::Transform(GameObject* gameObject) {
 	this->gameObject = gameObject;
@@ -10,6 +10,8 @@ Transform::Transform(GameObject* gameObject) {
 	right = Vector3(1, 0, 0);
 	up = Vector3(0, 1, 0);
 	rotationEuler = Quaternion::ToEuler(rotation);
+	cachedPosition = position;
+	cachedScale = scale;
 	cachedRotation = rotation;
 	cachedForward = forward;
 	cachedRight = right;
@@ -92,6 +94,12 @@ void KritiaEngine::Transform::ComponentUpdate() {
 		forward = Vector3::Normalize(rotationMatrix * Vector3(0, 0, 1));
 		cachedForward = forward;
 		UpdateTransformMatrix();
+	} else if (cachedPosition != position) {
+		UpdateTransformMatrix();
+		cachedPosition = position;
+	} else if (cachedScale != scale) {
+		UpdateTransformMatrix();
+		cachedScale = scale;
 	}
 }
 
@@ -115,6 +123,8 @@ void KritiaEngine::Transform::DeserializeFromJson(const json& json) {
 	this->position = Vector3(json["Position"][0], json["Position"][1], json["Position"][2]);
 	this->rotation = Quaternion(json["Rotation"][0], json["Rotation"][1], json["Rotation"][2], json["Rotation"][3]);
 	this->scale = Vector3(json["Scale"][0], json["Scale"][1], json["Scale"][2]);
+	UpdateTransformMatrix();
+	rotationMatrix = (Matrix3x3)Quaternion::ToRotationMatrix(rotation);
 }
 
 std::string KritiaEngine::Transform::GetInspectorLabel() {

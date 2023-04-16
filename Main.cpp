@@ -7,12 +7,14 @@
 #include "Editor/ImguiManager.h"
 #include "CoreModule/Manager/ResourceManager.h"
 #include "CoreModule/Manager/PhysicsManager.h"
+#include "Editor/EditorApplication.h"
 
 using namespace KritiaEngine;
 using namespace KritiaEngine::SceneManagement;
 using namespace KritiaEngine::Manager;
 using namespace KritiaEngine::Rendering;
 using namespace KritiaEngine::Editor::GUI;
+using namespace KritiaEngine::Editor;
 
 constexpr const char* title = "Kritia Engine";
 
@@ -51,11 +53,14 @@ void Render() {
 }
 
 void Update() {
-    BehaviourManager::BehaviourUpdate();
     if (editor) {
         Camera::editorCamera->EditorCameraUpdate();
     }
-    PhysicsManager::PhysicsUpdate();
+    BehaviourManager::ComponentUpdate();
+    if (EditorApplication::isPlaying) {
+        BehaviourManager::BehaviourUpdate();
+        PhysicsManager::PhysicsUpdate();
+    }
 }
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
