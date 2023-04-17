@@ -63,18 +63,21 @@ Vector3 KritiaEngine::Vector3::Zero()
 
 Vector3 KritiaEngine::Vector3::Normalize(const Vector3 &vec)
 {
-	if (Settings::UseGLM) {
-		glm::vec3 vec3 = glm::normalize(ToGlmVec3(vec));
-		return Vector3(vec3.x, vec3.y, vec3.z);
+	if (vec != Vector3::Zero()) {
+		float temp = Mathf::Sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+		return Vector3(vec.x / temp, vec.y / temp, vec.z / temp);
+	} else {
+		return Vector3::Zero();
 	}
+
 }
 
 Vector3 KritiaEngine::Vector3::Cross(const Vector3 &vec1, const Vector3 &vec2)
 {
-	if (Settings::UseGLM) {
-		glm::vec3 vec3 = glm::cross(ToGlmVec3(vec1),ToGlmVec3(vec2));
-		return Vector3(vec3.x, vec3.y, vec3.z);
-	}
+	Vector3 vec = Vector3(vec1.y * vec2.z - vec2.y * vec1.z,
+		vec1.z * vec2.x - vec2.z * vec1.x,
+		vec1.x * vec2.y - vec2.x * vec1.y);
+	return vec;
 }
 
 Vector3 KritiaEngine::Vector3::Project(const Vector3& point, const Vector3& axis) {
@@ -167,6 +170,10 @@ KritiaEngine::Vector3::operator std::vector<float>() const {
 std::ostringstream& KritiaEngine::operator<<(std::ostringstream& cout, const Vector3& vec) {
 	cout << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
 	return cout;
+}
+
+Vector3 KritiaEngine::operator-(const Vector3& self) {
+	return Vector3(-self.x, -self.y, -self.z);
 }
 
 Vector3 KritiaEngine::operator*(float a, const Vector3& vec)

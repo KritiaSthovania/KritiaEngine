@@ -71,16 +71,31 @@ namespace KritiaEngine {
 	class GameObject;
 	class RigidBody;
 
+	struct ContactPoint {
+		ContactPoint(const Vector3& normal, const Vector3& position, std::shared_ptr<Collider> self, std::shared_ptr<Collider> other) {
+			this->normal = normal;
+			this->position = position;
+			thisCollider = self;
+			otherCollider = other;
+		}
+		Vector3 normal;
+		Vector3 position;
+		std::shared_ptr<Collider> thisCollider;
+		std::shared_ptr<Collider> otherCollider;
+	};
+
 	struct Collision {
 		Collision() {
-			collider = nullptr;
+			selfCollider = nullptr;
+			otherCollider = nullptr;
 			rigidBody = nullptr;
 			gameObject = nullptr;
-			contactPoints = std::vector<Vector3>();
+			contactPoints = std::vector<ContactPoint>();
 		}
-		std::shared_ptr<Collider> collider;
+		std::shared_ptr<Collider> selfCollider;
+		std::shared_ptr<Collider> otherCollider;
 		std::shared_ptr<RigidBody> rigidBody;
 		GameObject* gameObject;
-		std::vector<Vector3> contactPoints;
+		std::vector<ContactPoint> contactPoints;
 	};
 }

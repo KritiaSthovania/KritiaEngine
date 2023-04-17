@@ -31,6 +31,7 @@ namespace KritiaEngine {
 		float y;
 		float z;
 		//operators
+		friend Vector3 operator-(const Vector3& self);
 		friend Vector3 operator*(float a, const Vector3& vec);
 		friend Vector3 operator+(const Vector3& vec1, const Vector3& vec2);
 		friend Vector3 operator-(const Vector3& vec1, const Vector3& vec2);

@@ -35,15 +35,17 @@ namespace KritiaEngine::Manager {
 		static void CheckCollision();
 		static void SweepAndPrune();
 		static void SortAABB();
-
+		static void CheckBVH();
+		static void ResolveCollision();
 		static float timer;
 		static std::list<RigidBody*> rigidBodies;
 		static std::list<Collider*> colliders;
-		static std::list<std::tuple<Collider*, Collider*>> collisionPair;
+		static std::list<std::pair<Collider*, Collider*>> collisionPair;
+		static std::list<Collision> collisions;
 		static std::vector<AABBPoint> pointsX;
 		static std::vector<AABBPoint> pointsY;
 		static std::vector<AABBPoint> pointsZ;
-		
+
 	};
 }
 

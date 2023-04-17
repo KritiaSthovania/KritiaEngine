@@ -18,3 +18,22 @@ void KritiaEngine::Collider::OnObjectDestroy() {
 	Component::OnObjectDestroy();
 	PhysicsManager::RemoveCollider(this);
 }
+
+void KritiaEngine::Collider::OnInspector() {
+	Behaviour::OnInspector();
+	ImguiAlias::FloatField("Friction", &friction);
+	ImguiAlias::FloatField("Bounciness", &bounciness);
+}
+
+std::string KritiaEngine::Collider::SerializeToJson() {
+	json json = json::parse(Behaviour::SerializeToJson());
+	json["Friction"] = friction;
+	json["Bounciness"] = bounciness;
+	return json.dump();
+}
+
+void KritiaEngine::Collider::DeserializeFromJson(const json& json) {
+	Behaviour::DeserializeFromJson(json);
+	friction = json["Friction"];
+	bounciness = json["Bounciness"];
+}

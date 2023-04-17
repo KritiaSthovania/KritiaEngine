@@ -24,26 +24,27 @@ Vector3 KritiaEngine::BoxCollider::GetVertex(PointPos pos) {
     } 
     switch (pos) {
     case ForwardBottomLeft:
-        return Transform()->position + center + rot * Vector3(-1, -1,  1) * bound.GetExtent() * size;
+        return Transform()->position + center + rot * Vector3(-1, -1,  1) * bound.GetExtent() * size * Transform()->scale;
     case ForwardBottomRight:
-        return Transform()->position + center + rot * Vector3(1,  -1,  1) * bound.GetExtent() * size;
+        return Transform()->position + center + rot * Vector3(1,  -1,  1) * bound.GetExtent() * size * Transform()->scale;
     case ForwardTopLeft: 
-        return Transform()->position + center + rot * Vector3(-1,  1,  1) * bound.GetExtent() * size;
+        return Transform()->position + center + rot * Vector3(-1,  1,  1) * bound.GetExtent() * size * Transform()->scale;
     case ForwardTopRight:
-        return Transform()->position + center + rot * Vector3( 1,  1,  1) * bound.GetExtent() * size;
+        return Transform()->position + center + rot * Vector3( 1,  1,  1) * bound.GetExtent() * size * Transform()->scale;
     case BackBottomLeft:
-        return Transform()->position + center + rot * Vector3(-1, -1, -1) * bound.GetExtent() * size;
+        return Transform()->position + center + rot * Vector3(-1, -1, -1) * bound.GetExtent() * size * Transform()->scale;
     case BackBottomRight:
-        return Transform()->position + center + rot * Vector3( 1, -1, -1) * bound.GetExtent() * size;
+        return Transform()->position + center + rot * Vector3( 1, -1, -1) * bound.GetExtent() * size * Transform()->scale;
     case BackTopLeft:
-        return Transform()->position + center + rot * Vector3(-1,  1, -1) * bound.GetExtent() * size;
+        return Transform()->position + center + rot * Vector3(-1,  1, -1) * bound.GetExtent() * size * Transform()->scale;
     case BackTopRight:
-        return Transform()->position + center + rot * Vector3( 1,  1, -1) * bound.GetExtent() * size;
+        return Transform()->position + center + rot * Vector3( 1,  1, -1) * bound.GetExtent() * size * Transform()->scale;
     }
 }
 
 void KritiaEngine::BoxCollider::ComponentUpdate() {
     if (cachedPosition != Transform()->position || cachedRotation != Transform()->rotation || cachedScale != Transform()->scale || cachedBoundingVolumeDepth != boundingVolumeDepth) {
+        boundingVolume = nullptr;
         UpdateBound();
         UpdateBoundingVolume();
         cachedPosition = Transform()->position;
@@ -54,7 +55,7 @@ void KritiaEngine::BoxCollider::ComponentUpdate() {
 }
 
 void KritiaEngine::BoxCollider::OnInspector() {
-    Behaviour::OnInspector();
+    Collider::OnInspector();
     ImguiAlias::FloatField3("Center", &center.x);
     ImguiAlias::FloatField3("Size", &size.x);
     ImguiAlias::IntField("Bounding Volume Depth", &boundingVolumeDepth);
@@ -62,7 +63,7 @@ void KritiaEngine::BoxCollider::OnInspector() {
 }
 
 std::string KritiaEngine::BoxCollider::SerializeToJson() {
-    json json = json::parse(Behaviour::SerializeToJson());
+    json json = json::parse(Collider::SerializeToJson());
     json["Type"] = "BoxCollider";
     json["Center"] = { center.x, center.y, center.z };
     json["Size"] = { size.x, size.y, size.z };
@@ -73,11 +74,12 @@ std::string KritiaEngine::BoxCollider::SerializeToJson() {
 
 void KritiaEngine::BoxCollider::DeserializeFromJson(const json& json) {
     assert(json["Type"] == "BoxCollider");
-    Behaviour::DeserializeFromJson(json);
+    Collider::DeserializeFromJson(json);
     center = Vector3(json["Center"][0], json["Center"][1], json["Center"][2]);
     size = Vector3(json["Size"][0], json["Size"][1], json["Size"][2]);
     boundingVolumeDepth = json["BoundingVolumeDepth"];
     isTrigger = json["IsTrigger"];
+    UpdateBoundingVolume();
 }
 
 std::string KritiaEngine::BoxCollider::GetInspectorLabel() {
@@ -98,6 +100,7 @@ void KritiaEngine::BoxCollider::UpdateBound() {
         GetVertex(ForwardTopRight).y, GetVertex(BackBottomLeft).y, GetVertex(BackBottomRight).y, GetVertex(BackTopLeft).y, GetVertex(BackTopRight).y }),
         std::max({ GetVertex(ForwardBottomLeft).z, GetVertex(ForwardBottomRight).z, GetVertex(ForwardTopLeft).z,
         GetVertex(ForwardTopRight).z, GetVertex(BackBottomLeft).z, GetVertex(BackBottomRight).z, GetVertex(BackTopLeft).z, GetVertex(BackTopRight).z }));
+
     bound.size = max - min;
 }
 

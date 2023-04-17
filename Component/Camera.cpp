@@ -1,10 +1,10 @@
 #include "Camera.h"
+#include "../CoreModule/Utilities.h"
 #include "../CoreModule/Input.h"
 #include "../CoreModule/Time.h"
 #include "../CoreModule/Mathf.h"
 #include "Transform.h"
 using namespace KritiaEngine;
-using namespace glm;
 
 std::shared_ptr<Camera> Camera::current = nullptr;
 std::shared_ptr<Camera> Camera::editorCamera = nullptr;
@@ -25,9 +25,7 @@ void Camera::EditorCameraUpdate() {
 KritiaEngine::Camera::Camera()
 {
     this->Position = Vector3(0, 1, 5);
-    Vector3 vec1 = Vector3(0, 0, 0);
-    Vector3 vec2 = Vector3(0, 1, 0);
-    this->Forward = Vector3::Normalize(vec1 - vec2);
+    this->Forward = Vector3(0, 0, 1);
     this->Target = Vector3(0, 0, 0);
     WorldUp = Vector3(0, 1, 0);
     Right = Vector3::Normalize(Vector3::Cross(Forward, Vector3(0, 1, 0)));
@@ -43,10 +41,8 @@ KritiaEngine::Camera::Camera()
 KritiaEngine::Camera::Camera(GameObject* gameObject)
 {
     this->gameObject = gameObject;
-    this->Position = Vector3(0, 0, 3);
-    Vector3 vec1 = Vector3(0, 0, 0);
-    Vector3 vec2 = Vector3(0, 1, 0);
-    this->Forward = Vector3::Normalize(vec1 - vec2);
+    this->Position = Vector3(0, 1, 5);
+    this->Forward = Vector3(0, 0, 1);
     this->Target = Vector3(0, 0, 0);
     WorldUp = Vector3(0, 1, 0);
     Right = Vector3::Normalize(Vector3::Cross(Forward, Vector3(0, 1, 0)));

@@ -8,12 +8,13 @@ using namespace KritiaEngine::Manager;
 using AABBPoint = KritiaEngine::Manager::PhysicsManager::AABBPoint;
 using MinMax = PhysicsManager::MinMax;
 
-float PhysicsManager::stepSize = 0.03f;
+float PhysicsManager::stepSize = 0.02f;
 float PhysicsManager::timer = 0;
 Vector3 PhysicsManager::gravityAccelaration = Vector3(0, -9.81, 0);
 std::list<Collider*> PhysicsManager::colliders = std::list<Collider*>();
 std::list<RigidBody*> PhysicsManager::rigidBodies = std::list<RigidBody*>();
-std::list<std::tuple<Collider*, Collider*>> PhysicsManager::collisionPair = std::list<std::tuple<Collider*, Collider*>>();
+std::list<Collision> PhysicsManager::collisions = std::list<Collision>();
+std::list<std::pair<Collider*, Collider*>> PhysicsManager::collisionPair = std::list<std::pair<Collider*, Collider*>>();
 std::vector<AABBPoint> PhysicsManager::pointsX = std::vector<AABBPoint>();
 std::vector<AABBPoint> PhysicsManager::pointsY = std::vector<AABBPoint>();
 std::vector<AABBPoint> PhysicsManager::pointsZ = std::vector<AABBPoint>();
@@ -44,6 +45,7 @@ void KritiaEngine::Manager::PhysicsManager::RemoveCollider(Collider* collider) {
 void KritiaEngine::Manager::PhysicsManager::PhysicsUpdate() {
 	if (timer > stepSize) {
 		CheckCollision();
+		ResolveCollision();
 		for (RigidBody* rb : rigidBodies) {
 			rb->PhysicsUpdate();
 		}
@@ -60,7 +62,7 @@ void KritiaEngine::Manager::PhysicsManager::Initialize() {
 void KritiaEngine::Manager::PhysicsManager::CheckCollision() {
 	SortAABB();
 	SweepAndPrune();
-
+	CheckBVH();
 }
 
 // Sweep and Prune using AABB (collider.bound)
@@ -137,4 +139,48 @@ void KritiaEngine::Manager::PhysicsManager::SortAABB() {
 	std::sort(pointsX.begin(), pointsX.end());
 	std::sort(pointsY.begin(), pointsY.end());
 	std::sort(pointsZ.begin(), pointsZ.end());
+}
+
+void KritiaEngine::Manager::PhysicsManager::CheckBVH() {
+	for (auto collision : collisionPair) {
+		Collision col1 = collision.first->CheckCollision(collision.second);
+		if (col1.gameObject != nullptr) {
+			collisions.push_back(col1);
+		}
+		Collision col2 = collision.second->CheckCollision(collision.first);
+		if (col2.gameObject != nullptr) {
+			collisions.push_back(col2);
+		}
+	}
+}
+
+void KritiaEngine::Manager::PhysicsManager::ResolveCollision() {
+	for (auto collision : collisions) {
+		if (collision.selfCollider->isTrigger) {
+			// OnTrigerEnter ...
+		} else {
+			// collided object has rigidbody
+			if (collision.selfCollider->gameObject->GetComponent<RigidBody>() != nullptr) {
+				auto otherRB = collision.otherCollider->gameObject->GetComponent<RigidBody>();
+				auto selfRB = collision.selfCollider->gameObject->GetComponent<RigidBody>();
+				Vector3 impulse;
+				Vector3 selfImpulse;
+				if (otherRB != nullptr) {
+					impulse = selfRB->mass * selfRB->GetVelocity() + otherRB->mass * otherRB->GetVelocity();
+					selfImpulse = otherRB->mass / (selfRB->mass + otherRB->mass) * selfImpulse;
+				} else {
+					impulse = selfRB->mass * selfRB->GetVelocity();
+					selfImpulse = impulse;
+				}
+				selfImpulse *= collision.selfCollider->bounciness;
+				if (Vector3::Magnitude(selfImpulse) < 0.1) {
+					selfImpulse = Vector3::Zero();
+				}
+				for (ContactPoint p : collision.contactPoints) {
+					selfRB->AddForceAndTorque(p.position, - selfImpulse / PhysicsManager::stepSize / collision.contactPoints.size() * 2);
+				}
+			}
+		}
+	}
+	collisions.clear();
 }

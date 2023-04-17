@@ -1,5 +1,5 @@
 #include "BoundingVolume.h"
-#include "Collider.h"
+#include "BoxCollider.h"
 #include "../RigidBody.h"
 #include "../../CoreModule/Mathf.h"
 using namespace KritiaEngine;
@@ -16,20 +16,30 @@ void KritiaEngine::BoundingVolumeOBB::CheckCollision(Collision* collision, Bound
 	if (Collided(other, selfTransform, otherTransform)) {
 		// reached the leaf of the BVH
 		if (child1 == nullptr && child2 == nullptr) {
+			collision->selfCollider = selfTransform->gameObject->GetComponent<BoxCollider>();
+			collision->otherCollider = otherTransform->gameObject->GetComponent<BoxCollider>();
+			collision->rigidBody = otherTransform->gameObject->GetComponent<RigidBody>();
+			collision->gameObject = otherTransform->gameObject;
+
 			// Approximation of the contact point, may need refinement
 			Vector3 verticesSum = Vector3::Zero();
+			Vector3 otherVerticesSum = Vector3::Zero();
 			for (int i = 0; i < vertices.size(); i++) {
 				verticesSum += vertices[i];
+				otherVerticesSum += other->vertices[i];
 			}
-			collision->contactPoints.push_back((float)1 / 8 * verticesSum);
+			Vector3 position = 1.f / 8 * verticesSum;
+			Vector3 normal = Vector3::Zero();
+			if (collision->selfCollider->gameObject->GetComponent<RigidBody>()!= nullptr) {
+				normal = -Vector3::Normalize(collision->selfCollider->gameObject->GetComponent<RigidBody>()->GetVelocity());
+			}
+			ContactPoint p(normal, position, collision->selfCollider, collision->otherCollider);
+			collision->contactPoints.push_back(p);
 		}
 		else {
 			child1->CheckCollision(collision, other, selfTransform, otherTransform);
 			child2->CheckCollision(collision, other, selfTransform, otherTransform);		
 		}
-		collision->collider = otherTransform->gameObject->GetComponent<Collider>();
-		collision->rigidBody = otherTransform->gameObject->GetComponent<RigidBody>();
-		collision->gameObject = otherTransform->gameObject;
 	} 
 }
 
@@ -65,22 +75,21 @@ bool KritiaEngine::BoundingVolumeOBB::Collided(BoundingVolumeOBB* other, const s
 	collided &= IntervalOverlapped(other, selfTransform->right);
 	collided &= IntervalOverlapped(other, selfTransform->up);
 	collided &= IntervalOverlapped(other, selfTransform->forward);
-
 	collided &= IntervalOverlapped(other, otherTransform->right);
 	collided &= IntervalOverlapped(other, otherTransform->up);
 	collided &= IntervalOverlapped(other, otherTransform->forward);
 
-	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->right, otherTransform->right)));
-	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->right, otherTransform->up)));
-	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->right, otherTransform->forward)));
+	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->right, otherTransform->right) == Vector3::Zero() ? selfTransform->right : Vector3::Cross(selfTransform->right, otherTransform->right)));
+	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->right, otherTransform->up) == Vector3::Zero() ? selfTransform->right : Vector3::Cross(selfTransform->right, otherTransform->up)));
+	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->right, otherTransform->forward) == Vector3::Zero() ? selfTransform->right : Vector3::Cross(selfTransform->right, otherTransform->forward)));
 
-	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->up, otherTransform->right)));
-	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->up, otherTransform->up)));
-	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->up, otherTransform->forward)));
+	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->up, otherTransform->right) == Vector3::Zero() ? selfTransform->up : Vector3::Cross(selfTransform->up, otherTransform->right)));
+	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->up, otherTransform->up) == Vector3::Zero() ? selfTransform->up : Vector3::Cross(selfTransform->up, otherTransform->up)));
+	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->up, otherTransform->forward) == Vector3::Zero() ? selfTransform->up : Vector3::Cross(selfTransform->up, otherTransform->forward)));
 
-	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->forward, otherTransform->right)));
-	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->forward, otherTransform->up)));
-	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->forward, otherTransform->forward)));
+	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->forward, otherTransform->right) == Vector3::Zero() ? selfTransform->forward : Vector3::Cross(selfTransform->forward, otherTransform->right)));
+	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->forward, otherTransform->up) == Vector3::Zero() ? selfTransform->forward : Vector3::Cross(selfTransform->forward, otherTransform->up)));
+	collided &= IntervalOverlapped(other, Vector3::Normalize(Vector3::Cross(selfTransform->forward, otherTransform->forward) == Vector3::Zero() ? selfTransform->forward : Vector3::Cross(selfTransform->forward, otherTransform->forward)));
 
 	return collided;
 }
@@ -150,6 +159,7 @@ void KritiaEngine::BoundingVolumeOBB::CreateChildren(int maximumDepth, int curre
 			child1->vertices.push_back(0.5 * (vertices[1] + vertices[5]));
 			child1->vertices.push_back(0.5 * (vertices[2] + vertices[6]));
 			child1->vertices.push_back(0.5 * (vertices[3] + vertices[7]));
+			child1->CreateChildren(maximumDepth, currentDepth + 1);
 
 			child2->vertices.push_back(0.5 * (vertices[0] + vertices[4]));
 			child2->vertices.push_back(0.5 * (vertices[1] + vertices[5]));
@@ -159,6 +169,7 @@ void KritiaEngine::BoundingVolumeOBB::CreateChildren(int maximumDepth, int curre
 			child2->vertices.push_back(vertices[5]);
 			child2->vertices.push_back(vertices[6]);
 			child2->vertices.push_back(vertices[7]);
+			child2->CreateChildren(maximumDepth, currentDepth + 1);
 		}
 	}
 
@@ -167,6 +178,9 @@ void KritiaEngine::BoundingVolumeOBB::CreateChildren(int maximumDepth, int curre
 void KritiaEngine::BoundingVolumeOBB::UpdateChildren(int maximumDepth, int currentDepth) {
 	// Vertices Order OBB: ForwardBottomLeft, ForwardBottomRight, ForwardTopLeft, ForwardTopRight, BackBottomLeft, BackBottomRight, BackTopLeft, BackTopRight. (Aligned with BoxCollider::PointPos)
 	if (currentDepth < maximumDepth) {
+		if (child1 == nullptr) {
+			CreateChildren(maximumDepth, currentDepth);
+		}
 		Vector3 diagonal = vertices[0] - vertices[7];
 		float xLength = Vector3::Magnitude(vertices[0] - vertices[1]);
 		float yLength = Vector3::Magnitude(vertices[0] - vertices[2]);
