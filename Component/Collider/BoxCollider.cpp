@@ -24,21 +24,21 @@ Vector3 KritiaEngine::BoxCollider::GetVertex(PointPos pos) {
     } 
     switch (pos) {
     case ForwardBottomLeft:
-        return Transform()->position + center + rot * Vector3(-1, -1,  1) * bound.GetExtent() * size * Transform()->scale;
+        return Transform()->position + center + rot * (Vector3(-1, -1,  1) * Transform()->scale) * bound.GetExtent() * size ;
     case ForwardBottomRight:
-        return Transform()->position + center + rot * Vector3(1,  -1,  1) * bound.GetExtent() * size * Transform()->scale;
+        return Transform()->position + center + rot * (Vector3(1,  -1,  1) * Transform()->scale) * bound.GetExtent() * size;
     case ForwardTopLeft: 
-        return Transform()->position + center + rot * Vector3(-1,  1,  1) * bound.GetExtent() * size * Transform()->scale;
+        return Transform()->position + center + rot * (Vector3(-1,  1,  1) * Transform()->scale) * bound.GetExtent() * size ;
     case ForwardTopRight:
-        return Transform()->position + center + rot * Vector3( 1,  1,  1) * bound.GetExtent() * size * Transform()->scale;
+        return Transform()->position + center + rot * (Vector3( 1,  1,  1) * Transform()->scale) * bound.GetExtent() * size;
     case BackBottomLeft:
-        return Transform()->position + center + rot * Vector3(-1, -1, -1) * bound.GetExtent() * size * Transform()->scale;
+        return Transform()->position + center + rot * (Vector3(-1, -1, -1) * Transform()->scale) * bound.GetExtent() * size;
     case BackBottomRight:
-        return Transform()->position + center + rot * Vector3( 1, -1, -1) * bound.GetExtent() * size * Transform()->scale;
+        return Transform()->position + center + rot * (Vector3( 1, -1, -1) * Transform()->scale) * bound.GetExtent() * size;
     case BackTopLeft:
-        return Transform()->position + center + rot * Vector3(-1,  1, -1) * bound.GetExtent() * size * Transform()->scale;
+        return Transform()->position + center + rot * (Vector3(-1,  1, -1) * Transform()->scale) * bound.GetExtent() * size;
     case BackTopRight:
-        return Transform()->position + center + rot * Vector3( 1,  1, -1) * bound.GetExtent() * size * Transform()->scale;
+        return Transform()->position + center + rot * (Vector3( 1,  1, -1) * Transform()->scale) * bound.GetExtent() * size;
     }
 }
 
@@ -100,7 +100,6 @@ void KritiaEngine::BoxCollider::UpdateBound() {
         GetVertex(ForwardTopRight).y, GetVertex(BackBottomLeft).y, GetVertex(BackBottomRight).y, GetVertex(BackTopLeft).y, GetVertex(BackTopRight).y }),
         std::max({ GetVertex(ForwardBottomLeft).z, GetVertex(ForwardBottomRight).z, GetVertex(ForwardTopLeft).z,
         GetVertex(ForwardTopRight).z, GetVertex(BackBottomLeft).z, GetVertex(BackBottomRight).z, GetVertex(BackTopLeft).z, GetVertex(BackTopRight).z }));
-
     bound.size = max - min;
 }
 

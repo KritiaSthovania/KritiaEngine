@@ -36,7 +36,9 @@ namespace KritiaEngine {
 		Vector3 force = Vector3::Zero();
 		Vector3 torque = Vector3::Zero();
 		Vector3 velocity = Vector3::Zero();
+		Vector3 lastVelocity = Vector3::Zero();
 		Vector3 angularVelocity = Vector3::Zero();
+		Vector3 lastAngularVelocity = Vector3::Zero();
 		Vector3 accelaration = Vector3::Zero();
 		Vector3 angularAccelaration = Vector3::Zero();
 		std::shared_ptr<MeshFilter> meshFilter = nullptr;

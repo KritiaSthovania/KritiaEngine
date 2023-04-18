@@ -37,8 +37,9 @@
 - [x] 资源管理
 - 支持材质（Material），模型网格（fbx，obj），贴图（png，jpg），预制体（Prefab）的导入
 - 用资源池进行资源管理以及垃圾回收: 基于最简单的Reference Counting，支持Material, Mesh以及Texture。预制体不会被回收，并且普通的GameObject会直接在Destory方法中析构。
-- [ ] 物理引擎
+
 - [ ] CPU渲染器
+- [ ] 物理引擎: 考虑用第三方
 #### 大概率没时间去做的：
 - [ ] Play In Editor
 - [ ] 脚本系统

@@ -171,13 +171,13 @@ void KritiaEngine::Manager::PhysicsManager::ResolveCollision() {
 				} else {
 					impulse = selfRB->mass * selfRB->GetVelocity();
 					selfImpulse = impulse;
+					selfRB->velocity = -selfRB->velocity * collision.selfCollider->bounciness;
 				}
 				selfImpulse *= collision.selfCollider->bounciness;
-				if (Vector3::Magnitude(selfImpulse) < 0.1) {
-					selfImpulse = Vector3::Zero();
-				}
+				
 				for (ContactPoint p : collision.contactPoints) {
-					selfRB->AddForceAndTorque(p.position, - selfImpulse / PhysicsManager::stepSize / collision.contactPoints.size() * 2);
+					Vector3 force1 = std::abs(Vector3::Dot(selfImpulse, p.normal)) * p.normal / PhysicsManager::stepSize;
+					selfRB->AddForceAndTorque(p.position, force1 / collision.contactPoints.size() * 2);
 				}
 			}
 		}

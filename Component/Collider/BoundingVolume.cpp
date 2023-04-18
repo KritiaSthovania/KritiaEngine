@@ -29,9 +29,10 @@ void KritiaEngine::BoundingVolumeOBB::CheckCollision(Collision* collision, Bound
 				otherVerticesSum += other->vertices[i];
 			}
 			Vector3 position = 1.f / 8 * verticesSum;
+			Vector3 otherPosition = 1.f / 8 * otherVerticesSum;
 			Vector3 normal = Vector3::Zero();
 			if (collision->selfCollider->gameObject->GetComponent<RigidBody>()!= nullptr) {
-				normal = -Vector3::Normalize(collision->selfCollider->gameObject->GetComponent<RigidBody>()->GetVelocity());
+				normal = Vector3::Normalize(position - otherPosition);
 			}
 			ContactPoint p(normal, position, collision->selfCollider, collision->otherCollider);
 			collision->contactPoints.push_back(p);

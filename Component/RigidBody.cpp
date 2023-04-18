@@ -16,6 +16,7 @@ void KritiaEngine::RigidBody::AddForce(const Vector3& force) {
 void KritiaEngine::RigidBody::AddTorque(const Vector3& position, const Vector3& force) {
 	if (std::dynamic_pointer_cast<BoxCollider>(collider) != nullptr) {
 		this->torque += Vector3::Cross(position - (Transform()->position + std::dynamic_pointer_cast<BoxCollider>(collider)->center), force);
+
 	}
 }
 
@@ -61,9 +62,11 @@ void KritiaEngine::RigidBody::PhysicsUpdate() {
 		if (useGravity) {
 			accelaration += PhysicsManager::gravityAccelaration;
 		}
+		lastVelocity = velocity;
 		velocity += accelaration * PhysicsManager::stepSize;
 		Transform()->position += velocity * PhysicsManager::stepSize;
 		angularAccelaration = GetInertiaTensorInverseWorld() * torque;
+		lastAngularVelocity = angularVelocity;
 		angularVelocity += angularAccelaration * PhysicsManager::stepSize;
 		Quaternion omegaTilde = Quaternion(angularVelocity.x, angularVelocity.y, angularVelocity.z, 0);
 		Transform()->rotation += 0.5 * omegaTilde * Transform()->rotation * PhysicsManager::stepSize;
