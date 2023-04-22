@@ -14,6 +14,7 @@ int Settings::ScreenHeight = 2160;
 float Settings::NearPlaneDistance = 0.1f;
 float Settings::FarPlaneDistance = 100.f;
 bool Settings::UseOpenGL = true;
+bool Settings::UseSoftwareRendering = false;
 bool Settings::UseGLM = true;
 int Settings::ShadowWidth = 1024;
 int Settings::ShadowHeight = 1024;
@@ -27,6 +28,7 @@ void KritiaEngine::Settings::Serialize() {
     json["NearPlaneDistance"] = NearPlaneDistance;
     json["FarPlaneDistance"] = FarPlaneDistance;
     json["UseOpenGL"] = UseOpenGL;
+    json["UseSoftwareRendering"] = UseSoftwareRendering;
     json["UseGLM"] = UseGLM;
     json["ShadowWidth"] = ShadowWidth;
     json["ShadowHeight"] = ShadowHeight;
@@ -45,6 +47,7 @@ void KritiaEngine::Settings::Deserialize() {
     NearPlaneDistance = json["NearPlaneDistance"];
     FarPlaneDistance = json["FarPlaneDistance"];
     UseOpenGL = json["UseOpenGL"];
+    UseSoftwareRendering = json["UseSoftwareRendering"];
     UseGLM = json["UseGLM"];
     ShadowWidth = json["ShadowWidth"];
     ShadowHeight = json["ShadowHeight"];
@@ -57,6 +60,7 @@ void KritiaEngine::Settings::ShowOnEditorWindow() {
     ImguiAlias::FloatField("Near Plane Distance", &NearPlaneDistance);
     ImguiAlias::FloatField("Far Plane Distance", &FarPlaneDistance);
     ImguiAlias::BoolField("Use OpenGL", &UseOpenGL);
+    ImguiAlias::BoolField("Use SoftwareRendering", &UseSoftwareRendering);
     ImguiAlias::BoolField("Use GLM", &UseGLM);
     ImguiAlias::IntField("Shadow Width", &ShadowWidth);
     ImguiAlias::IntField("Shadow Height", &ShadowHeight);

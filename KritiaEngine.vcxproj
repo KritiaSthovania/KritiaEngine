@@ -170,6 +170,7 @@
     <ClCompile Include="Editor\EditorWindows\HierachyWindow.cpp" />
     <ClCompile Include="Editor\ImguiAlias.cpp" />
     <ClCompile Include="CoreModule\Manager\GameObjectManager.cpp" />
+    <ClCompile Include="includes\ImGuizmo\ImGuizmo.cpp" />
     <ClCompile Include="includes\imgui\backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="includes\imgui\backends\imgui_impl_opengl3.cpp" />
     <ClCompile Include="includes\imgui\imgui.cpp" />
@@ -191,6 +192,7 @@
     <ClCompile Include="Rendering\RenderingProvider.cpp" />
     <ClCompile Include="CoreModule\Manager\ResourceManager.cpp" />
     <ClCompile Include="Component\RigidBody.cpp" />
+    <ClCompile Include="Rendering\SoftwareRendering.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Collider\BoundingVolume.h" />
@@ -230,6 +232,7 @@
     <ClInclude Include="Editor\EditorWindows\HierachyWindow.h" />
     <ClInclude Include="Editor\ImguiAlias.h" />
     <ClInclude Include="CoreModule\Manager\GameObjectManager.h" />
+    <ClInclude Include="includes\ImGuizmo\ImGuizmo.h" />
     <ClInclude Include="includes\imgui\backends\imgui_impl_glfw.h" />
     <ClInclude Include="includes\imgui\backends\imgui_impl_opengl3.h" />
     <ClInclude Include="includes\imgui\backends\imgui_impl_opengl3_loader.h" />
@@ -257,6 +260,7 @@
     <ClInclude Include="Rendering\RenderingProvider.h" />
     <ClInclude Include="CoreModule\Manager\ResourceManager.h" />
     <ClInclude Include="Component\RigidBody.h" />
+    <ClInclude Include="Rendering\SoftwareRendering.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

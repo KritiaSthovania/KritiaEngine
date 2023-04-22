@@ -9,8 +9,13 @@ namespace KritiaEngine {
 		Vector2(float x, float y);
 		Vector2(const glm::vec2& vec);
 		Vector2();
+		static float Cross(const Vector2& vec1, const Vector2& vec2);
 		float x, y;
 		static Vector2 Zero();
+		friend Vector2 operator* (float a, const Vector2& vec);
+		Vector2 operator-(const Vector2& vec) const;
+		Vector2 operator+(const Vector2& vec) const;
+		Vector2 operator/(float a) const;
 		operator glm::vec2() const;
 	};
 
@@ -58,6 +63,7 @@ namespace KritiaEngine {
 		Vector4(float x, float y, float z, float w);
 		Vector4();
 		Vector4(glm::vec4 vec);
+		Vector4(const Vector3& vec, float w);
 		static Vector4 Zero();
 		static glm::vec4 ToGlmVec4(const Vector4& vec4);
 		float x;
@@ -66,10 +72,10 @@ namespace KritiaEngine {
 		float w;
 		// operators
 		friend Vector4 operator*(float a, const Vector4& vec);
-		Vector4 operator+ (const Vector4& vec);
-		Vector4 operator- (const Vector4& vec);
-		Vector4 operator* (float a);
-		Vector4 operator/ (float a);
+		Vector4 operator+ (const Vector4& vec) const;
+		Vector4 operator- (const Vector4& vec) const;
+		Vector4 operator* (float a) const;
+		Vector4 operator/ (float a) const;
 		void operator+= (const Vector4& vec);
 		void operator-= (const Vector4& vec);
 		void operator*= (float a);
@@ -77,6 +83,7 @@ namespace KritiaEngine {
 		bool operator== (const Vector4& vec);
 		bool operator!= (const Vector4& vec);
 		operator glm::vec4() const;
+		operator Vector3() const;
 		operator std::vector<float>() const;
 	private:
 
@@ -94,8 +101,8 @@ namespace KritiaEngine {
 		static glm::mat3 ToGlmMat3(const Matrix3x3 &mat);
 		// operator
 		operator glm::mat3() const;
-		Vector3 operator* (const Vector3& vec3);
-		Matrix3x3 operator* (const Matrix3x3& mat);
+		Vector3 operator* (const Vector3& vec3) const;
+		Matrix3x3 operator* (const Matrix3x3& mat) const;
 	private:
 		float entries[3][3];
 	};
@@ -141,12 +148,12 @@ namespace KritiaEngine {
 		/// Get a column by index
 		/// </summary>
 		/// <param name="index">0 to 3</param>
-		Vector4 GetColumn(int index);
+		Vector4 GetColumn(int index) const;
 		/// <summary>
 		/// Get a column by index
 		/// </summary>
 		/// <param name="index">0 to 3</param>
-		Vector4 GetRow(int index);
+		Vector4 GetRow(int index) const;
 		/// <summary>
 		/// Set a column by index
 		/// </summary>
@@ -161,7 +168,7 @@ namespace KritiaEngine {
 		/// <summary>
 		/// Get an entry by row and column
 		/// </summary>
-		float GetEntry(int row, int column);
+		float GetEntry(int row, int column) const;
 		/// <summary>
 		/// Set an entry by row and column
 		/// </summary>
@@ -170,8 +177,8 @@ namespace KritiaEngine {
 		float* GetPtr();
 
 		// operators
-		Matrix4x4 operator* (const Matrix4x4& mat);
-		Vector4 operator* (const Vector4& vec4);
+		Matrix4x4 operator* (const Matrix4x4& mat) const;
+		Vector4 operator* (const Vector4& vec4) const;
 		void operator *= (const Matrix4x4& mat);
 		operator glm::mat4() const;
 		/// <summary>

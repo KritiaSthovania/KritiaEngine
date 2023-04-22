@@ -21,8 +21,24 @@ KritiaEngine::Vector2::Vector2() {
 	this->x = this->y = 0;
 }
 
+float KritiaEngine::Vector2::Cross(const Vector2& vec1, const Vector2& vec2) {
+	return vec1.x * vec2.y - vec1.y * vec2.x;
+}
+
 Vector2 KritiaEngine::Vector2::Zero() {
 	return Vector2();
+}
+
+Vector2 KritiaEngine::Vector2::operator-(const Vector2& vec) const {
+	return Vector2(this->x - vec.x, this->y - vec.y);
+}
+
+Vector2 KritiaEngine::Vector2::operator+(const Vector2& vec) const {
+	return Vector2(this->x + vec.x, this->y + vec.y);
+}
+
+Vector2 KritiaEngine::Vector2::operator/(float a) const {
+	return Vector2(x / a, y / a);
 }
 
 KritiaEngine::Vector2::operator glm::vec2() const {
@@ -167,6 +183,10 @@ KritiaEngine::Vector3::operator std::vector<float>() const {
 	return std::vector<float>({ x,y,z });
 }
 
+Vector2 KritiaEngine::operator*(float a, const Vector2& vec) {
+	return Vector2(a * vec.x, a * vec.y);
+}
+
 std::ostringstream& KritiaEngine::operator<<(std::ostringstream& cout, const Vector3& vec) {
 	cout << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
 	return cout;
@@ -213,6 +233,13 @@ KritiaEngine::Vector4::Vector4(glm::vec4 vec)
 	this->w = vec.w;
 }
 
+KritiaEngine::Vector4::Vector4(const Vector3& vec, float w) {
+	this->x = vec.x;
+	this->y = vec.y;
+	this->z = vec.z;
+	this->w = w;
+}
+
 Vector4 KritiaEngine::Vector4::Zero()
 {
 	return Vector4();
@@ -224,22 +251,22 @@ glm::vec4 KritiaEngine::Vector4::ToGlmVec4(const Vector4 &vec4)
 }
 
 
-Vector4 KritiaEngine::Vector4::operator+(const Vector4& vec)
+Vector4 KritiaEngine::Vector4::operator+(const Vector4& vec) const
 {
 	return Vector4(this->x + vec.x, this->y + vec.y, this->z + vec.z, this->w + vec.w);
 }
 
-Vector4 KritiaEngine::Vector4::operator-(const Vector4& vec)
+Vector4 KritiaEngine::Vector4::operator-(const Vector4& vec) const
 {
 	return Vector4(this->x - vec.x, this->y - vec.y, this->z - vec.z, this->w - vec.w);
 }
 
-Vector4 KritiaEngine::Vector4::operator*(float a)
+Vector4 KritiaEngine::Vector4::operator*(float a) const
 {
 	return Vector4(this->x * a, this->y * a, this->z * a, this->w * a);
 }
 
-Vector4 KritiaEngine::Vector4::operator/(float a)
+Vector4 KritiaEngine::Vector4::operator/(float a) const
 {
 	return Vector4(this->x / a, this->y / a, this->z / a, this->w / a);
 }
@@ -289,6 +316,10 @@ KritiaEngine::Vector4::operator glm::vec4() const
 	return glm::vec4(x, y, z, w);
 }
 
+KritiaEngine::Vector4::operator Vector3() const {
+	return Vector3(x, y, z);
+}
+
 KritiaEngine::Vector4::operator std::vector<float>() const {
 	return std::vector<float>({ x, y, z, w });
 }
@@ -314,14 +345,14 @@ glm::mat4 KritiaEngine::Matrix4x4::ToGlmMat4(const Matrix4x4 &mat4)
 	return glm::mat4(column0, column1, column2, column3);
 }
 
-Matrix4x4 KritiaEngine::Matrix4x4::operator*(const Matrix4x4 &mat)
+Matrix4x4 KritiaEngine::Matrix4x4::operator*(const Matrix4x4 &mat) const
 {
 	if (Settings::UseGLM) {
 		return Matrix4x4(ToGlmMat4(*this) * ToGlmMat4(mat));
 	}
 }
 
-Vector4 KritiaEngine::Matrix4x4::operator*(const Vector4& vec4) {
+Vector4 KritiaEngine::Matrix4x4::operator*(const Vector4& vec4) const {
 	return (glm::mat4)(*this) * (glm::vec4)(vec4);
 }
 
@@ -388,7 +419,7 @@ Matrix4x4 KritiaEngine::Matrix4x4::LookAt(const Vector3 &eye, const Vector3 &cen
 
 }
 
-Vector4 KritiaEngine::Matrix4x4::GetColumn(int index)
+Vector4 KritiaEngine::Matrix4x4::GetColumn(int index) const
 {
 	switch (index) {
 	case 0:
@@ -402,7 +433,7 @@ Vector4 KritiaEngine::Matrix4x4::GetColumn(int index)
 	}
 }
 
-Vector4 KritiaEngine::Matrix4x4::GetRow(int index)
+Vector4 KritiaEngine::Matrix4x4::GetRow(int index) const
 {
 	switch (index) {
 	case 0:
@@ -470,7 +501,7 @@ void KritiaEngine::Matrix4x4::SetRow(int index, const Vector4 &row)
 	}
 }
 
-float KritiaEngine::Matrix4x4::GetEntry(int row, int column)
+float KritiaEngine::Matrix4x4::GetEntry(int row, int column) const
 {
 	return entries[column][row];
 }
@@ -559,11 +590,11 @@ KritiaEngine::Matrix3x3::operator glm::mat3() const
 	return glm::mat3(column0, column1, column2);
 }
 
-Vector3 KritiaEngine::Matrix3x3::operator*(const Vector3& vec3) {
+Vector3 KritiaEngine::Matrix3x3::operator*(const Vector3& vec3) const {
 	return (glm::mat3)*this * (glm::vec3)vec3;
 }
 
-Matrix3x3 KritiaEngine::Matrix3x3::operator*(const Matrix3x3& mat) {
+Matrix3x3 KritiaEngine::Matrix3x3::operator*(const Matrix3x3& mat) const {
 	return (glm::mat3)*this * glm::mat3(mat);
 }
 

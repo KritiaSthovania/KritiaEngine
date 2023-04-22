@@ -1,378 +1,471 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="源文件">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="CoreModule">
+      <UniqueIdentifier>{16a2dcf8-bc97-4be4-b1df-e52e5ea40af9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    <Filter Include="CoreModule\Manager">
+      <UniqueIdentifier>{b4ab95f0-f04a-4326-8dff-ae1c612b8fdd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="资源文件">
+    <Filter Include="CoreModule\Interface">
+      <UniqueIdentifier>{94dcc280-bedd-482a-a471-cf413a483077}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CoreModule\Manager\Header">
+      <UniqueIdentifier>{7b927570-542d-4941-b800-bfd95c9db057}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CoreModule\Manager\Source">
+      <UniqueIdentifier>{566290fc-222b-4bcf-bf20-15918e951dbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CoreModule\Header">
+      <UniqueIdentifier>{50d8d029-c66b-4654-91ab-b543e687970d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CoreModule\Source">
+      <UniqueIdentifier>{6e8ffb61-ec9c-49cb-8567-f1dc99633161}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor">
+      <UniqueIdentifier>{36dea61d-c83f-4955-be51-0bae8d6203f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\EditorWindow">
+      <UniqueIdentifier>{fc7d3c9b-0893-468d-ad03-614cbf31a4e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\EditorWindow\Header">
+      <UniqueIdentifier>{b34263fc-63bc-4640-9fbe-1810a2be8dd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\EditorWindow\Source">
+      <UniqueIdentifier>{73491419-8290-4f43-a7d6-2f19a4a7c6cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\Header">
+      <UniqueIdentifier>{629ae8ea-a99f-4010-9c8c-62cbcb4ee6ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\Source">
+      <UniqueIdentifier>{554ed249-208c-4aff-893a-d26fdb8e92b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering">
+      <UniqueIdentifier>{97391ae6-d593-4a08-a3f9-7663dee42d24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\Header">
+      <UniqueIdentifier>{310586f7-8dcc-4461-81c6-eb8acdd1fa09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\Source">
+      <UniqueIdentifier>{8c350e7f-3214-4cc6-bf9a-3b049e377bb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes">
+      <UniqueIdentifier>{f3ad3744-baba-4cb9-b320-ef1224cd0a49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\imgui">
+      <UniqueIdentifier>{86d30f4e-399a-40e5-9eb0-f4fe152763f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\nfd">
+      <UniqueIdentifier>{85c9822e-7557-4e69-bb3a-f76d67fba7fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\json">
+      <UniqueIdentifier>{26a7e5ce-b51d-431a-ada7-ac3c3744b89d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\stb">
+      <UniqueIdentifier>{8e33b4c2-82bc-42a7-b52b-496d5de36956}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\ImGuizmo">
+      <UniqueIdentifier>{4f17fe5a-f6dc-4dd7-9712-0d1123826e1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Component">
+      <UniqueIdentifier>{66ecc546-e000-4d44-a04e-a2990b1d1cf7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Component\Source">
+      <UniqueIdentifier>{1051fb70-ce94-46ec-98b8-5f92f1b22491}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Component\Renderer">
+      <UniqueIdentifier>{4543c6ce-25c7-4b46-8ba6-64e710289028}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Component\Renderer\Header">
+      <UniqueIdentifier>{aa37ee80-b27d-4864-aaf2-500fb141d2e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Component\Renderer\Source">
+      <UniqueIdentifier>{d89711fc-8e8b-4ad8-88e0-76ad838ff17a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Component\Collider">
+      <UniqueIdentifier>{880a5a13-71e8-492b-9edd-2a0290dc610a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Component\Collider\Header">
+      <UniqueIdentifier>{8af5ef03-73fc-4b98-912a-6cf7a3a27ebe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Component\Collider\Source">
+      <UniqueIdentifier>{e904fdfd-6e1d-4e36-a17d-8d9e3caf4175}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Component\Header">
+      <UniqueIdentifier>{7d2fed1a-0a60-4d3a-a49d-5ca647c7fd27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\Shader.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\GameObject.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\Input.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\Lighting.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\Material.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\Mathf.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\MathStructs.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\Object.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\Scene.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\SceneManager.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\Settings.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\Texture.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\Time.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\Utilities.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="Component\Camera.cpp">
+      <Filter>Component\Source</Filter>
     </ClCompile>
     <ClCompile Include="Component\Behaviour.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Component\Camera.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Component\Source</Filter>
     </ClCompile>
     <ClCompile Include="Component\Component.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Component\Light.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\Mesh.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Component\MonoBehaviour.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Component\Transform.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Component\Renderer\MeshRenderer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Component\Renderer\Renderer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\AssetDatabase.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Component\MeshFilter.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\EditorApplication.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\RenderingProvider.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\Manager\RendererManager.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\Manager\BehaviourManager.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\OpenGLRendering.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="includes\imgui\backends\imgui_impl_glfw.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="includes\imgui\backends\imgui_impl_opengl3.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="includes\imgui\imgui.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="includes\imgui\imgui_demo.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="includes\imgui\imgui_draw.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="includes\imgui\imgui_tables.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="includes\imgui\imgui_widgets.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\ImguiManager.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\EditorWindow.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\EditorWindows\HierachyWindow.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\EditorWindows\InspectorWindow.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Component\Source</Filter>
     </ClCompile>
     <ClCompile Include="Component\ComponentFactory.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Component\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Editor\MainMenuBarFunction.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="Component\Light.cpp">
+      <Filter>Component\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Editor\EditorWindows\ProjectFileExplorer.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="Component\MeshFilter.cpp">
+      <Filter>Component\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Editor\ImguiAlias.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\Manager\GameObjectManager.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\Manager\ResourceManager.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\EditorWindows\ConsoleWindow.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\Physics.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Component\Collider\Collider.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Component\Collider\BoxCollider.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreModule\Manager\PhysicsManager.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Component\Collider\BoundingVolume.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="Component\MonoBehaviour.cpp">
+      <Filter>Component\Source</Filter>
     </ClCompile>
     <ClCompile Include="Component\RigidBody.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Component\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\Collider\BoxCollider.cpp">
+      <Filter>Component\Collider\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\Collider\Collider.cpp">
+      <Filter>Component\Collider\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\Collider\BoundingVolume.cpp">
+      <Filter>Component\Collider\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\Renderer\MeshRenderer.cpp">
+      <Filter>Component\Renderer\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\Renderer\Renderer.cpp">
+      <Filter>Component\Renderer\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Manager\BehaviourManager.cpp">
+      <Filter>CoreModule\Manager\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Manager\PhysicsManager.cpp">
+      <Filter>CoreModule\Manager\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Manager\ResourceManager.cpp">
+      <Filter>CoreModule\Manager\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Manager\GameObjectManager.cpp">
+      <Filter>CoreModule\Manager\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\GameObject.cpp">
+      <Filter>CoreModule\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Input.cpp">
+      <Filter>CoreModule\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Lighting.cpp">
+      <Filter>CoreModule\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Material.cpp">
+      <Filter>CoreModule\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Mathf.cpp">
+      <Filter>CoreModule\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\MathStructs.cpp">
+      <Filter>CoreModule\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Mesh.cpp">
+      <Filter>CoreModule\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Object.cpp">
+      <Filter>CoreModule\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Physics.cpp">
+      <Filter>CoreModule\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Scene.cpp">
+      <Filter>CoreModule\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\SceneManager.cpp">
+      <Filter>CoreModule\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Settings.cpp">
+      <Filter>CoreModule\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Texture.cpp">
+      <Filter>CoreModule\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Utilities.cpp">
+      <Filter>CoreModule\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Time.cpp">
+      <Filter>CoreModule\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\Transform.cpp">
+      <Filter>Component\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorWindows\ConsoleWindow.cpp">
+      <Filter>Editor\EditorWindow\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorWindows\HierachyWindow.cpp">
+      <Filter>Editor\EditorWindow\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorWindows\ProjectFileExplorer.cpp">
+      <Filter>Editor\EditorWindow\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorWindows\InspectorWindow.cpp">
+      <Filter>Editor\EditorWindow\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorApplication.cpp">
+      <Filter>Editor\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorWindow.cpp">
+      <Filter>Editor\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\AssetDatabase.cpp">
+      <Filter>Editor\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\ImguiManager.cpp">
+      <Filter>Editor\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\MainMenuBarFunction.cpp">
+      <Filter>Editor\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\ImguiAlias.cpp">
+      <Filter>Editor\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="includes\imgui\imgui.cpp">
+      <Filter>includes\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="includes\imgui\imgui_demo.cpp">
+      <Filter>includes\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="includes\imgui\imgui_draw.cpp">
+      <Filter>includes\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="includes\imgui\backends\imgui_impl_opengl3.cpp">
+      <Filter>includes\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="includes\imgui\backends\imgui_impl_glfw.cpp">
+      <Filter>includes\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="includes\imgui\imgui_tables.cpp">
+      <Filter>includes\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="includes\imgui\imgui_widgets.cpp">
+      <Filter>includes\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="includes\ImGuizmo\ImGuizmo.cpp">
+      <Filter>includes\ImGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\OpenGLRendering.cpp">
+      <Filter>Rendering\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreModule\Manager\RendererManager.cpp">
+      <Filter>Rendering\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\RenderingProvider.cpp">
+      <Filter>Rendering\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Shader.cpp">
+      <Filter>Rendering\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Rendering\SoftwareRendering.cpp">
+      <Filter>Rendering\Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Main.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\Shader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\GameObject.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Input.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Lighting.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Material.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Mathf.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\MathStructs.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Object.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Scene.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\SceneManager.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Settings.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Texture.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Time.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Utilities.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Component\Behaviour.h">
-      <Filter>头文件</Filter>
+      <Filter>Component\Header</Filter>
     </ClInclude>
     <ClInclude Include="Component\Camera.h">
-      <Filter>头文件</Filter>
+      <Filter>Component\Header</Filter>
     </ClInclude>
     <ClInclude Include="Component\Component.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Component\Light.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Mesh.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Component\MonoBehaviour.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Component\Transform.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Component\Renderer\MeshRenderer.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Component\Renderer\Renderer.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\AssetDatabase.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Component\MeshFilter.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\EditorApplication.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\RenderingProvider.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Manager\RendererManager.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Manager\BehaviourManager.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\OpenGLRendering.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="includes\imgui\backends\imgui_impl_glfw.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="includes\imgui\backends\imgui_impl_opengl3.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="includes\imgui\backends\imgui_impl_opengl3_loader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="includes\imgui\imconfig.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="includes\imgui\imgui.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="includes\imgui\imgui_internal.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="includes\imgui\imstb_rectpack.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="includes\imgui\imstb_textedit.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="includes\imgui\imstb_truetype.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="includes\pch.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\ImguiManager.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\EditorWindow.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\EditorWindows\HierachyWindow.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\EditorWindows\InspectorWindow.h">
-      <Filter>头文件</Filter>
+      <Filter>Component\Header</Filter>
     </ClInclude>
     <ClInclude Include="Component\ComponentFactory.h">
-      <Filter>头文件</Filter>
+      <Filter>Component\Header</Filter>
     </ClInclude>
-    <ClInclude Include="includes\nfd\nfd.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="Component\Light.h">
+      <Filter>Component\Header</Filter>
     </ClInclude>
-    <ClInclude Include="includes\nfd\nfd.hpp">
-      <Filter>头文件</Filter>
+    <ClInclude Include="Component\MeshFilter.h">
+      <Filter>Component\Header</Filter>
     </ClInclude>
-    <ClInclude Include="Editor\MainMenuBarFunction.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="includes\stb\stb_image.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\EditorWindows\ProjectFileExplorer.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\ImguiAlias.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Manager\GameObjectManager.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Interface\ISerializable.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Manager\ResourceManager.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Interface\IInspectable.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="includes\json\json.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\EditorWindows\ConsoleWindow.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Physics.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Component\Collider\Collider.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Component\Collider\BoxCollider.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreModule\Manager\PhysicsManager.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Component\Collider\BoundingVolume.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="Component\MonoBehaviour.h">
+      <Filter>Component\Header</Filter>
     </ClInclude>
     <ClInclude Include="Component\RigidBody.h">
-      <Filter>头文件</Filter>
+      <Filter>Component\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\Transform.h">
+      <Filter>Component\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Manager\BehaviourManager.h">
+      <Filter>CoreModule\Manager\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Manager\GameObjectManager.h">
+      <Filter>CoreModule\Manager\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Manager\PhysicsManager.h">
+      <Filter>CoreModule\Manager\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Manager\ResourceManager.h">
+      <Filter>CoreModule\Manager\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Interface\ISerializable.h">
+      <Filter>CoreModule\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\Renderer\MeshRenderer.h">
+      <Filter>Component\Renderer\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\Renderer\Renderer.h">
+      <Filter>Component\Renderer\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\Collider\BoxCollider.h">
+      <Filter>Component\Collider\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\Collider\Collider.h">
+      <Filter>Component\Collider\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\Collider\BoundingVolume.h">
+      <Filter>Component\Collider\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Interface\IInspectable.h">
+      <Filter>CoreModule\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\GameObject.h">
+      <Filter>CoreModule\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Input.h">
+      <Filter>CoreModule\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Lighting.h">
+      <Filter>CoreModule\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Material.h">
+      <Filter>CoreModule\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Mathf.h">
+      <Filter>CoreModule\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\MathStructs.h">
+      <Filter>CoreModule\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Mesh.h">
+      <Filter>CoreModule\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Object.h">
+      <Filter>CoreModule\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Physics.h">
+      <Filter>CoreModule\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Scene.h">
+      <Filter>CoreModule\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\SceneManager.h">
+      <Filter>CoreModule\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Settings.h">
+      <Filter>CoreModule\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Texture.h">
+      <Filter>CoreModule\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Time.h">
+      <Filter>CoreModule\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Utilities.h">
+      <Filter>CoreModule\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorApplication.h">
+      <Filter>Editor\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorWindow.h">
+      <Filter>Editor\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\AssetDatabase.h">
+      <Filter>Editor\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\MainMenuBarFunction.h">
+      <Filter>Editor\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\ImguiAlias.h">
+      <Filter>Editor\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\ImguiManager.h">
+      <Filter>Editor\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorWindows\ConsoleWindow.h">
+      <Filter>Editor\EditorWindow\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorWindows\HierachyWindow.h">
+      <Filter>Editor\EditorWindow\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorWindows\InspectorWindow.h">
+      <Filter>Editor\EditorWindow\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorWindows\ProjectFileExplorer.h">
+      <Filter>Editor\EditorWindow\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreModule\Manager\RendererManager.h">
+      <Filter>Rendering\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\RenderingProvider.h">
+      <Filter>Rendering\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Shader.h">
+      <Filter>Rendering\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\OpenGLRendering.h">
+      <Filter>Rendering\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\imgui\imgui.h">
+      <Filter>includes\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\imgui\backends\imgui_impl_glfw.h">
+      <Filter>includes\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\imgui\backends\imgui_impl_opengl3.h">
+      <Filter>includes\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\imgui\backends\imgui_impl_opengl3_loader.h">
+      <Filter>includes\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\imgui\imgui_internal.h">
+      <Filter>includes\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\imgui\imconfig.h">
+      <Filter>includes\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\imgui\imstb_textedit.h">
+      <Filter>includes\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\imgui\imstb_rectpack.h">
+      <Filter>includes\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\imgui\imstb_truetype.h">
+      <Filter>includes\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\nfd\nfd.h">
+      <Filter>includes\nfd</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\nfd\nfd.hpp">
+      <Filter>includes\nfd</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\json\json.hpp">
+      <Filter>includes\json</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\stb\stb_image.h">
+      <Filter>includes\stb</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\ImGuizmo\ImGuizmo.h">
+      <Filter>includes\ImGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\pch.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="Main.h" />
+    <ClInclude Include="Rendering\SoftwareRendering.h">
+      <Filter>Rendering\Header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

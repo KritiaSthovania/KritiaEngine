@@ -9,6 +9,7 @@ namespace KritiaEngine{
 		static float NearPlaneDistance;
 		static float FarPlaneDistance;
 		static bool UseOpenGL;
+		static bool UseSoftwareRendering;
 		static bool UseGLM;
 		static int ShadowWidth, ShadowHeight;
 		static std::string LastOpenedScenePath;

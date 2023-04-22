@@ -263,10 +263,9 @@ void OpenGLRendering::ApplyMaterialShaderOnRender(const Matrix4x4& model, const 
 	SetSpotLightProperties(pos, shader);
 	// model matrix
 	shader->SetMat4("model", model);
-	Matrix4x4 mat4 = model;
-	Matrix3x3 normalMatrix = Matrix3x3({ mat4.GetEntry(0, 0), mat4.GetEntry(1, 0), mat4.GetEntry(2, 0),
-										 mat4.GetEntry(0, 1), mat4.GetEntry(1, 1), mat4.GetEntry(2, 1),
-										 mat4.GetEntry(0, 2), mat4.GetEntry(1, 2), mat4.GetEntry(2, 2) }).Inverse().Transpose();
+	Matrix3x3 normalMatrix = Matrix3x3({ model.GetEntry(0, 0), model.GetEntry(1, 0), model.GetEntry(2, 0),
+										 model.GetEntry(0, 1), model.GetEntry(1, 1), model.GetEntry(2, 1),
+										 model.GetEntry(0, 2), model.GetEntry(1, 2), model.GetEntry(2, 2) }).Inverse().Transpose();
 	shader->SetMat3("normalMatrix", normalMatrix);
 	shader->SetVec3("viewPos", viewPos);
 	shader->SetMat4("lightSpaceMatrix", Lighting::LightingSystem::GetMainLightSource()->GetLightMatrixVP(0));
