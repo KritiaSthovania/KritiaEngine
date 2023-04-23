@@ -14,6 +14,7 @@ namespace KritiaEngine::Manager {
 
 namespace KritiaEngine::Rendering {
 	class OpenGLRendering;
+	class SoftwareRendering;
 }
 
 namespace KritiaEngine {
@@ -24,12 +25,14 @@ namespace KritiaEngine {
 		friend class KritiaEngine::Editor::AssetDatabase;
 		friend class KritiaEngine::Manager::ResourceManager;
 		friend class KritiaEngine::Rendering::OpenGLRendering;
+		friend class KritiaEngine::Rendering::SoftwareRendering;
 	public:
 		Texture() = default;
 		Texture(const std::string& path);
 		void LoadImage(const std::string& path, bool alphaChannel);
 		std::string path;
 		Vector2 size;
+		int channels;
 	private:
 		// The ID in Graphics API, e.g. GLuint
 		unsigned int ID = 0;

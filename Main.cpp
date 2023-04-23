@@ -48,7 +48,7 @@ int main()
 void Render() {
     RenderingProvider::ClearFramebuffer();
     RendererManager::Render();
-    ImguiManager::RenderGUI();
+    //ImguiManager::RenderGUI();
     glfwSwapBuffers(window);
 }
 

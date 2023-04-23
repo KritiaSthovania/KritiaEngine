@@ -82,7 +82,7 @@ void KritiaEngine::Rendering::OpenGLRendering::CreateShadowMap(Light* light) {
 }
 
 void OpenGLRendering::ClearFramebuffer() {
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.f, 0.f, 0.f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -162,6 +162,8 @@ void OpenGLRendering::Load2DTexture(const std::shared_ptr<Texture>& texture, boo
 		if (alphaChannel) {
 			data = stbi_load(texture->path.c_str(), &width, &height, &nrChannels, 4);
 			if (data) {
+				texture->size = Vector2(width, height);
+				texture->channels = nrChannels;
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 				glGenerateMipmap(GL_TEXTURE_2D);
 			} else {
@@ -173,6 +175,8 @@ void OpenGLRendering::Load2DTexture(const std::shared_ptr<Texture>& texture, boo
 		} else {
 			data = stbi_load(texture->path.c_str(), &width, &height, &nrChannels, 3);
 			if (data) {
+				texture->size = Vector2(width, height);
+				texture->channels = nrChannels;
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 				glGenerateMipmap(GL_TEXTURE_2D);
 			} else {
@@ -186,7 +190,7 @@ void OpenGLRendering::Load2DTexture(const std::shared_ptr<Texture>& texture, boo
 	}
 }
 
-unsigned int KritiaEngine::Rendering::OpenGLRendering::Load2DTextureFromPath(const std::string& path, bool alphaChannel) {
+unsigned int KritiaEngine::Rendering::OpenGLRendering::Load2DTextureFromPath(const std::string& path, bool alphaChannel, Vector2& size, int& channel) {
 	int width, height, nrChannels;
 	unsigned int id;
 	glGenTextures(1, &id);
@@ -200,6 +204,9 @@ unsigned int KritiaEngine::Rendering::OpenGLRendering::Load2DTextureFromPath(con
 	if (alphaChannel) {
 		data = stbi_load(path.c_str(), &width, &height, &nrChannels, 4);
 		if (data) {
+			size.x = width;
+			size.y = height;
+			channel = nrChannels;
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 		} else {
@@ -211,6 +218,9 @@ unsigned int KritiaEngine::Rendering::OpenGLRendering::Load2DTextureFromPath(con
 	} else {
 		data = stbi_load(path.c_str(), &width, &height, &nrChannels, 3);
 		if (data) {
+			size.x = width;
+			size.y = height;
+			channel = nrChannels;
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 		} else {

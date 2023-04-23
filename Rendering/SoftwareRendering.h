@@ -27,22 +27,13 @@ namespace KritiaEngine::Rendering {
 			Vector3 N;
 			Vector2 ScreenPosition;
 		};
-
-		//static std::vector<std::vector<Mesh::Vertex>> vertexBuffer;
-		//static std::vector<std::vector<int>> vertexIndexBuffer;
-		static Matrix4x4 viewMatrix;
-		static Matrix4x4 projectionMatrix;
-		static std::vector<std::vector<Color>> frameBuffer;
-		static std::vector<std::vector<float>> depthBuffer;
-		static std::map<unsigned int, std::vector<std::vector<Color>>> shadowFramebuffers;
-		static std::map<unsigned int, std::shared_ptr<Texture>> shadowMap;
-		static std::map<unsigned int, std::vector<std::shared_ptr<Texture>>> shadowMapPoint;
-		static const int pointLightPcfSamples = 20;
-		static Vector3 sampleOffsetDirections[pointLightPcfSamples];
-
 		static void Initialize();
+		static void ClearFramebuffer();
 		static void CreateShadowMap(Light* light);
+		static void Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel);
+		static unsigned int Load2DTexture(const std::string& path, bool alphaChannel, Vector2& size, int& channel);
 		static void UpdateUniformBufferMatricesVP(const Matrix4x4& view, const Matrix4x4& projection);
+		static void SetupRenderSubmesh();
 		static void RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos);
 		static ShadingInOutFields VertexShading(const Mesh::Vertex& vertex, const Matrix4x4& model, const Matrix3x3 &normalMatrix, Vector4& screenPos);
 		static void Rasterize(int startIndex, const std::vector<ShadingInOutFields>& vertexOutFields, std::vector<ShadingInOutFields>& fragmentInFields);
@@ -58,6 +49,20 @@ namespace KritiaEngine::Rendering {
 		static float ComputePointShadow(const std::shared_ptr<Material>& material, Light* pointLight, const ShadingInOutFields& inField, const Vector3& viewPos);
 		static float ComputeSpotShadow(const std::shared_ptr<Material>& material, Light* spotLight, const ShadingInOutFields& inField);
 		static void DrawPixel(const Vector2& position, const Color& color);
+
+
+		static Matrix4x4 viewMatrix;
+		static Matrix4x4 projectionMatrix;
+		static std::vector<std::vector<Color>> frameBuffer;
+		static std::vector<std::vector<float>> depthBuffer;
+		static std::map<unsigned int, std::vector<std::vector<Color>>> shadowFramebuffers;
+		static std::map<unsigned int, std::shared_ptr<Texture>> shadowMap;
+		static std::map<unsigned int, std::vector<std::shared_ptr<Texture>>> shadowMapPoint;
+		static const int pointLightPcfSamples = 20;
+		static Vector3 sampleOffsetDirections[pointLightPcfSamples];
+		static std::map<unsigned int, unsigned char*> textures;
+		static unsigned int texture2DCounter;
+
 	};
 }
 

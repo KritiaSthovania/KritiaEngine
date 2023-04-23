@@ -1,1 +1,1 @@
-{"LastOpenedScene":"./Assets/New Scene.scene.json","ScreenWidth":3840,"ScreenHeight":2160,"NearPlaneDistance":0.10000000149011612,"FarPlaneDistance":100.0,"UseOpenGL":true,"UseSoftwareRendering":false,"UseGLM":true,"ShadowWidth":1024,"ShadowHeight":1024}
+{"LastOpenedScene":"./Assets/New Scene.scene.json","ScreenWidth":800,"ScreenHeight":400,"NearPlaneDistance":0.10000000149011612,"FarPlaneDistance":100.0,"UseOpenGL":false,"UseSoftwareRendering":true,"UseGLM":true,"ShadowWidth":1024,"ShadowHeight":1024}

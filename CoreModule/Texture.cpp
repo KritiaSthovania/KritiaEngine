@@ -12,10 +12,11 @@ KritiaEngine::Texture::Texture(const std::string& path)
 	this->path = path;
 }
 
+
 void KritiaEngine::Texture::LoadImage(const std::string& path, bool alphaChannel)
 {
 	this->path = path;
-	ID = Rendering::RenderingProvider::Load2DTextureFromPath(path, alphaChannel);
+	ID = Rendering::RenderingProvider::Load2DTextureFromPath(path, alphaChannel, size, channels);
 	loaded = true;
 }
 
