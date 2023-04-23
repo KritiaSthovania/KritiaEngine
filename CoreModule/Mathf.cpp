@@ -1,5 +1,6 @@
 #include "Mathf.h"
 #include "Settings.h"
+#include <cstdarg>
 using namespace KritiaEngine;
 
 const float KritiaEngine::Mathf::PI = 3.14159265358979323846264338327950288;
@@ -37,6 +38,35 @@ float KritiaEngine::Mathf::Sign(float value) {
 		return 0;
 	}
 }
+
+float KritiaEngine::Mathf::Min(std::initializer_list<float> values) {
+	float min = FLT_MAX;
+	for (float i : values) {
+		if (i < min) {
+			min = i;
+		}
+	}
+	return min;
+}
+
+float KritiaEngine::Mathf::Max(std::initializer_list<float> values) {
+	float max = FLT_MIN;
+	for (float i : values) {
+		if (i > max) {
+			max = i;
+		}
+	}
+	return max;
+}
+
+float KritiaEngine::Mathf::Min(float a, float b) {
+	return a < b ? a : b;
+}
+
+float KritiaEngine::Mathf::Max(float a, float b) {
+	return a > b ? a : b;
+}
+
 
 Matrix4x4 KritiaEngine::Mathf::Translate(const Matrix4x4& mat4, const Vector3& vec3)
 {

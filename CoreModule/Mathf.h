@@ -12,6 +12,10 @@ namespace KritiaEngine {
 		static float Radians(float degrees);
 		static float Sqrt(float number);
 		static float Sign(float value);
+		static float Min(std::initializer_list<float> values);
+		static float Max(std::initializer_list<float> values);
+		static float Min(float a, float b);
+		static float Max(float a, float b);
 		/// <summary>
 		/// Translate a matrix by a given vector
 		/// </summary>

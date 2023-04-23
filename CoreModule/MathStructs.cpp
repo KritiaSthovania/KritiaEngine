@@ -37,6 +37,19 @@ Vector2 KritiaEngine::Vector2::operator+(const Vector2& vec) const {
 	return Vector2(this->x + vec.x, this->y + vec.y);
 }
 
+Vector2 KritiaEngine::Vector2::operator*(const Vector2& vec) const {
+	return Vector2(x * vec.x, y * vec.y);
+}
+
+void KritiaEngine::Vector2::operator-=(const Vector2& vec) {
+	x -= vec.x;
+	y -= vec.y;
+}
+
+Vector2 KritiaEngine::Vector2::operator*(float a) const {
+	return Vector2(a * x, a * y);
+}
+
 Vector2 KritiaEngine::Vector2::operator/(float a) const {
 	return Vector2(x / a, y / a);
 }
@@ -185,6 +198,10 @@ KritiaEngine::Vector3::operator std::vector<float>() const {
 
 Vector2 KritiaEngine::operator*(float a, const Vector2& vec) {
 	return Vector2(a * vec.x, a * vec.y);
+}
+
+Vector2 KritiaEngine::operator/(float a, const Vector2& vec) {
+	return Vector2(a / vec.x, a / vec.y);
 }
 
 std::ostringstream& KritiaEngine::operator<<(std::ostringstream& cout, const Vector3& vec) {

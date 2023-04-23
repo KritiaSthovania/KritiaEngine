@@ -13,8 +13,12 @@ namespace KritiaEngine {
 		float x, y;
 		static Vector2 Zero();
 		friend Vector2 operator* (float a, const Vector2& vec);
+		friend Vector2 operator/ (float a, const Vector2& vec);
 		Vector2 operator-(const Vector2& vec) const;
 		Vector2 operator+(const Vector2& vec) const;
+		Vector2 operator*(const Vector2& vec) const;
+		void operator-= (const Vector2& vec);
+		Vector2 operator*(float a) const;
 		Vector2 operator/(float a) const;
 		operator glm::vec2() const;
 	};

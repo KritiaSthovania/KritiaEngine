@@ -27,6 +27,13 @@ KritiaEngine::Color::Color(const Vector4& vec4)
 	this->a = vec4.w;
 }
 
+KritiaEngine::Color::Color(const Vector3& rgb, float a) {
+	r = rgb.x;
+	g = rgb.y;
+	b = rgb.z;
+	this->a = a;
+}
+
 Vector3 KritiaEngine::Color::GetRGB()
 {
 	return Vector3(r, g, b);

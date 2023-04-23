@@ -2,6 +2,7 @@
 #include "Object.h"
 #include "Interface/ISerializable.h"
 #include "Interface/IInspectable.h"
+#include "Utilities.h"
 
 namespace KritiaEngine::Editor {
 	class AssetDatabase;
@@ -28,6 +29,7 @@ namespace KritiaEngine {
 		Texture(const std::string& path);
 		void LoadImage(const std::string& path, bool alphaChannel);
 		std::string path;
+		Vector2 size;
 	private:
 		// The ID in Graphics API, e.g. GLuint
 		unsigned int ID = 0;

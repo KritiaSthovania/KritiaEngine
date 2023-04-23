@@ -31,6 +31,7 @@ namespace KritiaEngine {
 		/// </summary>
 		Color(float r, float g, float b, float a);
 		Color(const Vector4& vec4);
+		Color(const Vector3& rgb, float a);
 		float r;
 		float g;
 		float b;

@@ -1,23 +1,32 @@
 #include "SoftwareRendering.h"
+#include "../Component/Transform.h"
 #include "../CoreModule/Settings.h"
 #include "../CoreModule/Mathf.h"
 using namespace KritiaEngine;
 using namespace KritiaEngine::Rendering;
+using namespace KritiaEngine::Lighting;
 
 Matrix4x4 SoftwareRendering::viewMatrix;
 Matrix4x4 SoftwareRendering::projectionMatrix;
-std::vector<std::vector<Color>> SoftwareRendering::screenBuffer;
+std::vector<std::vector<Color>> SoftwareRendering::frameBuffer;
 std::vector<std::vector<float>> SoftwareRendering::depthBuffer;
+std::map<unsigned int, std::vector<std::vector<Color>>> SoftwareRendering::shadowFramebuffers;
+std::map<unsigned int, std::shared_ptr<Texture>>  SoftwareRendering::shadowMap;
+Vector3 SoftwareRendering::sampleOffsetDirections[pointLightPcfSamples] = { Vector3(1, 1, 1), Vector3(1, -1, 1), Vector3(-1, -1, 1), Vector3(-1, 1, 1),
+		   Vector3(1, 1, -1), Vector3(1, -1, -1), Vector3(-1, -1, -1), Vector3(-1, 1, -1),
+		   Vector3(1, 1, 0), Vector3(1, -1, 0), Vector3(-1, -1, 0), Vector3(-1, 1, 0),
+		   Vector3(1, 0, 1), Vector3(-1, 0, 1), Vector3(1, 0, -1), Vector3(-1, 0, -1),
+		   Vector3(0, 1, 1), Vector3(0, -1, 1), Vector3(0, -1, -1), Vector3(0, 1, -1) };
 
 void KritiaEngine::Rendering::SoftwareRendering::Initialize() {
-	screenBuffer.resize(Settings::ScreenWidth);
-	for (std::vector<Color> column : screenBuffer) {
+	frameBuffer.resize(Settings::ScreenWidth);
+	for (std::vector<Color> column : frameBuffer) {
 		column.resize(Settings::ScreenHeight);
 	}
 	for (int i = 0; i < Settings::ScreenWidth; i++) {
 		depthBuffer.push_back(std::vector<float>());
 		for (int j = 0; j < Settings::ScreenHeight; j++) {
-			depthBuffer[i].push_back(-1);
+			depthBuffer[i].push_back(FLT_MAX);
 		}
 	}
 }
@@ -42,7 +51,7 @@ void KritiaEngine::Rendering::SoftwareRendering::RenderSubmesh(const std::shared
 		Rasterize(i, vertexOutFields, fragmentInFields);
 	}
 	for (int i = 0; i < vertexOutFields.size(); i++) {
-		FragmentShading(material, fragmentInFields);
+		FragmentShading(material, fragmentInFields, viewPos, pos);
 	}
 
 	//for (std::pair<Vector2, Color> p : pixelsToDraw) {
@@ -52,8 +61,8 @@ void KritiaEngine::Rendering::SoftwareRendering::RenderSubmesh(const std::shared
 
 SoftwareRendering::ShadingInOutFields SoftwareRendering::VertexShading(const Mesh::Vertex& vertex, const Matrix4x4& model, const Matrix3x3& normalMatrix, Vector4& screenPos) {
 	ShadingInOutFields out;
-	out.ScreenPosition = Vector4(projectionMatrix * viewMatrix * model * Vector4(vertex.Position, 1.0));
-	out.NDC = Vector4(out.ScreenPosition.x / out.ScreenPosition.w, out.ScreenPosition.y / out.ScreenPosition.w, out.ScreenPosition.z / out.ScreenPosition.w, out.ScreenPosition.w / out.ScreenPosition.w);
+	out.WorldPosition = Vector4(projectionMatrix * viewMatrix * model * Vector4(vertex.Position, 1.0));
+	out.NDC = Vector4(out.WorldPosition.x / out.WorldPosition.w, out.WorldPosition.y / out.WorldPosition.w, out.WorldPosition.z / out.WorldPosition.w, out.WorldPosition.w / out.WorldPosition.w);
 	out.FragPos = Vector3(model * Vector4(vertex.Position, 1.0));
 	out.Normal = normalMatrix * vertex.Normal;
 	out.TexCoord = vertex.TexCoord;
@@ -68,29 +77,29 @@ SoftwareRendering::ShadingInOutFields SoftwareRendering::VertexShading(const Mes
 	return out;
 }
 
-void KritiaEngine::Rendering::SoftwareRendering::Rasterize(int startIndex, const std::vector<ShadingInOutFields>& vertexOutFields, std::vector<ShadingInOutFields>& fragmentInFields) {
+void SoftwareRendering::Rasterize(int startIndex, const std::vector<ShadingInOutFields>& vertexOutFields, std::vector<ShadingInOutFields>& fragmentInFields) {
 	Vector2 pixelSize = Vector2(1.f / Settings::ScreenWidth, 1.f / Settings::ScreenHeight);
 	Vector2 screenPos1 = ViewportTransform(vertexOutFields[startIndex].NDC);
 	Vector2 screenPos2 = ViewportTransform(vertexOutFields[startIndex + 1].NDC);
 	Vector2 screenPos3 = ViewportTransform(vertexOutFields[startIndex + 2].NDC);
-	float minX = std::min(screenPos1.x, screenPos2.x, screenPos3.x);
-	float maxX = std::max(screenPos1.x, screenPos2.x, screenPos3.x);
-	float minY = std::min(screenPos1.y, screenPos2.y, screenPos3.y);
-	float maxY = std::max(screenPos1.y, screenPos2.y, screenPos3.y);
+	float minX = Mathf::Min({ screenPos1.x, screenPos2.x, screenPos3.x });
+	float maxX = Mathf::Max({ screenPos1.x, screenPos2.x, screenPos3.x });
+	float minY = Mathf::Min({ screenPos1.y, screenPos2.y, screenPos3.y });
+	float maxY = Mathf::Max({ screenPos1.y, screenPos2.y, screenPos3.y });
 	// Pixel is always on positions with an integer subscript, so we iterate over integers
-	for (int i = minX; i <= maxX; i++) {
-		for (int j = minY; j <= maxY; j++) {
+	for (int i = Mathf::Max((int)minX, 0); i <= Mathf::Min((int)maxX, Settings::ScreenWidth); i++) {
+		for (int j = Mathf::Max((int)minY, 0); j <= Mathf::Min((int)maxY, Settings::ScreenHeight); j++) {
 			if (InTriangle(Vector2(i + pixelSize.x / 2, j + pixelSize.y / 2), screenPos1, screenPos2, screenPos3)) {
 				// For all pixels in the triangle, we interpolate the vertex and get one ShadingInOutFields for fragment shading
 				float lambda12 = std::abs(Vector2::Cross(screenPos1 - screenPos2, Vector2(i, j) - screenPos2) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
 				float lambda13 = std::abs(Vector2::Cross(screenPos3 - screenPos1, Vector2(i, j) - screenPos1) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
 				float lambda23 = std::abs(Vector2::Cross(screenPos2 - screenPos3, Vector2(i, j) - screenPos3) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
 				ShadingInOutFields in;
-				float z1 = vertexOutFields[startIndex].ScreenPosition.z;
-				float z2 = vertexOutFields[startIndex + 1].ScreenPosition.z;
-				float z3 = vertexOutFields[startIndex + 2].ScreenPosition.z;
+				float z1 = vertexOutFields[startIndex].WorldPosition.z;
+				float z2 = vertexOutFields[startIndex + 1].WorldPosition.z;
+				float z3 = vertexOutFields[startIndex + 2].WorldPosition.z;
 				float z4 = 1 / (lambda12 / z3 + lambda13 / z2 + lambda23 / z1);
-				in.ScreenPosition = z4 * (lambda12 * vertexOutFields[startIndex + 2].ScreenPosition / z3 + lambda13 * vertexOutFields[startIndex + 1].ScreenPosition / z2 + lambda23 * vertexOutFields[startIndex].ScreenPosition / z1);
+				in.WorldPosition = z4 * (lambda12 * vertexOutFields[startIndex + 2].WorldPosition / z3 + lambda13 * vertexOutFields[startIndex + 1].WorldPosition / z2 + lambda23 * vertexOutFields[startIndex].WorldPosition / z1);
 				in.NDC = z4 * (lambda12 * vertexOutFields[startIndex + 2].NDC / z3 + lambda13 * vertexOutFields[startIndex + 1].NDC / z2 + lambda23 * vertexOutFields[startIndex].NDC / z1);
 				in.FragPos = z4 * (lambda12 * vertexOutFields[startIndex + 2].FragPos / z3 + lambda13 * vertexOutFields[startIndex + 1].FragPos / z2 + lambda23 * vertexOutFields[startIndex].FragPos / z1);
 				in.FragPosLightSpace = z4 * (lambda12 * vertexOutFields[startIndex + 2].FragPosLightSpace / z3 + lambda13 * vertexOutFields[startIndex + 1].FragPosLightSpace / z2 + lambda23 * vertexOutFields[startIndex].FragPosLightSpace / z1);
@@ -99,17 +108,18 @@ void KritiaEngine::Rendering::SoftwareRendering::Rasterize(int startIndex, const
 				in.T = z4 * (lambda12 * vertexOutFields[startIndex + 2].T / z3 + lambda13 * vertexOutFields[startIndex + 1].T / z2 + lambda23 * vertexOutFields[startIndex].T / z1);
 				in.N = z4 * (lambda12 * vertexOutFields[startIndex + 2].N / z3 + lambda13 * vertexOutFields[startIndex + 1].N / z2 + lambda23 * vertexOutFields[startIndex].N / z1);
 				in.B = z4 * (lambda12 * vertexOutFields[startIndex + 2].B / z3 + lambda13 * vertexOutFields[startIndex + 1].B / z2 + lambda23 * vertexOutFields[startIndex].B / z1);
+				in.ScreenPosition = Vector2(i, j);
 				fragmentInFields.push_back(in);
 			}
 		}
 	}
 }
 
-Vector2 ViewportTransform(const Vector4& ndc) {
+Vector2 SoftwareRendering::ViewportTransform(const Vector4& ndc) {
 	return Vector2(ndc.x * Settings::ScreenWidth / 2 + Settings::ScreenWidth / 2, ndc.y * Settings::ScreenHeight / 2 + Settings::ScreenHeight / 2);
 }
 
-bool InTriangle(const Vector2& p, const Vector2& a, const Vector2& b, const Vector2& c) {
+bool SoftwareRendering::InTriangle(const Vector2& p, const Vector2& a, const Vector2& b, const Vector2& c) {
 	Vector2 ab = b - a;
 	Vector2 bc = c - b;
 	Vector2 ca = a - c;
@@ -120,13 +130,208 @@ bool InTriangle(const Vector2& p, const Vector2& a, const Vector2& b, const Vect
 	}
 }
 
-std::pair<Vector2, Color> KritiaEngine::Rendering::SoftwareRendering::FragmentShading(const std::shared_ptr<Material>& material, const std::vector<ShadingInOutFields>& inFields) {
-	
-
+void SoftwareRendering::FragmentShading(const std::shared_ptr<Material>& material, const std::vector<ShadingInOutFields>& inFields, const Vector3& viewPos, const Vector3& pos) {
+	if (material->renderMode == Material::RenderMode::Opaque) {
+        //#pragma omp parallel for
+		for (int i = 0; i < inFields.size(); i++) {
+			ShadingInOutFields in = inFields[i];
+			// Early-Z
+			if (in.NDC.z > depthBuffer[in.ScreenPosition.x][in.ScreenPosition.y]) {
+				continue;
+			}
+			float previousZ = depthBuffer[in.ScreenPosition.x][in.ScreenPosition.y];
+			depthBuffer[in.ScreenPosition.x][in.ScreenPosition.y] = in.NDC.z;
+			Matrix3x3 TBN = Matrix3x3(Vector3::Normalize(in.T), Vector3::Normalize(in.B), Vector3::Normalize(in.N));
+			Vector3 viewDir = Vector3::Normalize(viewPos - in.FragPos);
+			Light* mainLight = LightingSystem::GetMainLightSource();
+			Vector3 lightDir = -Vector3::Normalize(mainLight->Transform()->position);
+			Vector3 norm;
+			if (material->normalMap != nullptr) {
+				norm = SampleTexture(material->normalMap, in.TexCoord).GetRGB();
+				norm = Vector3::Normalize(norm * 2 - Vector3(1, 1, 1));
+				norm - Vector3::Normalize(TBN * norm);
+			} else {
+				norm = Vector3::Normalize(in.Normal);
+			}
+			Vector2 texCoord;
+			if (material->parallaxMap != nullptr) {
+				texCoord = ComputeParallaxMapping(material, in.TexCoord, viewDir);
+				if (texCoord.x > 1.f || texCoord.y > 1.f || texCoord.x < 0.f || texCoord.y < 0.f) {
+					// Discard the fragment
+					depthBuffer[in.ScreenPosition.x][in.ScreenPosition.y] = previousZ;
+					continue; 
+				}
+			} else {
+				texCoord = in.TexCoord;
+			}
+			Vector3 ambientComp = mainLight->ambientIntensity * mainLight->color.GetRGB() * material->albedo.GetRGB() * SampleTexture(material->mainTexture, texCoord).GetRGB();
+			float diffuseFactor = Mathf::Max(Vector3::Dot(norm, lightDir), 0.f);
+			Vector3 diffuseComp = diffuseFactor * mainLight->diffuseIntensity * mainLight->color.GetRGB() * material->albedo.GetRGB() * SampleTexture(material->mainTexture, texCoord).GetRGB();
+			Vector3 halfwayDir = Vector3::Normalize(lightDir + viewDir);
+			float specularFactor = std::pow(Mathf::Max(Vector3::Dot(norm, halfwayDir), 0.f), material->shininess);
+			Vector3 specularComp = specularFactor * mainLight->specularIntensity * mainLight->color.GetRGB() * SampleTexture(material->specularMap, texCoord).GetRGB();
+			float shadow = ComputeMainShadow(material, in.FragPosLightSpace);
+			Color finalColor = Color((ambientComp + (1 - shadow) * (diffuseComp + specularComp)), 1.f);
+			std::vector<Light*> pointLights = LightingSystem::GetPointLightAroundPos(pos);
+			std::vector<Light*> spotLights = LightingSystem::GetSpotLightAroundPos(pos);
+			for (int j = 0; j < Mathf::Min((int)pointLights.size(), LightingSystem::MaxPointLightsForOneObject); j++) {
+				finalColor += ComputePointLight(material, pointLights[j], norm, in.FragPos, viewDir, texCoord, material->albedo.GetRGB(), in, viewPos);
+			}
+			for (int j = 0; j < Mathf::Min((int)spotLights.size(), LightingSystem::MaxSpotLightsForOneObject); j++) {
+				finalColor += ComputeSpotLight(material, spotLights[j], norm, in.FragPos, viewDir, texCoord, material->albedo.GetRGB(), in);
+			}
+			frameBuffer[in.ScreenPosition.x][in.ScreenPosition.y] = finalColor;
+		}
+	}
 }
 
+Vector2 SoftwareRendering::ComputeParallaxMapping(const std::shared_ptr<Material>& material, const Vector2& texCoord, const Vector3& viewDir) {
+	const int depthLayers = 10;
+	const float heightScale = 0.1f;
+	// calculate the size of each layer
+	float layerDepth = 1.0 / depthLayers;
+	// depth of current layer
+	float currentLayerDepth = 0.0;
+	// the amount to shift the texture coordinates per layer (from vector P)
+	Vector2 P = heightScale * Vector2(viewDir.x, viewDir.y) ;
+	Vector2 deltaTexCoords = P / depthLayers;
+	// get initial values
+	Vector2 currentTexCoords = texCoord;
+	float currentDepthMapValue = SampleTexture(material->parallaxMap, currentTexCoords).r;
 
-void KritiaEngine::Rendering::SoftwareRendering::DrawPixel(const Vector2& position, const Color& color) {
+	while (currentLayerDepth < currentDepthMapValue) {
+		// shift texture coordinates along direction of P
+		currentTexCoords -= deltaTexCoords;
+		// get depthmap value at current texture coordinates
+		currentDepthMapValue = SampleTexture(material->parallaxMap, currentTexCoords).r;
+		// get depth of next layer
+		currentLayerDepth += layerDepth;
+	}
+
+	// get texture coordinates before collision (reverse operations)
+	Vector2 prevTexCoords = currentTexCoords + deltaTexCoords;
+
+	// get depth after and before collision for linear interpolation
+	float afterDepth = currentDepthMapValue - currentLayerDepth;
+	float beforeDepth = SampleTexture(material->parallaxMap, prevTexCoords).r - currentLayerDepth + layerDepth;
+
+	// interpolation of texture coordinates
+	float weight = afterDepth / (afterDepth - beforeDepth);
+	Vector2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+	return finalTexCoords;
+}
+
+Color SoftwareRendering::ComputePointLight(const std::shared_ptr<Material>& material, Light* pointLight, const Vector3& normal, const Vector3& fragPos, const Vector3& viewDir, const Vector2& texCoord, const Vector3& albedo, const ShadingInOutFields& inField, const Vector3& viewPos) {
+	Vector3 pointLightDir = Vector3::Normalize(pointLight->Transform()->position - fragPos);
+	float diff = Mathf::Max(Vector3::Dot(normal, pointLightDir), 0.f);
+	Vector3 halfwayDir = Vector3::Normalize(pointLightDir + viewDir);
+	float spec = std::pow(Mathf::Max(Vector3::Dot(normal, halfwayDir), 0.f), material->shininess);
+	float distance = Vector3::Magnitude(pointLight->Transform()->position - fragPos);
+	float attenuation = 1.0 / (pointLight->constantAttenuationFactor + pointLight->linearAttenuationFactor * distance + pointLight->quadraticAttenuationFactor * (distance * distance));
+	Vector3 ambient = pointLight->ambientIntensity * pointLight->color.GetRGB() * SampleTexture(material->mainTexture, texCoord).GetRGB() * albedo;
+	Vector3 diffuse = pointLight->diffuseIntensity * pointLight->color.GetRGB() * diff * SampleTexture(material->mainTexture, texCoord).GetRGB() * albedo;
+	Vector3 specular = pointLight->specularIntensity * pointLight->color.GetRGB() * spec * SampleTexture(material->specularMap, texCoord).GetRGB();
+	ambient *= attenuation;
+	diffuse *= attenuation;
+	specular *= attenuation;
+	float shadow = ComputePointShadow(material, pointLight, inField, viewPos);
+	return Color(ambient + (1 - shadow) * (diffuse + specular), 1.0);
+}
+Color SoftwareRendering::ComputeSpotLight(const std::shared_ptr<Material>& material, Light* spotLight, const Vector3& normal, const Vector3& fragPos, const Vector3& viewDir, const Vector2& texCoord, const Vector3& albedo, const ShadingInOutFields& inField) {
+	Vector3 lightDir = Vector3::Normalize(spotLight->Transform()->position - fragPos);
+	float theta = Vector3::Dot(lightDir, Vector3::Normalize(-spotLight->Transform()->forward));
+	float epsilon = Mathf::Cos(spotLight->cutOffAngleInner) - Mathf::Cos(spotLight->cutOffAngleOuter);
+	float intensity = std::clamp((theta - Mathf::Cos(spotLight->cutOffAngleOuter)) / epsilon, 0.f, 1.f);
+	float distance = Vector3::Magnitude(spotLight->Transform()->position - fragPos);
+	float attenuation = 1.0 / (spotLight->constantAttenuationFactor + spotLight->linearAttenuationFactor * distance + spotLight->quadraticAttenuationFactor * (distance * distance));
+
+	float diff = Mathf::Max(Vector3::Dot(normal, lightDir), 0.f);
+	Vector3 halfwayDir = Vector3::Normalize(lightDir + viewDir);
+	float spec = std::pow(Mathf::Max(Vector3::Dot(normal, halfwayDir), 0.f), material->shininess);
+
+	Vector3 ambient = spotLight->ambientIntensity * spotLight->color.GetRGB() * SampleTexture(material->mainTexture, texCoord).GetRGB() * albedo;
+	Vector3 diffuse = spotLight->diffuseIntensity * spotLight->color.GetRGB() * diff * SampleTexture(material->mainTexture, texCoord).GetRGB() * albedo;
+	Vector3 specular = spotLight->specularIntensity * spotLight->color.GetRGB() * spec * SampleTexture(material->specularMap, texCoord).GetRGB();
+
+	ambient *= intensity * attenuation;
+	diffuse *= intensity * attenuation;
+	specular *= intensity * attenuation;
+	float shadow = ComputeSpotShadow(material, spotLight, inField);
+	return Color(ambient + (1 - shadow) * (diffuse + specular), 1.f);
+}
+
+float SoftwareRendering::ComputeMainShadow(const std::shared_ptr<Material>& material, const Vector4& fragPosLightSpace) {
+	Light* mainLight = LightingSystem::GetMainLightSource();
+	Vector3 projCoords = (Vector3)fragPosLightSpace / fragPosLightSpace.w;
+	projCoords = projCoords * 0.5 + Vector3(0.5, 0.5, 0.5);
+	float shadow = 0;
+	if (projCoords.z > 1.0) {
+		shadow = 1.0;
+	} else {
+		float closestDepth = SampleTexture(shadowMap[mainLight->shadowMapID], Vector2(projCoords.x, projCoords.y)).r;
+		float currentDepth = projCoords.z;
+		Vector2 texelSize = 1.0 / shadowMap[LightingSystem::GetMainLightSource()->shadowMapID]->size;
+		for (int x = -1; x <= 1; ++x) {
+			for (int y = -1; y <= 1; ++y) {
+				float pcfDepth = SampleTexture(shadowMap[mainLight->shadowMapID], Vector2(projCoords.x, projCoords.y) + texelSize * Vector2(x, y)).r;
+				// perhaps need bias
+				shadow += currentDepth > pcfDepth ? 1.0 : 0.0;
+			}
+		}
+		shadow /= 9.0;
+	}
+	return shadow;
+}
+
+float SoftwareRendering::ComputePointShadow(const std::shared_ptr<Material>& material, Light* pointLight, const ShadingInOutFields& inField, const Vector3& viewPos) {
+
+	float shadow = 0.0;
+	Vector3 fragToLight = inField.FragPos - pointLight->Transform()->position;
+	float currentDepth = Vector3::Magnitude(fragToLight);
+	float viewDistance = Vector3::Magnitude(viewPos - inField.FragPos);
+	float diskRadius = (1.0 + (viewDistance / Settings::FarPlaneDistance)) / 25.0;
+	for (int i = 0; i < pointLightPcfSamples; ++i) {
+		float closestDepth = SampleCubeTexture(shadowMapPoint[pointLight->shadowMapPointID], fragToLight + sampleOffsetDirections[i] * diskRadius).r;
+		closestDepth *= Settings::FarPlaneDistance;   // Undo mapping [0;1]
+		// may need bias
+		shadow += currentDepth > closestDepth ? 1.0 : 0.0;
+	}
+	shadow /= float(pointLightPcfSamples);
+	return shadow;
+}
+
+float SoftwareRendering::ComputeSpotShadow(const std::shared_ptr<Material>& material, Light* spotLight, const ShadingInOutFields& inField) {
+	Vector4 fragPosLightSpace = spotLight->GetLightMatrixVP(0) * Vector4(inField.FragPos, 1.0);
+	Vector3 projCoords = Vector3(fragPosLightSpace) / fragPosLightSpace.w;
+	projCoords = projCoords * 0.5 + Vector3(0.5, 0.5, 0.5);
+	float shadow = 0;
+	if (projCoords.z > 1.0) {
+		shadow = 1.0;
+	} else {
+		float closestDepth = SampleTexture(shadowMap[spotLight->shadowMapID], Vector2(projCoords.x, projCoords.y)).r;
+		float currentDepth = projCoords.z;
+		Vector2 texelSize = 1.0 / shadowMap[LightingSystem::GetMainLightSource()->shadowMapID]->size;
+		for (int x = -1; x <= 1; ++x) {
+			for (int y = -1; y <= 1; ++y) {
+				float pcfDepth = SampleTexture(shadowMap[spotLight->shadowMapID], Vector2(projCoords.x, projCoords.y) + texelSize * Vector2(x, y)).r;
+				// perhaps need bias
+				shadow += currentDepth > pcfDepth ? 1.0 : 0.0;
+			}
+		}
+		shadow /= 9.0;
+	}
+	return shadow;
+}
+
+Color SoftwareRendering::SampleTexture(const std::shared_ptr<Texture>& texture, const Vector2& texCoord) {
+	return Color();
+}
+
+Color SoftwareRendering::SampleCubeTexture(const std::vector<std::shared_ptr<Texture>>& textures, const Vector3& direction) {
+	return Color();
+}
+
+void SoftwareRendering::DrawPixel(const Vector2& position, const Color& color) {
 	glBegin(GL_POINT);
 	glColor3f(color.r, color.g, color.b);
 	glVertex2f(position.x, position.y);

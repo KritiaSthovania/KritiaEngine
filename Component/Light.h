@@ -7,6 +7,7 @@
 
 namespace KritiaEngine::Rendering {
 	class OpenGLRendering;
+	class SoftwareRendering;
 }
 
 namespace KritiaEngine {
@@ -20,6 +21,7 @@ namespace KritiaEngine {
 	class Light : public Behaviour
 	{
 		friend class KritiaEngine::Rendering::OpenGLRendering;
+		friend class KritiaEngine::Rendering::SoftwareRendering;
 	public:
 		Light(GameObject *gameObject);
 		/// <summary>
