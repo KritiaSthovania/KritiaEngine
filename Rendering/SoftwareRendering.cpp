@@ -16,6 +16,7 @@ std::map<unsigned int, std::shared_ptr<Texture>>  SoftwareRendering::shadowMap;
 std::map<unsigned int, std::vector<std::shared_ptr<Texture>>> SoftwareRendering::shadowMapPoint;
 std::map<unsigned int, unsigned char*> SoftwareRendering::textures;
 unsigned int SoftwareRendering::texture2DCounter = 0;
+HDC SoftwareRendering::dc;
 
 Vector3 SoftwareRendering::sampleOffsetDirections[pointLightPcfSamples] = { Vector3(1, 1, 1), Vector3(1, -1, 1), Vector3(-1, -1, 1), Vector3(-1, 1, 1),
 		   Vector3(1, 1, -1), Vector3(1, -1, -1), Vector3(-1, -1, -1), Vector3(-1, 1, -1),
@@ -23,7 +24,8 @@ Vector3 SoftwareRendering::sampleOffsetDirections[pointLightPcfSamples] = { Vect
 		   Vector3(1, 0, 1), Vector3(-1, 0, 1), Vector3(1, 0, -1), Vector3(-1, 0, -1),
 		   Vector3(0, 1, 1), Vector3(0, -1, 1), Vector3(0, -1, -1), Vector3(0, 1, -1) };
 
-void SoftwareRendering::Initialize() {
+void SoftwareRendering::Initialize(HWND hwnd) {
+	dc = GetWindowDC(hwnd);
 	for (int i = 0; i < Settings::ScreenWidth; i++) {
 		frameBuffer.push_back(std::vector<Color>());
 		for (int j = 0; j < Settings::ScreenWidth; j++) {
@@ -126,21 +128,26 @@ void SoftwareRendering::RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFil
 	Matrix3x3 normalMatrix = Matrix3x3({ model.GetEntry(0, 0), model.GetEntry(1, 0), model.GetEntry(2, 0),
 									 model.GetEntry(0, 1), model.GetEntry(1, 1), model.GetEntry(2, 1),
 									 model.GetEntry(0, 2), model.GetEntry(1, 2), model.GetEntry(2, 2) }).Inverse().Transpose();
+
+
 	for (int i = 0; i < mesh->submeshVertices[submeshIndex].size(); i++) {
 		Vector4 screenPos;
 		vertexOutFields.push_back(VertexShading(mesh->submeshVertices[submeshIndex][i], model, normalMatrix, screenPos));
 	}
-	for (int i = 0; i < mesh->submeshIndices[submeshIndex][i] - 2; i++) {
+	for (int i = 0; i < mesh->submeshIndices[submeshIndex].size() - 2; i++) {
 		Rasterize(i, vertexOutFields, fragmentInFields);
 	}
+
 	for (int i = 0; i < vertexOutFields.size(); i++) {
 		FragmentShading(material, fragmentInFields, viewPos, pos);
 	}
+
 	for (int i = 0; i < frameBuffer.size(); i++) {
-		for (int j = 0; j < frameBuffer.size(); j++) {
-			DrawPixel(Vector2((float)i / Settings::ScreenWidth, (float)j / Settings::ScreenHeight), frameBuffer[i][j]);
+		for (int j = 0; j < frameBuffer[i].size(); j++) {
+			DrawPixel(Vector2(i, j), frameBuffer[i][j]);
 		}
 	}
+	
 }
 
 SoftwareRendering::ShadingInOutFields SoftwareRendering::VertexShading(const Mesh::Vertex& vertex, const Matrix4x4& model, const Matrix3x3& normalMatrix, Vector4& screenPos) {
@@ -171,8 +178,9 @@ void SoftwareRendering::Rasterize(int startIndex, const std::vector<ShadingInOut
 	float minY = Mathf::Min({ screenPos1.y, screenPos2.y, screenPos3.y });
 	float maxY = Mathf::Max({ screenPos1.y, screenPos2.y, screenPos3.y });
 	// Pixel is always on positions with an integer subscript, so we iterate over integers
-	for (int i = Mathf::Max((int)minX, 0); i < Mathf::Min((int)maxX, Settings::ScreenWidth); i++) {
-		for (int j = Mathf::Max((int)minY, 0); j < Mathf::Min((int)maxY, Settings::ScreenHeight); j++) {
+
+	for (int i = Mathf::Max((int)minX, 0); i < (int)Mathf::Min((int)maxX, Settings::ScreenWidth); i++) {
+		for (int j = Mathf::Max((int)minY, 0); j < (int)Mathf::Min((int)maxY, Settings::ScreenHeight); j++) {
 			if (InTriangle(Vector2(i + pixelSize.x / 2, j + pixelSize.y / 2), screenPos1, screenPos2, screenPos3)) {
 				// For all pixels in the triangle, we interpolate the vertex and get one ShadingInOutFields for fragment shading
 				float lambda12 = std::abs(Vector2::Cross(screenPos1 - screenPos2, Vector2(i, j) - screenPos2) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
@@ -423,8 +431,5 @@ Color SoftwareRendering::SampleCubeTexture(const std::vector<std::shared_ptr<Tex
 }
 
 void SoftwareRendering::DrawPixel(const Vector2& position, const Color& color) {
-	glBegin(GL_POINT);
-	glColor3f(color.r, color.g, color.b);
-	glVertex2f(position.x, position.y);
-	glEnd();
+	SetPixel(dc, (int)position.x, (int)position.y, RGB(color.r * 255, color.g * 255, color.b * 255));
 }

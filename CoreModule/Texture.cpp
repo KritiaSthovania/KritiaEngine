@@ -13,7 +13,7 @@ KritiaEngine::Texture::Texture(const std::string& path)
 }
 
 
-void KritiaEngine::Texture::LoadImage(const std::string& path, bool alphaChannel)
+void KritiaEngine::Texture::LoadImage2D(const std::string& path, bool alphaChannel)
 {
 	this->path = path;
 	ID = Rendering::RenderingProvider::Load2DTextureFromPath(path, alphaChannel, size, channels);
@@ -60,7 +60,7 @@ void KritiaEngine::Texture::OnInspector() {
 	ImGui::SameLine();
 	ImGui::Text(path.c_str());
 	if (!loaded) {
-		LoadImage(path, false);
+		LoadImage2D(path, false);
 	}
 	ImGui::Image((void*)ID, ImVec2(ImGui::GetWindowContentRegionWidth(), ImGui::GetWindowContentRegionWidth()));
 }

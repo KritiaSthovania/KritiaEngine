@@ -8,6 +8,7 @@
 #include "../CoreModule/Lighting.h"
 #include "../CoreModule/Utilities.h"
 #include <pch.h>
+#include <windows.h>
 
 namespace KritiaEngine::Rendering {
 
@@ -27,7 +28,7 @@ namespace KritiaEngine::Rendering {
 			Vector3 N;
 			Vector2 ScreenPosition;
 		};
-		static void Initialize();
+		static void Initialize(HWND hwnd);
 		static void ClearFramebuffer();
 		static void CreateShadowMap(Light* light);
 		static void Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel);
@@ -62,7 +63,7 @@ namespace KritiaEngine::Rendering {
 		static Vector3 sampleOffsetDirections[pointLightPcfSamples];
 		static std::map<unsigned int, unsigned char*> textures;
 		static unsigned int texture2DCounter;
-
+		static HDC dc;
 	};
 }
 

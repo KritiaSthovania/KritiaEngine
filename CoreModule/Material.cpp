@@ -39,8 +39,11 @@ KritiaEngine::Material::Material(const std::shared_ptr<Shader>& shader) {
 
 void Material::Initialize() {
 	if (!initialized) {
-		shader->Use();
-		shader->UniformBlockBinding(shader->GetUniformBlockIndex("MatricesVP"), static_cast<unsigned int>(RenderingProvider::UniformBindingPoint::MatricesVP));
+		if (Settings::UseOpenGL) {
+			shader->Use();
+			shader->UniformBlockBinding(shader->GetUniformBlockIndex("MatricesVP"), static_cast<unsigned int>(RenderingProvider::UniformBindingPoint::MatricesVP));
+		}
+
 		if (mainTexture != nullptr) {
 			if (renderMode == RenderMode::Transparent) {
 				RenderingProvider::Load2DTexture(mainTexture, true);
@@ -59,46 +62,63 @@ void Material::Initialize() {
 		}
 		if (normalMap != nullptr) {
 			RenderingProvider::Load2DTexture(normalMap, false);
-			shader->SetBool("hasNormalMap", true);
+			if (Settings::UseOpenGL) {
+				shader->SetBool("hasNormalMap", true);
+			}
 		} else {
-			shader->SetBool("hasNormalMap", false);
+			if (Settings::UseOpenGL) {
+				shader->SetBool("hasNormalMap", false);
+			}
+
 		}
 		if (parallaxMap != nullptr) {
 			RenderingProvider::Load2DTexture(parallaxMap, false);
-			shader->SetBool("hasParallaxMap", true);
-			shader->SetFloat("heightScale", 0.1f);
-			shader->SetInt("depthLayers", 10);
+			if (Settings::UseOpenGL) {
+				shader->SetBool("hasParallaxMap", true);
+				shader->SetFloat("heightScale", 0.1f);
+				shader->SetInt("depthLayers", 10);
+			}
+
 		} else {
-			shader->SetBool("hasParallaxMap", false);
+			if (Settings::UseOpenGL) {
+				shader->SetBool("hasParallaxMap", false);
+			}
+
 		}
-		shader->SetInt("mainTexture", diffuseSamplerIndex);
-		shader->SetInt("specularMap", specularSamplerIndex);
-		shader->SetInt("normalMap", normalSamplerIndex);
-		shader->SetInt("parallaxMap", parallaxSamplerIndex);
-		shader->SetInt("shadowMap", shadowSamplerIndex);
-		shader->SetFloat("shininess", shininess);
-		shader->SetVec3("albedo", albedo.GetRGB());
-		for (int i = 0; i < Lighting::LightingSystem::MaxPointLightsForOneObject; i++) {
-			std::string str = "pointLights[" + std::to_string(i) + "]" + ".shadowMapCube";
-			shader->SetInt(str, shadowSamplerIndex + 1 + i);
+		if (Settings::UseOpenGL) {
+			shader->SetInt("mainTexture", diffuseSamplerIndex);
+			shader->SetInt("specularMap", specularSamplerIndex);
+			shader->SetInt("normalMap", normalSamplerIndex);
+			shader->SetInt("parallaxMap", parallaxSamplerIndex);
+			shader->SetInt("shadowMap", shadowSamplerIndex);
+			shader->SetFloat("shininess", shininess);
+			shader->SetVec3("albedo", albedo.GetRGB());
+			for (int i = 0; i < Lighting::LightingSystem::MaxPointLightsForOneObject; i++) {
+				std::string str = "pointLights[" + std::to_string(i) + "]" + ".shadowMapCube";
+				shader->SetInt(str, shadowSamplerIndex + 1 + i);
+			}
+			for (int i = 0; i < Lighting::LightingSystem::MaxSpotLightsForOneObject; i++) {
+				std::string str = "spotLights[" + std::to_string(i) + "]" + ".shadowMapSpot";
+				shader->SetInt(str, shadowSamplerIndex + 1 + Lighting::LightingSystem::MaxPointLightsForOneObject + i);
+			}
+			shader->SetFloat("farPlaneDistance", Settings::FarPlaneDistance);
+			// Make sure the shader supports GPU instancing while using it.
+			shader->SetBool("instancing", GPUInstancingEnabled);
 		}
-		for (int i = 0; i < Lighting::LightingSystem::MaxSpotLightsForOneObject; i++) {
-			std::string str = "spotLights[" + std::to_string(i) + "]" + ".shadowMapSpot";
-			shader->SetInt(str, shadowSamplerIndex + 1 + Lighting::LightingSystem::MaxPointLightsForOneObject + i);
-		}
-		shader->SetFloat("farPlaneDistance", Settings::FarPlaneDistance);
-		// Make sure the shader supports GPU instancing while using it.
-		shader->SetBool("instancing", GPUInstancingEnabled);
+
 		initialized = true;
 	}
 }
 
 void KritiaEngine::Material::SetPropertiesOnRender() {
-	shader->Use();
-	shader->SetFloat("shininess", shininess);
-	shader->SetVec3("albedo", albedo.GetRGB());
-	shader->SetFloat("farPlaneDistance", Settings::FarPlaneDistance);
-	shader->SetBool("instancing", GPUInstancingEnabled);
+	if (Settings::UseOpenGL) {
+		shader->Use();
+		shader->SetFloat("shininess", shininess);
+		shader->SetVec3("albedo", albedo.GetRGB());
+		shader->SetFloat("farPlaneDistance", Settings::FarPlaneDistance);
+		shader->SetBool("instancing", GPUInstancingEnabled);
+	}
+
 }
 
 std::string KritiaEngine::Material::SerializeToJson() {
@@ -243,7 +263,11 @@ void KritiaEngine::Material::OnInspector() {
 		if (path != "") {
 			normalMap = ResourceManager::GetTexture(path);
 			RenderingProvider::Load2DTexture(normalMap, false);
-			shader->SetBool("hasNormalMap", true);
+			if (Settings::UseOpenGL) {
+				shader->Use();
+				shader->SetBool("hasNormalMap", true);
+			}
+
 		}
 	}
 	ImGui::Text("Parallax Map ");
@@ -256,9 +280,13 @@ void KritiaEngine::Material::OnInspector() {
 		if (path != "") {
 			parallaxMap = ResourceManager::GetTexture(path);
 			RenderingProvider::Load2DTexture(parallaxMap, false);
-			shader->SetBool("hasParallaxMap", true);
-			shader->SetFloat("heightScale", 0.1f);
-			shader->SetInt("depthLayers", 10);
+			if (Settings::UseOpenGL) {
+				shader->Use();
+				shader->SetBool("hasParallaxMap", true);
+				shader->SetFloat("heightScale", 0.1f);
+				shader->SetInt("depthLayers", 10);
+			}
+
 		}
 	}
 }

@@ -19,16 +19,16 @@ bool RenderingProvider::gammaCorrectionEnabled = true;
 bool RenderingProvider::shadowEnabled = true;
 std::vector<Texture> RenderingProvider::skyboxTextures = std::vector<Texture>();
 Matrix4x4 RenderingProvider::projection;
-RenderingProvider::RenderingBackend RenderingProvider::backend = RenderingProvider::RenderingBackend::OpenGL;
+RenderingProvider::RenderingBackend RenderingProvider::backend = RenderingProvider::RenderingBackend::Software;
 
-void KritiaEngine::Rendering::RenderingProvider::Initialize() {
+void KritiaEngine::Rendering::RenderingProvider::Initialize(HWND hwnd) {
 	if (Settings::UseOpenGL) {
 		backend = RenderingBackend::OpenGL;
 		OpenGLRendering::Initialize();
 		OpenGLRendering::CreateUniformBuffer(static_cast<unsigned int>(UniformBindingPoint::MatricesVP));
 	} else if (Settings::UseSoftwareRendering) {
 		backend = RenderingBackend::Software;
-		SoftwareRendering::Initialize();
+		SoftwareRendering::Initialize(hwnd);
 	}
 	CreateSkybox();
 }

@@ -11,7 +11,7 @@ std::shared_ptr<Camera> Camera::editorCamera = nullptr;
 
 // Editor-Only
 void Camera::EditorCameraUpdate() {
-    if (!(ImGui::GetIO().WantCaptureMouse)) {
+    if (Settings::UseOpenGL && !(ImGui::GetIO().WantCaptureMouse)) {
         GLFWwindow* window = Input::GetWindow();
         float deltaTime = Time::deltaTime;
         EditorProcessMouseScroll(Input::GetMouseScrollOffset());

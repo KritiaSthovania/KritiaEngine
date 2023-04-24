@@ -29,7 +29,7 @@ namespace KritiaEngine {
 	public:
 		Texture() = default;
 		Texture(const std::string& path);
-		void LoadImage(const std::string& path, bool alphaChannel);
+		void LoadImage2D(const std::string& path, bool alphaChannel);
 		std::string path;
 		Vector2 size;
 		int channels;

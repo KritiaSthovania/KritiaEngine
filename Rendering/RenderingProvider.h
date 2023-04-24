@@ -5,6 +5,7 @@
 #include "../Component/MeshFilter.h"
 #include "../CoreModule/Material.h"
 #include "../CoreModule/Lighting.h"
+#include <windows.h>
 using namespace KritiaEngine;
 
 namespace KritiaEngine::Rendering{
@@ -19,7 +20,7 @@ namespace KritiaEngine::Rendering{
 			Software
 		};
 
-		static void Initialize();
+		static void Initialize(HWND hwnd);
 		static void ClearFramebuffer();
 		/// <summary>
 		/// Load a cube map
