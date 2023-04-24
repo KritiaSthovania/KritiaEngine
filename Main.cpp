@@ -63,6 +63,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     if (!RegisterClass(&wndclass)) {
         return 0;
     } 
+
     hwnd = CreateWindow(TEXT("KritiaEngineWindow"), TEXT("KritiaEngine"), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, Settings::ScreenWidth, Settings::ScreenHeight, NULL, NULL, hInstance, NULL);
     ShowWindow(hwnd, iCmdShow);
     UpdateWindow(hwnd);
@@ -118,8 +119,8 @@ void Render() {
     RendererManager::Render();
     if (Settings::UseOpenGL) {
         ImguiManager::RenderGUI();
-        glfwSwapBuffers(window);
     }
+    RenderingProvider::SwapFramebuffer(window);
 }
 
 void Update() {

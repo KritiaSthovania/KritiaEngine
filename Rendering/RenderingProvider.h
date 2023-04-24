@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <pch.h>
 #include "../CoreModule/MathStructs.h"
 #include "Shader.h"
 #include "../Component/MeshFilter.h"
@@ -22,6 +23,7 @@ namespace KritiaEngine::Rendering{
 
 		static void Initialize(HWND hwnd);
 		static void ClearFramebuffer();
+		static void SwapFramebuffer(GLFWwindow* window);
 		/// <summary>
 		/// Load a cube map
 		/// </summary>

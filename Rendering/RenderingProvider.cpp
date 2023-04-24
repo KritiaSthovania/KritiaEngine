@@ -41,6 +41,14 @@ void KritiaEngine::Rendering::RenderingProvider::ClearFramebuffer() {
 	}
 }
 
+void KritiaEngine::Rendering::RenderingProvider::SwapFramebuffer(GLFWwindow* window) {
+	if (backend == RenderingBackend::OpenGL) {
+		OpenGLRendering::SwapFramebuffer(window);
+	} else if (backend == RenderingBackend::Software) {
+		SoftwareRendering::SwapFramebuffer();
+	}
+}
+
 unsigned int KritiaEngine::Rendering::RenderingProvider::LoadCubeMap(const std::vector<Texture>& cubeTextures) {
 	if (backend == RenderingBackend::OpenGL) {
 		return OpenGLRendering::LoadCubeMap(cubeTextures);

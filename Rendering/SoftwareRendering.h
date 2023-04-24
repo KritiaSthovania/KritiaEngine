@@ -17,7 +17,7 @@ namespace KritiaEngine::Rendering {
 	private:
 		// corresponding to the out/in variables in the BlinnPhongShader
 		struct ShadingInOutFields {
-			Vector4 WorldPosition;
+			Vector4 ClipSpacePosition;
 			Vector4 NDC;
 			Vector3 Normal;
 			Vector3 FragPos;
@@ -30,13 +30,14 @@ namespace KritiaEngine::Rendering {
 		};
 		static void Initialize(HWND hwnd);
 		static void ClearFramebuffer();
+		static void SwapFramebuffer();
 		static void CreateShadowMap(Light* light);
 		static void Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel);
 		static unsigned int Load2DTexture(const std::string& path, bool alphaChannel, Vector2& size, int& channel);
 		static void UpdateUniformBufferMatricesVP(const Matrix4x4& view, const Matrix4x4& projection);
 		static void SetupRenderSubmesh();
 		static void RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos);
-		static ShadingInOutFields VertexShading(const Mesh::Vertex& vertex, const Matrix4x4& model, const Matrix3x3 &normalMatrix, Vector4& screenPos);
+		static void VertexShading(const Mesh::Vertex& vertex, const Matrix4x4& model, const Matrix3x3 &normalMatrix, Vector4& screenPos, std::vector<ShadingInOutFields>& vertexOut);
 		static void Rasterize(int startIndex, const std::vector<ShadingInOutFields>& vertexOutFields, std::vector<ShadingInOutFields>& fragmentInFields);
 		static Vector2 ViewportTransform(const Vector4& ndc);
 		static bool InTriangle(const Vector2& p, const Vector2& a, const Vector2& b, const Vector2& c);

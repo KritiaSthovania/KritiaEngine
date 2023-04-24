@@ -29,7 +29,7 @@ void SoftwareRendering::Initialize(HWND hwnd) {
 	for (int i = 0; i < Settings::ScreenWidth; i++) {
 		frameBuffer.push_back(std::vector<Color>());
 		for (int j = 0; j < Settings::ScreenWidth; j++) {
-			frameBuffer[i].push_back(Color(0, 0, 0, 0));
+			frameBuffer[i].push_back(Color(0, 0, 0, 1));
 		}
 	}
 	for (int i = 0; i < Settings::ScreenWidth; i++) {
@@ -44,6 +44,14 @@ void SoftwareRendering::ClearFramebuffer() {
 	for (std::vector<Color>& column : frameBuffer) {
 		for (Color c : column) {
 			c = Color(0, 0, 0, 1);
+		}
+	}
+}
+
+void KritiaEngine::Rendering::SoftwareRendering::SwapFramebuffer() {
+	for (int i = 0; i < frameBuffer.size(); i++) {
+		for (int j = 0; j < frameBuffer[i].size(); j++) {
+			DrawPixel(Vector2(i, j), frameBuffer[i][j]);
 		}
 	}
 }
@@ -97,7 +105,7 @@ unsigned int SoftwareRendering::Load2DTexture(const std::string& path, bool alph
 			size.y = height;
 			channel = nrChannels;
 		} else {
-			std::cout << "Failed to load texture at " << path << std::endl;
+			std::cout << "Failed to load texture at " << path.c_str() << std::endl;
 		}
 	} else {
 		textures[id] = stbi_load(path.c_str(), &width, &height, &nrChannels, 3);
@@ -106,7 +114,7 @@ unsigned int SoftwareRendering::Load2DTexture(const std::string& path, bool alph
 			size.y = height;
 			channel = nrChannels;
 		} else {
-			std::cout << "Failed to load texture at " << path << std::endl;
+			std::cout << "Failed to load texture at " << path.c_str() << std::endl;
 		}
 	}
 	return id;
@@ -123,7 +131,7 @@ void KritiaEngine::Rendering::SoftwareRendering::SetupRenderSubmesh() {
 
 void SoftwareRendering::RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos) {
 	auto mesh = meshFilter->mesh;
-	std::vector<ShadingInOutFields> vertexOutFields; 
+	std::vector<ShadingInOutFields> vertexOutFields;
 	std::vector<ShadingInOutFields> fragmentInFields;
 	Matrix3x3 normalMatrix = Matrix3x3({ model.GetEntry(0, 0), model.GetEntry(1, 0), model.GetEntry(2, 0),
 									 model.GetEntry(0, 1), model.GetEntry(1, 1), model.GetEntry(2, 1),
@@ -132,44 +140,40 @@ void SoftwareRendering::RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFil
 
 	for (int i = 0; i < mesh->submeshVertices[submeshIndex].size(); i++) {
 		Vector4 screenPos;
-		vertexOutFields.push_back(VertexShading(mesh->submeshVertices[submeshIndex][i], model, normalMatrix, screenPos));
+		VertexShading(mesh->submeshVertices[submeshIndex][i], model, normalMatrix, screenPos, vertexOutFields);
 	}
-	for (int i = 0; i < mesh->submeshIndices[submeshIndex].size() - 2; i++) {
+	for (int i = 0; i < vertexOutFields.size() - 2; i++) {
 		Rasterize(i, vertexOutFields, fragmentInFields);
 	}
 
 	for (int i = 0; i < vertexOutFields.size(); i++) {
 		FragmentShading(material, fragmentInFields, viewPos, pos);
 	}
-
-	for (int i = 0; i < frameBuffer.size(); i++) {
-		for (int j = 0; j < frameBuffer[i].size(); j++) {
-			DrawPixel(Vector2(i, j), frameBuffer[i][j]);
-		}
-	}
 	
 }
 
-SoftwareRendering::ShadingInOutFields SoftwareRendering::VertexShading(const Mesh::Vertex& vertex, const Matrix4x4& model, const Matrix3x3& normalMatrix, Vector4& screenPos) {
-	ShadingInOutFields out;
-	out.WorldPosition = Vector4(projectionMatrix * viewMatrix * model * Vector4(vertex.Position, 1.0));
-	out.NDC = Vector4(out.WorldPosition.x / out.WorldPosition.w, out.WorldPosition.y / out.WorldPosition.w, out.WorldPosition.z / out.WorldPosition.w, out.WorldPosition.w / out.WorldPosition.w);
-	out.FragPos = Vector3(model * Vector4(vertex.Position, 1.0));
-	out.Normal = normalMatrix * vertex.Normal;
-	out.TexCoord = vertex.TexCoord;
-	out.FragPosLightSpace = Lighting::LightingSystem::GetMainLightSource()->GetLightMatrixVP(0) * Vector4(out.FragPos, 1.0);
-	// Gram-Schmidt Process
-	out.T = Vector3::Normalize(Vector3(model * Vector4(vertex.Tangent, 0.0)));
-	out.N = Vector3::Normalize(Vector3(model * Vector4(vertex.Normal, 0.0)));
-	// re-orthogonalize T wrt. N
-	out.T = Vector3::Normalize(out.T - Vector3::Dot(out.T, out.N) * out.N);
-	// retrieve perpendicular vector B with the cross product of T and N
-	out.B = Vector3::Cross(out.T, out.N);
-	return out;
+void SoftwareRendering::VertexShading(const Mesh::Vertex& vertex, const Matrix4x4& model, const Matrix3x3& normalMatrix, Vector4& screenPos, std::vector<ShadingInOutFields>& vertexOut) {
+	ShadingInOutFields out = ShadingInOutFields();
+	out.ClipSpacePosition = projectionMatrix * viewMatrix * model * Vector4(vertex.Position, 1.0);
+	if (out.ClipSpacePosition.w > 0) {
+		out.NDC = Vector4(out.ClipSpacePosition.x / out.ClipSpacePosition.w, -out.ClipSpacePosition.y / out.ClipSpacePosition.w, out.ClipSpacePosition.z / out.ClipSpacePosition.w, out.ClipSpacePosition.w / out.ClipSpacePosition.w);
+		out.FragPos = Vector3(model * Vector4(vertex.Position, 1.0));
+		out.Normal = normalMatrix * vertex.Normal;
+		out.TexCoord = vertex.TexCoord;
+		out.FragPosLightSpace = Lighting::LightingSystem::GetMainLightSource()->GetLightMatrixVP(0) * Vector4(out.FragPos, 1.0);
+		// Gram-Schmidt Process
+		out.T = Vector3::Normalize(Vector3(model * Vector4(vertex.Tangent, 0.0)));
+		out.N = Vector3::Normalize(Vector3(model * Vector4(vertex.Normal, 0.0)));
+		// re-orthogonalize T wrt. N
+		out.T = Vector3::Normalize(out.T - Vector3::Dot(out.T, out.N) * out.N);
+		// retrieve perpendicular vector B with the cross product of T and N
+		out.B = Vector3::Cross(out.T, out.N);
+		vertexOut.push_back(out);
+	}
 }
 
 void SoftwareRendering::Rasterize(int startIndex, const std::vector<ShadingInOutFields>& vertexOutFields, std::vector<ShadingInOutFields>& fragmentInFields) {
-	Vector2 pixelSize = Vector2(1.f / Settings::ScreenWidth, 1.f / Settings::ScreenHeight);
+	const Vector2 pixelSize = Vector2(1.f / Settings::ScreenWidth, 1.f / Settings::ScreenHeight);
 	Vector2 screenPos1 = ViewportTransform(vertexOutFields[startIndex].NDC);
 	Vector2 screenPos2 = ViewportTransform(vertexOutFields[startIndex + 1].NDC);
 	Vector2 screenPos3 = ViewportTransform(vertexOutFields[startIndex + 2].NDC);
@@ -178,7 +182,6 @@ void SoftwareRendering::Rasterize(int startIndex, const std::vector<ShadingInOut
 	float minY = Mathf::Min({ screenPos1.y, screenPos2.y, screenPos3.y });
 	float maxY = Mathf::Max({ screenPos1.y, screenPos2.y, screenPos3.y });
 	// Pixel is always on positions with an integer subscript, so we iterate over integers
-
 	for (int i = Mathf::Max((int)minX, 0); i < (int)Mathf::Min((int)maxX, Settings::ScreenWidth); i++) {
 		for (int j = Mathf::Max((int)minY, 0); j < (int)Mathf::Min((int)maxY, Settings::ScreenHeight); j++) {
 			if (InTriangle(Vector2(i + pixelSize.x / 2, j + pixelSize.y / 2), screenPos1, screenPos2, screenPos3)) {
@@ -187,20 +190,21 @@ void SoftwareRendering::Rasterize(int startIndex, const std::vector<ShadingInOut
 				float lambda13 = std::abs(Vector2::Cross(screenPos3 - screenPos1, Vector2(i, j) - screenPos1) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
 				float lambda23 = std::abs(Vector2::Cross(screenPos2 - screenPos3, Vector2(i, j) - screenPos3) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
 				ShadingInOutFields in;
-				float z1 = vertexOutFields[startIndex].WorldPosition.z;
-				float z2 = vertexOutFields[startIndex + 1].WorldPosition.z;
-				float z3 = vertexOutFields[startIndex + 2].WorldPosition.z;
+				float z1 = vertexOutFields[startIndex].ClipSpacePosition.z;
+				float z2 = vertexOutFields[startIndex + 1].ClipSpacePosition.z;
+				float z3 = vertexOutFields[startIndex + 2].ClipSpacePosition.z;
 				float z4 = 1 / (lambda12 / z3 + lambda13 / z2 + lambda23 / z1);
-				in.WorldPosition = z4 * (lambda12 * vertexOutFields[startIndex + 2].WorldPosition / z3 + lambda13 * vertexOutFields[startIndex + 1].WorldPosition / z2 + lambda23 * vertexOutFields[startIndex].WorldPosition / z1);
+				in.ClipSpacePosition = z4 * (lambda12 * vertexOutFields[startIndex + 2].ClipSpacePosition / z3 + lambda13 * vertexOutFields[startIndex + 1].ClipSpacePosition / z2 + lambda23 * vertexOutFields[startIndex].ClipSpacePosition / z1);
 				in.NDC = z4 * (lambda12 * vertexOutFields[startIndex + 2].NDC / z3 + lambda13 * vertexOutFields[startIndex + 1].NDC / z2 + lambda23 * vertexOutFields[startIndex].NDC / z1);
 				in.FragPos = z4 * (lambda12 * vertexOutFields[startIndex + 2].FragPos / z3 + lambda13 * vertexOutFields[startIndex + 1].FragPos / z2 + lambda23 * vertexOutFields[startIndex].FragPos / z1);
 				in.FragPosLightSpace = z4 * (lambda12 * vertexOutFields[startIndex + 2].FragPosLightSpace / z3 + lambda13 * vertexOutFields[startIndex + 1].FragPosLightSpace / z2 + lambda23 * vertexOutFields[startIndex].FragPosLightSpace / z1);
-				in.Normal = z4 * (lambda12 * vertexOutFields[startIndex + 2].Normal / z3 + lambda13 * vertexOutFields[startIndex + 1].Normal / z2 + lambda23 * vertexOutFields[startIndex].Normal / z1);
+				in.Normal = Vector3::Normalize(z4 * (lambda12 * vertexOutFields[startIndex + 2].Normal / z3 + lambda13 * vertexOutFields[startIndex + 1].Normal / z2 + lambda23 * vertexOutFields[startIndex].Normal / z1));
 				in.TexCoord = z4 * (lambda12 * vertexOutFields[startIndex + 2].TexCoord / z3 + lambda13 * vertexOutFields[startIndex + 1].TexCoord / z2 + lambda23 * vertexOutFields[startIndex].TexCoord / z1);
 				in.T = z4 * (lambda12 * vertexOutFields[startIndex + 2].T / z3 + lambda13 * vertexOutFields[startIndex + 1].T / z2 + lambda23 * vertexOutFields[startIndex].T / z1);
 				in.N = z4 * (lambda12 * vertexOutFields[startIndex + 2].N / z3 + lambda13 * vertexOutFields[startIndex + 1].N / z2 + lambda23 * vertexOutFields[startIndex].N / z1);
 				in.B = z4 * (lambda12 * vertexOutFields[startIndex + 2].B / z3 + lambda13 * vertexOutFields[startIndex + 1].B / z2 + lambda23 * vertexOutFields[startIndex].B / z1);
 				in.ScreenPosition = Vector2(i, j);
+
 				fragmentInFields.push_back(in);
 			}
 		}
@@ -236,7 +240,8 @@ void SoftwareRendering::FragmentShading(const std::shared_ptr<Material>& materia
 			Matrix3x3 TBN = Matrix3x3(Vector3::Normalize(in.T), Vector3::Normalize(in.B), Vector3::Normalize(in.N));
 			Vector3 viewDir = Vector3::Normalize(viewPos - in.FragPos);
 			Light* mainLight = LightingSystem::GetMainLightSource();
-			Vector3 lightDir = -Vector3::Normalize(mainLight->Transform()->position);
+			Vector3 lightDir = -Vector3::Normalize(mainLight->Transform()->forward);
+
 			Vector3 norm;
 			if (material->normalMap != nullptr) {
 				norm = SampleTexture(material->normalMap, in.TexCoord).GetRGB();
@@ -244,6 +249,10 @@ void SoftwareRendering::FragmentShading(const std::shared_ptr<Material>& materia
 				norm - Vector3::Normalize(TBN * norm);
 			} else {
 				norm = Vector3::Normalize(in.Normal);
+			}
+			// back face culling
+			if (Vector3::Dot(-viewDir, norm) > 0) {
+				continue;
 			}
 			Vector2 texCoord;
 			if (material->parallaxMap != nullptr) {
@@ -264,15 +273,16 @@ void SoftwareRendering::FragmentShading(const std::shared_ptr<Material>& materia
 			Vector3 specularComp = specularFactor * mainLight->specularIntensity * mainLight->color.GetRGB() * SampleTexture(material->specularMap, texCoord).GetRGB();
 			float shadow = ComputeMainShadow(material, in.FragPosLightSpace);
 			Color finalColor = Color((ambientComp + (1 - shadow) * (diffuseComp + specularComp)), 1.f);
-			/*std::vector<Light*> pointLights = LightingSystem::GetPointLightAroundPos(pos);
-			std::vector<Light*> spotLights = LightingSystem::GetSpotLightAroundPos(pos);
-			for (int j = 0; j < Mathf::Min((int)pointLights.size(), LightingSystem::MaxPointLightsForOneObject); j++) {
-				finalColor += ComputePointLight(material, pointLights[j], norm, in.FragPos, viewDir, texCoord, material->albedo.GetRGB(), in, viewPos);
-			}
-			for (int j = 0; j < Mathf::Min((int)spotLights.size(), LightingSystem::MaxSpotLightsForOneObject); j++) {
-				finalColor += ComputeSpotLight(material, spotLights[j], norm, in.FragPos, viewDir, texCoord, material->albedo.GetRGB(), in);
-			}*/
+			//std::vector<Light*> pointLights = LightingSystem::GetPointLightAroundPos(pos);
+			//std::vector<Light*> spotLights = LightingSystem::GetSpotLightAroundPos(pos);
+			//for (int j = 0; j < Mathf::Min((int)pointLights.size(), LightingSystem::MaxPointLightsForOneObject); j++) {
+			//	finalColor += ComputePointLight(material, pointLights[j], norm, in.FragPos, viewDir, texCoord, material->albedo.GetRGB(), in, viewPos);
+			//}
+			//for (int j = 0; j < Mathf::Min((int)spotLights.size(), LightingSystem::MaxSpotLightsForOneObject); j++) {
+			//	finalColor += ComputeSpotLight(material, spotLights[j], norm, in.FragPos, viewDir, texCoord, material->albedo.GetRGB(), in);
+			//}
 			//std::cout << ambientComp.x << " " << ambientComp.y << " " << ambientComp.z << std::endl;
+			//frameBuffer[(int)in.ScreenPosition.x][(int)in.ScreenPosition.y] = Color(norm, 1.f);
 			frameBuffer[(int)in.ScreenPosition.x][(int)in.ScreenPosition.y] = finalColor;
 		}
 	}
@@ -417,7 +427,8 @@ float SoftwareRendering::ComputeSpotShadow(const std::shared_ptr<Material>& mate
 }
 
 Color SoftwareRendering::SampleTexture(const std::shared_ptr<Texture>& texture, const Vector2& texCoord) {
-	unsigned char* pixelOffset = textures[texture->ID] + ((unsigned int)texCoord.x + (unsigned int)texCoord.y * (unsigned int)texture->size.x) * texture->channels;
+	return Color(1,1,1,1);
+	unsigned char* pixelOffset = textures[texture->ID] + ((unsigned int)(texCoord.x * texture->size.x) + (unsigned int)(texCoord.y * texture->size.y) * (unsigned int)texture->size.x) * texture->channels;
 	if (texture->channels == 3) {
 		return Color(pixelOffset[0], pixelOffset[1], pixelOffset[2], 1.f);
 	} else {

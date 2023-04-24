@@ -16,6 +16,7 @@ namespace KritiaEngine::Rendering {
 		static void Initialize();
 		static void CreateShadowMap(Light* light);
 		static void ClearFramebuffer();
+		static void SwapFramebuffer(GLFWwindow* window);
 		/// <summary>
 		/// Load a cube map
 		/// </summary>

@@ -86,6 +86,10 @@ void OpenGLRendering::ClearFramebuffer() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
+void KritiaEngine::Rendering::OpenGLRendering::SwapFramebuffer(GLFWwindow* window) {
+	glfwSwapBuffers(window);
+}
+
 
 void KritiaEngine::Rendering::OpenGLRendering::UpdateGPUInstancingBuffer() {
 	for (std::map<std::tuple<Mesh, Material, int>, unsigned int>::iterator iter = gpuInstancingCount.begin(); iter != gpuInstancingCount.end(); iter++) {
