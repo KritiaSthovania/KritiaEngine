@@ -45,6 +45,7 @@ void Material::Initialize() {
 		}
 
 		if (mainTexture != nullptr) {
+
 			if (renderMode == RenderMode::Transparent) {
 				RenderingProvider::Load2DTexture(mainTexture, true);
 
@@ -176,6 +177,7 @@ std::shared_ptr<Material> KritiaEngine::Material::DeserializeFromJson(const json
 		nlohmann::ordered_json paraJson = json::parse((std::string)json["ParallexMap"]);
 		mat->parallaxMap = ResourceManager::GetTexture(paraJson);
 	}
+	mat->Initialize();
 	return mat;
 }
 
@@ -234,6 +236,7 @@ void KritiaEngine::Material::OnInspector() {
 			} else if (renderMode == RenderMode::Opaque) {
 				RenderingProvider::Load2DTexture(mainTexture, false);
 			}
+			SerializeToFile();
 		}
 	}
 	ImGui::Text("Specular Map ");
@@ -251,6 +254,7 @@ void KritiaEngine::Material::OnInspector() {
 			} else if (renderMode == RenderMode::Opaque) {
 				RenderingProvider::Load2DTexture(specularMap, false);
 			}
+			SerializeToFile();
 		}
 	}
 	ImGui::Text("Normal Map   ");
@@ -267,7 +271,7 @@ void KritiaEngine::Material::OnInspector() {
 				shader->Use();
 				shader->SetBool("hasNormalMap", true);
 			}
-
+			SerializeToFile();
 		}
 	}
 	ImGui::Text("Parallax Map ");
@@ -286,7 +290,7 @@ void KritiaEngine::Material::OnInspector() {
 				shader->SetFloat("heightScale", 0.1f);
 				shader->SetInt("depthLayers", 10);
 			}
-
+			SerializeToFile();
 		}
 	}
 }

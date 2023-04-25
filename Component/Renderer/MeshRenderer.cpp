@@ -95,6 +95,9 @@ void KritiaEngine::MeshRenderer::OnInspector() {
 				std::string path = ImguiAlias::OpenFindResourceWindow("Material", materialFilePostfix);
 				if (path != "") {
 					materials[i] = ResourceManager::GetMaterial(path);
+					if (i < meshFilter->mesh->submeshMaterials.size()) {
+						meshFilter->mesh->submeshMaterials[i] = materials[i];
+					}
 				}			
 			}
 		}

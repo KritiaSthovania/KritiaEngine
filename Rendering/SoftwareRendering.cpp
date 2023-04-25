@@ -74,7 +74,7 @@ void SoftwareRendering::Load2DTexture(const std::shared_ptr<Texture>& texture, b
 			textures[id] = stbi_load(texture->path.c_str(), &width, &height, &nrChannels, 4);
 			if (textures[id]) {
 				texture->size = Vector2(width, height);
-				texture->channels = nrChannels;
+				texture->channels = 4;
 			} else{
 				std::cout << "Failed to load texture at " << texture->path << std::endl;			
 			}
@@ -82,7 +82,7 @@ void SoftwareRendering::Load2DTexture(const std::shared_ptr<Texture>& texture, b
 			textures[id] = stbi_load(texture->path.c_str(), &width, &height, &nrChannels, 3);
 			if (textures[id]) {
 				texture->size = Vector2(width, height);
-				texture->channels = nrChannels;
+				texture->channels = 3;
 			} else {
 				std::cout << "Failed to load texture at " << texture->path << std::endl;
 			}
@@ -103,7 +103,7 @@ unsigned int SoftwareRendering::Load2DTexture(const std::string& path, bool alph
 		if (textures[id]) {
 			size.x = width;
 			size.y = height;
-			channel = nrChannels;
+			channel = 4;
 		} else {
 			std::cout << "Failed to load texture at " << path.c_str() << std::endl;
 		}
@@ -112,7 +112,7 @@ unsigned int SoftwareRendering::Load2DTexture(const std::string& path, bool alph
 		if (textures[id]) {
 			size.x = width;
 			size.y = height;
-			channel = nrChannels;
+			channel = 3;
 		} else {
 			std::cout << "Failed to load texture at " << path.c_str() << std::endl;
 		}
@@ -426,13 +426,22 @@ float SoftwareRendering::ComputeSpotShadow(const std::shared_ptr<Material>& mate
 	return shadow;
 }
 
-Color SoftwareRendering::SampleTexture(const std::shared_ptr<Texture>& texture, const Vector2& texCoord) {
-	return Color(1,1,1,1);
+Color SoftwareRendering::SampleTexture(const std::shared_ptr<Texture>& texture, Vector2 texCoord) {
+	//return Color(1,1,1,1);
+	if (texCoord.x > 1) {
+		texCoord.x -= (int)texCoord.x;
+	}
+	if (texCoord.y > 1) {
+		texCoord.y -= (int)texCoord.y;
+	}
 	unsigned char* pixelOffset = textures[texture->ID] + ((unsigned int)(texCoord.x * texture->size.x) + (unsigned int)(texCoord.y * texture->size.y) * (unsigned int)texture->size.x) * texture->channels;
+	int x = (unsigned int)(texCoord.x * texture->size.x);
+	int y = (unsigned int)(texCoord.y * texture->size.y);
+	float offset = ((unsigned int)(texCoord.x * texture->size.x) + (unsigned int)(texCoord.y * texture->size.y) * (unsigned int)texture->size.x) * texture->channels;
 	if (texture->channels == 3) {
-		return Color(pixelOffset[0], pixelOffset[1], pixelOffset[2], 1.f);
+		return Color((int)pixelOffset[0] / 255.f, (int)pixelOffset[1] / 255.f, (int)pixelOffset[2] / 255.f, 1.f);
 	} else {
-		return Color(pixelOffset[0], pixelOffset[1], pixelOffset[2], pixelOffset[3]);
+		return Color((int)pixelOffset[0] / 255.f, (int)pixelOffset[1] / 255.f, (int)pixelOffset[2] / 255.f, (int)pixelOffset[3] / 255.f);
 	}
 
 }
@@ -443,4 +452,5 @@ Color SoftwareRendering::SampleCubeTexture(const std::vector<std::shared_ptr<Tex
 
 void SoftwareRendering::DrawPixel(const Vector2& position, const Color& color) {
 	SetPixel(dc, (int)position.x, (int)position.y, RGB(color.r * 255, color.g * 255, color.b * 255));
+	
 }

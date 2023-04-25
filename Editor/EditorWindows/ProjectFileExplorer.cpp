@@ -71,7 +71,7 @@ void KritiaEngine::Editor::GUI::ProjectFileExplorer::DisplayFile(const path& fil
 void KritiaEngine::Editor::GUI::ProjectFileExplorer::ShowRightClickMenu() {
 	if (ImGui::BeginMenu("Create")) {
 		if (ImGui::Selectable("New Material")) {
-			Material mat = Material();
+			Material mat = Material("");
 			mat.SerializeToFile();
 		}
 		ImGui::EndMenu();

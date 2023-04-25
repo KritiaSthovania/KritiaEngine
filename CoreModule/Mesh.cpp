@@ -43,8 +43,8 @@ KritiaEngine::Mesh KritiaEngine::Mesh::Cube() {
     material->albedo = Color(1.0f, 1.f, 1.f, 1);
     material->shininess = 32;
     material->renderMode = Material::RenderMode::Opaque;
-    material->mainTexture = std::shared_ptr<Texture>(new Texture("./StandardShader/Diffuse.png"));
-    material->specularMap = std::shared_ptr<Texture>(new Texture("./StandardShader/Diffuse.png"));
+    material->mainTexture = std::shared_ptr<Texture>(new Texture("./Assets/Textures/container_diffuse.png"));
+    material->specularMap = std::shared_ptr<Texture>(new Texture("./Assets/Textures/container_diffuse.png"));
     //material->normalMap = std::shared_ptr<Texture>(new Texture("./Assets/Textures/wall/bricks2_normal.jpg"));
     //material->parallaxMap = std::shared_ptr<Texture>(new Texture("./Assets/Textures/wall/bricks2_disp.jpg"));
     std::vector<std::shared_ptr<Material>> materials;

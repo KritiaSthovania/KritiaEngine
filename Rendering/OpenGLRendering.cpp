@@ -167,7 +167,7 @@ void OpenGLRendering::Load2DTexture(const std::shared_ptr<Texture>& texture, boo
 			data = stbi_load(texture->path.c_str(), &width, &height, &nrChannels, 4);
 			if (data) {
 				texture->size = Vector2(width, height);
-				texture->channels = nrChannels;
+				texture->channels = 4;
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 				glGenerateMipmap(GL_TEXTURE_2D);
 			} else {
@@ -180,7 +180,7 @@ void OpenGLRendering::Load2DTexture(const std::shared_ptr<Texture>& texture, boo
 			data = stbi_load(texture->path.c_str(), &width, &height, &nrChannels, 3);
 			if (data) {
 				texture->size = Vector2(width, height);
-				texture->channels = nrChannels;
+				texture->channels = 3;
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 				glGenerateMipmap(GL_TEXTURE_2D);
 			} else {
@@ -210,7 +210,7 @@ unsigned int KritiaEngine::Rendering::OpenGLRendering::Load2DTextureFromPath(con
 		if (data) {
 			size.x = width;
 			size.y = height;
-			channel = nrChannels;
+			channel = 4;
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 		} else {
@@ -224,7 +224,7 @@ unsigned int KritiaEngine::Rendering::OpenGLRendering::Load2DTextureFromPath(con
 		if (data) {
 			size.x = width;
 			size.y = height;
-			channel = nrChannels;
+			channel = 3;
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 		} else {

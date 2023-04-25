@@ -42,7 +42,7 @@ namespace KritiaEngine::Rendering {
 		static Vector2 ViewportTransform(const Vector4& ndc);
 		static bool InTriangle(const Vector2& p, const Vector2& a, const Vector2& b, const Vector2& c);
 		static void FragmentShading(const std::shared_ptr<Material>& material, const std::vector<ShadingInOutFields>& inFields, const Vector3& viewPos, const Vector3& pos);
-		static Color SampleTexture(const std::shared_ptr<Texture>& texture, const Vector2& texCoord);
+		static Color SampleTexture(const std::shared_ptr<Texture>& texture, Vector2 texCoord);
 		static Color SampleCubeTexture(const std::vector<std::shared_ptr<Texture>>& textures, const Vector3& direction);
 		static Vector2 ComputeParallaxMapping(const std::shared_ptr<Material>& material, const Vector2& texCoord, const Vector3& viewDir);
 		static float ComputeMainShadow(const std::shared_ptr<Material>& material, const Vector4& fragPosLightSpace);
