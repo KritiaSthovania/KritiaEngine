@@ -11,11 +11,12 @@ Matrix4x4 SoftwareRendering::viewMatrix;
 Matrix4x4 SoftwareRendering::projectionMatrix;
 std::vector<std::vector<Color>> SoftwareRendering::frameBuffer;
 std::vector<std::vector<float>> SoftwareRendering::depthBuffer;
-std::map<unsigned int, std::vector<std::vector<Color>>> SoftwareRendering::shadowFramebuffers;
+std::map<unsigned int, std::vector<std::vector<float>>> SoftwareRendering::shadowFramebuffers;
 std::map<unsigned int, std::shared_ptr<Texture>>  SoftwareRendering::shadowMap;
 std::map<unsigned int, std::vector<std::shared_ptr<Texture>>> SoftwareRendering::shadowMapPoint;
 std::map<unsigned int, unsigned char*> SoftwareRendering::textures;
 unsigned int SoftwareRendering::texture2DCounter = 0;
+unsigned int SoftwareRendering::shadowMapBufferCounter = 0;
 HDC SoftwareRendering::dc;
 
 Vector3 SoftwareRendering::sampleOffsetDirections[pointLightPcfSamples] = { Vector3(1, 1, 1), Vector3(1, -1, 1), Vector3(-1, -1, 1), Vector3(-1, 1, 1),
@@ -56,7 +57,33 @@ void KritiaEngine::Rendering::SoftwareRendering::SwapFramebuffer() {
 	}
 }
 
-void KritiaEngine::Rendering::SoftwareRendering::CreateShadowMap(Light* light) {}
+void KritiaEngine::Rendering::SoftwareRendering::CreateShadowMap(Light* light) {
+	std::shared_ptr<Texture> shadowMap = std::make_shared<Texture>(Texture());
+	shadowMap->loaded = true;
+	light->shadowMapFBO = shadowMapBufferCounter;
+	shadowMapBufferCounter++;
+	light->shadowMapID = texture2DCounter;
+	texture2DCounter++;
+	shadowFramebuffers[light->shadowMapFBO] = std::vector<std::vector<float>>();
+	shadowFramebuffers[light->shadowMapFBO].resize(Settings::ShadowWidth);
+	for (int i = 0; i < shadowFramebuffers[light->shadowMapFBO].size(); i++) {
+		shadowFramebuffers[light->shadowMapFBO][i] = std::vector<float>();
+		shadowFramebuffers[light->shadowMapFBO][i].resize(Settings::ShadowHeight);
+		for (int j = 0; j < shadowFramebuffers[light->shadowMapFBO][i].size(); j++) {
+			shadowFramebuffers[light->shadowMapFBO][i][j] = FLT_MAX;
+		}
+	}
+}
+
+float SoftwareRendering::SampleShadowMap(Light* light, Vector2 texCoord) {
+	if (texCoord.x > 1) {
+		texCoord.x -= (int)texCoord.x;
+	}
+	if (texCoord.y > 1) {
+		texCoord.y -= (int)texCoord.y;
+	}
+	return shadowFramebuffers[light->shadowMapFBO][int(texCoord.x)][int(texCoord.y)];
+}
 
 void SoftwareRendering::UpdateUniformBufferMatricesVP(const Matrix4x4& view, const Matrix4x4& projection) {
 	viewMatrix = view;
@@ -69,14 +96,14 @@ void SoftwareRendering::Load2DTexture(const std::shared_ptr<Texture>& texture, b
 		texture2DCounter++;
 		int width;
 		int height;
-		int nrChannels;	
+		int nrChannels;
 		if (alphaChannel) {
 			textures[id] = stbi_load(texture->path.c_str(), &width, &height, &nrChannels, 4);
 			if (textures[id]) {
 				texture->size = Vector2(width, height);
 				texture->channels = 4;
-			} else{
-				std::cout << "Failed to load texture at " << texture->path << std::endl;			
+			} else {
+				std::cout << "Failed to load texture at " << texture->path << std::endl;
 			}
 		} else {
 			textures[id] = stbi_load(texture->path.c_str(), &width, &height, &nrChannels, 3);
@@ -92,7 +119,7 @@ void SoftwareRendering::Load2DTexture(const std::shared_ptr<Texture>& texture, b
 	}
 }
 
-unsigned int SoftwareRendering::Load2DTexture(const std::string& path, bool alphaChannel, Vector2& size, int& channel) {
+unsigned int KritiaEngine::Rendering::SoftwareRendering::Load2DTexture(const std::string& path, bool alphaChannel, Vector2& size, int& channel) {
 	unsigned int id = texture2DCounter;
 	texture2DCounter++;
 	int width;
@@ -120,7 +147,84 @@ unsigned int SoftwareRendering::Load2DTexture(const std::string& path, bool alph
 	return id;
 }
 
-void KritiaEngine::Rendering::SoftwareRendering::SetupRenderSubmesh() {
+void SoftwareRendering::RenderShadowMap(const std::shared_ptr<MeshFilter>& meshFilter, int submeshIndex, const Matrix4x4& model, Light* light) {
+	if (light->type == LightType::Directional || light->type == LightType::Spot) {
+		auto mesh = meshFilter->mesh;
+		std::vector<ShadowShadingInOutFields> shadowVertexOut;
+		std::vector<ShadowShadingInOutFields> shadowFragmentIn;
+		for (int i = 0; i < mesh->submeshVertices[submeshIndex].size(); i++) {
+			VertexShadingShadow(mesh->submeshVertices[submeshIndex][i], light->GetLightMatrixVP(0), model, shadowVertexOut);
+		}
+		for (int i = 0; i < shadowVertexOut.size() - 2; i++) {
+			RasterizeShadow(i, shadowVertexOut, shadowFragmentIn);
+		}
+		FragmentShadingShadow(shadowFragmentIn, light);
+	} else {
+		//shadowMapShaderPoint->Use();
+		//shadowMapShaderPoint->SetMat4("shadowMatrices[0]", light->GetLightMatrixVP(0));
+		//shadowMapShaderPoint->SetMat4("shadowMatrices[1]", light->GetLightMatrixVP(1));
+		//shadowMapShaderPoint->SetMat4("shadowMatrices[2]", light->GetLightMatrixVP(2));
+		//shadowMapShaderPoint->SetMat4("shadowMatrices[3]", light->GetLightMatrixVP(3));
+		//shadowMapShaderPoint->SetMat4("shadowMatrices[4]", light->GetLightMatrixVP(4));
+		//shadowMapShaderPoint->SetMat4("shadowMatrices[5]", light->GetLightMatrixVP(5));
+		//shadowMapShaderPoint->SetMat4("model", model);
+		//shadowMapShaderPoint->SetFloat("far_plane", Settings::FarPlaneDistance);
+		//shadowMapShaderPoint->SetVec3("lightPos", light->Transform()->position);
+		//glBindVertexArray(meshFilter->mesh->VAOs[submeshIndex]);
+		//glDrawElements(GL_TRIANGLES, meshFilter->mesh->submeshIndices[submeshIndex].size(), GL_UNSIGNED_INT, 0);
+		//glBindVertexArray(0);
+	}
+}
+
+void SoftwareRendering::VertexShadingShadow(const Mesh::Vertex& vertex, const Matrix4x4& lightSpaceMatrix, const Matrix4x4& model, std::vector<ShadowShadingInOutFields>& shadowVertexOut) {
+	Vector4 lightSpacePos = lightSpaceMatrix * model * Vector4(vertex.Position, 1.f);
+	ShadowShadingInOutFields out;
+	out.LightSpacePosition = lightSpacePos;
+	if (lightSpacePos.w > 0) {
+		out.NDC = Vector4(lightSpacePos.x / lightSpacePos.w, -lightSpacePos.y / lightSpacePos.w, lightSpacePos.z / lightSpacePos.w, lightSpacePos.w / lightSpacePos.w);
+	}
+	shadowVertexOut.push_back(out);
+}
+
+void SoftwareRendering::RasterizeShadow(int startIndex, const std::vector<ShadowShadingInOutFields>& shadowVertexOut, std::vector<ShadowShadingInOutFields>& shadowFragmentIn) {
+	const Vector2 pixelSize = Vector2(1.f / Settings::ShadowWidth, 1.f / Settings::ShadowHeight);
+	Vector2 screenPos1 = ViewportTransform(shadowVertexOut[startIndex].NDC);
+	Vector2 screenPos2 = ViewportTransform(shadowVertexOut[startIndex + 1].NDC);
+	Vector2 screenPos3 = ViewportTransform(shadowVertexOut[startIndex + 2].NDC);
+	float minX = Mathf::Min({ screenPos1.x, screenPos2.x, screenPos3.x });
+	float maxX = Mathf::Max({ screenPos1.x, screenPos2.x, screenPos3.x });
+	float minY = Mathf::Min({ screenPos1.y, screenPos2.y, screenPos3.y });
+	float maxY = Mathf::Max({ screenPos1.y, screenPos2.y, screenPos3.y });
+	// Pixel is always on positions with an integer subscript, so we iterate over integers
+	for (int i = Mathf::Max((int)minX, 0); i < (int)Mathf::Min((int)maxX, Settings::ShadowWidth); i++) {
+		for (int j = Mathf::Max((int)minY, 0); j < (int)Mathf::Min((int)maxY, Settings::ShadowHeight); j++) {
+			if (InTriangle(Vector2(i + pixelSize.x / 2, j + pixelSize.y / 2), screenPos1, screenPos2, screenPos3)) {
+				// For all pixels in the triangle, we interpolate the vertex and get one ShadingInOutFields for fragment shading
+				float lambda12 = std::abs(Vector2::Cross(screenPos1 - screenPos2, Vector2(i, j) - screenPos2) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
+				float lambda13 = std::abs(Vector2::Cross(screenPos3 - screenPos1, Vector2(i, j) - screenPos1) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
+				float lambda23 = std::abs(Vector2::Cross(screenPos2 - screenPos3, Vector2(i, j) - screenPos3) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
+				ShadowShadingInOutFields in;
+				float z1 = shadowVertexOut[startIndex].LightSpacePosition.z;
+				float z2 = shadowVertexOut[startIndex + 1].LightSpacePosition.z;
+				float z3 = shadowVertexOut[startIndex + 2].LightSpacePosition.z;
+				float z4 = 1 / (lambda12 / z3 + lambda13 / z2 + lambda23 / z1);
+				in.LightSpacePosition = z4 * (lambda12 * shadowVertexOut[startIndex + 2].LightSpacePosition / z3 + lambda13 * shadowVertexOut[startIndex + 1].LightSpacePosition / z2 + lambda23 * shadowVertexOut[startIndex].LightSpacePosition / z1);
+				in.NDC = z4 * (lambda12 * shadowVertexOut[startIndex + 2].NDC / z3 + lambda13 * shadowVertexOut[startIndex + 1].NDC / z2 + lambda23 * shadowVertexOut[startIndex].NDC / z1);
+				in.ScreenPosition = Vector2(i, j);
+				shadowFragmentIn.push_back(in);
+			}
+		}
+	}
+}
+
+void SoftwareRendering::FragmentShadingShadow(const std::vector<ShadowShadingInOutFields>& inFields, Light* light) {
+	for (int i = 0; i < inFields.size(); i++) {
+		ShadowShadingInOutFields in = inFields[i];
+		shadowFramebuffers[light->shadowMapFBO][(int)in.ScreenPosition.x][(int)in.ScreenPosition.y] = inFields[i].NDC.z;
+	}
+}
+
+void SoftwareRendering::SetupRenderSubmesh() {
 	for (int i = 0; i < Settings::ScreenWidth; i++) {
 		depthBuffer.push_back(std::vector<float>());
 		for (int j = 0; j < Settings::ScreenHeight; j++) {
@@ -145,10 +249,7 @@ void SoftwareRendering::RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFil
 	for (int i = 0; i < vertexOutFields.size() - 2; i++) {
 		Rasterize(i, vertexOutFields, fragmentInFields);
 	}
-
-	for (int i = 0; i < vertexOutFields.size(); i++) {
-		FragmentShading(material, fragmentInFields, viewPos, pos);
-	}
+	FragmentShading(material, fragmentInFields, viewPos, pos);
 	
 }
 
@@ -215,7 +316,7 @@ Vector2 SoftwareRendering::ViewportTransform(const Vector4& ndc) {
 	return Vector2(ndc.x * Settings::ScreenWidth / 2 + Settings::ScreenWidth / 2, ndc.y * Settings::ScreenHeight / 2 + Settings::ScreenHeight / 2);
 }
 
-bool SoftwareRendering::InTriangle(const Vector2& p, const Vector2& a, const Vector2& b, const Vector2& c) {
+bool KritiaEngine::Rendering::SoftwareRendering::InTriangle(const Vector2& p, const Vector2& a, const Vector2& b, const Vector2& c) {
 	Vector2 ab = b - a;
 	Vector2 bc = c - b;
 	Vector2 ca = a - c;
@@ -225,7 +326,6 @@ bool SoftwareRendering::InTriangle(const Vector2& p, const Vector2& a, const Vec
 		return false;
 	}
 }
-
 void SoftwareRendering::FragmentShading(const std::shared_ptr<Material>& material, const std::vector<ShadingInOutFields>& inFields, const Vector3& viewPos, const Vector3& pos) {
 	if (material->renderMode == Material::RenderMode::Opaque) {
         #pragma omp parallel for
@@ -363,26 +463,26 @@ Color SoftwareRendering::ComputeSpotLight(const std::shared_ptr<Material>& mater
 	return Color(ambient + (1 - shadow) * (diffuse + specular), 1.f);
 }
 
-float SoftwareRendering::ComputeMainShadow(const std::shared_ptr<Material>& material, const Vector4& fragPosLightSpace) {
+float KritiaEngine::Rendering::SoftwareRendering::ComputeMainShadow(const std::shared_ptr<Material>& material, const Vector4& fragPosLightSpace) {
 	Light* mainLight = LightingSystem::GetMainLightSource();
 	Vector3 projCoords = (Vector3)fragPosLightSpace / fragPosLightSpace.w;
 	projCoords = projCoords * 0.5 + Vector3(0.5, 0.5, 0.5);
 	float shadow = 0;
-	//if (projCoords.z > 1.0) {
-	//	shadow = 1.0;
-	//} else {
-	//	float closestDepth = SampleTexture(shadowMap[mainLight->shadowMapID], Vector2(projCoords.x, projCoords.y)).r;
-	//	float currentDepth = projCoords.z;
-	//	Vector2 texelSize = 1.0 / shadowMap[LightingSystem::GetMainLightSource()->shadowMapID]->size;
-	//	for (int x = -1; x <= 1; ++x) {
-	//		for (int y = -1; y <= 1; ++y) {
-	//			float pcfDepth = SampleTexture(shadowMap[mainLight->shadowMapID], Vector2(projCoords.x, projCoords.y) + texelSize * Vector2(x, y)).r;
-	//			// perhaps need bias
-	//			shadow += currentDepth > pcfDepth ? 1.0 : 0.0;
-	//		}
-	//	}
-	//	shadow /= 9.0;
-	//}
+	if (projCoords.z > 1.0) {
+		shadow = 1.0;
+	} else {
+		float closestDepth = SampleShadowMap(mainLight, Vector2(projCoords.x, projCoords.y));
+		float currentDepth = projCoords.z;
+		Vector2 texelSize = 1.0 / Vector2(Settings::ShadowWidth, Settings::ShadowHeight);
+		for (int x = -1; x <= 1; ++x) {
+			for (int y = -1; y <= 1; ++y) {
+				float pcfDepth = SampleShadowMap(mainLight, Vector2(projCoords.x, projCoords.y) + texelSize * Vector2(x, y));
+				// perhaps need bias
+				shadow += currentDepth > pcfDepth ? 1.0 : 0.0;
+			}
+		}
+		shadow /= 9.0;
+	}
 	return shadow;
 }
 
@@ -426,7 +526,7 @@ float SoftwareRendering::ComputeSpotShadow(const std::shared_ptr<Material>& mate
 	return shadow;
 }
 
-Color SoftwareRendering::SampleTexture(const std::shared_ptr<Texture>& texture, Vector2 texCoord) {
+Color KritiaEngine::Rendering::SoftwareRendering::SampleTexture(const std::shared_ptr<Texture>& texture, Vector2 texCoord) {
 	//return Color(1,1,1,1);
 	if (texCoord.x > 1) {
 		texCoord.x -= (int)texCoord.x;
@@ -443,7 +543,6 @@ Color SoftwareRendering::SampleTexture(const std::shared_ptr<Texture>& texture, 
 	} else {
 		return Color((int)pixelOffset[0] / 255.f, (int)pixelOffset[1] / 255.f, (int)pixelOffset[2] / 255.f, (int)pixelOffset[3] / 255.f);
 	}
-
 }
 
 Color SoftwareRendering::SampleCubeTexture(const std::vector<std::shared_ptr<Texture>>& textures, const Vector3& direction) {

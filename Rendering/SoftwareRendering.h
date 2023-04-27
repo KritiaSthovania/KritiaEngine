@@ -28,6 +28,12 @@ namespace KritiaEngine::Rendering {
 			Vector3 N;
 			Vector2 ScreenPosition;
 		};
+
+		struct ShadowShadingInOutFields {
+			Vector4 LightSpacePosition;
+			Vector4 NDC;
+			Vector2 ScreenPosition;
+		};
 		static void Initialize(HWND hwnd);
 		static void ClearFramebuffer();
 		static void SwapFramebuffer();
@@ -35,6 +41,12 @@ namespace KritiaEngine::Rendering {
 		static void Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel);
 		static unsigned int Load2DTexture(const std::string& path, bool alphaChannel, Vector2& size, int& channel);
 		static void UpdateUniformBufferMatricesVP(const Matrix4x4& view, const Matrix4x4& projection);
+		static void RenderShadowMap(const std::shared_ptr<MeshFilter>& meshFilter, int submeshIndex, const Matrix4x4& model, Light* light);
+		static void VertexShadingShadow(const Mesh::Vertex& vertex, const Matrix4x4& lightSpaceMatrix, const Matrix4x4& model, std::vector<ShadowShadingInOutFields>& shadowVertexOut);
+		static void RasterizeShadow(int startIndex, const std::vector<ShadowShadingInOutFields>& shadowVertexOut, std::vector<ShadowShadingInOutFields>& shadowFragmentIn);
+		static void FragmentShadingShadow(const std::vector<ShadowShadingInOutFields>& inFields, Light* light);
+		static float SampleShadowMap(Light* light, Vector2 texCoord);
+		static float SampleShadowMapCube();
 		static void SetupRenderSubmesh();
 		static void RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos);
 		static void VertexShading(const Mesh::Vertex& vertex, const Matrix4x4& model, const Matrix3x3 &normalMatrix, Vector4& screenPos, std::vector<ShadingInOutFields>& vertexOut);
@@ -57,13 +69,14 @@ namespace KritiaEngine::Rendering {
 		static Matrix4x4 projectionMatrix;
 		static std::vector<std::vector<Color>> frameBuffer;
 		static std::vector<std::vector<float>> depthBuffer;
-		static std::map<unsigned int, std::vector<std::vector<Color>>> shadowFramebuffers;
+		static std::map<unsigned int, std::vector<std::vector<float>>> shadowFramebuffers;
 		static std::map<unsigned int, std::shared_ptr<Texture>> shadowMap;
 		static std::map<unsigned int, std::vector<std::shared_ptr<Texture>>> shadowMapPoint;
 		static const int pointLightPcfSamples = 20;
 		static Vector3 sampleOffsetDirections[pointLightPcfSamples];
 		static std::map<unsigned int, unsigned char*> textures;
 		static unsigned int texture2DCounter;
+		static unsigned int shadowMapBufferCounter;
 		static HDC dc;
 	};
 }

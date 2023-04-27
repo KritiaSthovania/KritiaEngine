@@ -61,7 +61,7 @@ void KritiaEngine::Rendering::RenderingProvider::CreateShadowMap(Light* light) {
 	if (backend == RenderingBackend::OpenGL) {
 		OpenGLRendering::CreateShadowMap(light);
 	} else if (backend == RenderingBackend::Software) {
-
+		SoftwareRendering::CreateShadowMap(light);
 	}
 }
 
@@ -123,7 +123,7 @@ void KritiaEngine::Rendering::RenderingProvider::RenderShadowMap(const std::shar
 	if (backend == RenderingBackend::OpenGL) {
 		OpenGLRendering::RenderShadowMap(meshFilter, submeshIndex, model, light);
 	} else if (backend == RenderingBackend::Software) {
-
+		SoftwareRendering::RenderShadowMap(meshFilter, submeshIndex, model, light);
 	}
 }
 
