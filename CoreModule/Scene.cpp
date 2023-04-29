@@ -81,7 +81,7 @@ void Scene::InitializeLighting() {
     this->mainLightSource = mainLightSource;
     std::shared_ptr<Light> light = this->mainLightSource->AddComponent<Light>();
     light->color = Color(1, 1, 1, 1);
-    light->Transform()->forward = Vector3::Normalize(Vector3(-1, -1, 1));
+    light->Transform()->forward = Vector3::Normalize(Vector3(-1, 0, 1));
     LightingSystem::SetMainLightSource(this->mainLightSource->GetComponent<Light>().get());
 }
 

@@ -148,7 +148,7 @@ void KritiaEngine::Rendering::RenderingProvider::SetupRenderShadowMap(Light* lig
 	if (backend == RenderingBackend::OpenGL) {
 		OpenGLRendering::SetupRenderShadowMap(light);
 	} else if (backend == RenderingBackend::Software) {
-
+		SoftwareRendering::SetupRenderShadowMap(light);
 	}
 }
 

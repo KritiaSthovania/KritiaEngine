@@ -41,9 +41,11 @@ namespace KritiaEngine::Rendering {
 		static void Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel);
 		static unsigned int Load2DTexture(const std::string& path, bool alphaChannel, Vector2& size, int& channel);
 		static void UpdateUniformBufferMatricesVP(const Matrix4x4& view, const Matrix4x4& projection);
+		static void SetupRenderShadowMap(Light* light);
 		static void RenderShadowMap(const std::shared_ptr<MeshFilter>& meshFilter, int submeshIndex, const Matrix4x4& model, Light* light);
 		static void VertexShadingShadow(const Mesh::Vertex& vertex, const Matrix4x4& lightSpaceMatrix, const Matrix4x4& model, std::vector<ShadowShadingInOutFields>& shadowVertexOut);
 		static void RasterizeShadow(int startIndex, const std::vector<ShadowShadingInOutFields>& shadowVertexOut, std::vector<ShadowShadingInOutFields>& shadowFragmentIn);
+		static Vector2 ViewportTransformShadow(const Vector4& ndc);
 		static void FragmentShadingShadow(const std::vector<ShadowShadingInOutFields>& inFields, Light* light);
 		static float SampleShadowMap(Light* light, Vector2 texCoord);
 		static float SampleShadowMapCube();

@@ -13,10 +13,10 @@ KritiaEngine::Color::Color()
 
 KritiaEngine::Color::Color(float r, float g, float b, float a)
 {
-	this->r = r;
-	this->g = g;
-	this->b = b;
-	this->a = a;
+	this->r = std::clamp(r, 0.f, 1.f);
+	this->g = std::clamp(g, 0.f, 1.f);
+	this->b = std::clamp(b, 0.f, 1.f);
+	this->a = std::clamp(a, 0.f, 1.f);
 }
 
 KritiaEngine::Color::Color(const Vector4& vec4)
