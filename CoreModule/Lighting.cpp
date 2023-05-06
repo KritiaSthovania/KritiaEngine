@@ -70,6 +70,9 @@ Light* KritiaEngine::Lighting::LightingSystem::GetMainLightSource() {
                 MainLightSource = light;
             }
         }
+        if (MainLightSource == nullptr) {
+            MainLightSource = *Lights.begin();
+        }
     }
     return MainLightSource;
 }

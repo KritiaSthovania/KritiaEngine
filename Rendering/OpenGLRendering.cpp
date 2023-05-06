@@ -438,14 +438,16 @@ void KritiaEngine::Rendering::OpenGLRendering::CreateSkybox(const std::vector<Te
 void KritiaEngine::Rendering::OpenGLRendering::SetMainLightProperties(const std::shared_ptr<Shader>& shader) {
 	// main light source should always be a directional light, and there should always be one such light source.
 	Light* mainlight = Lighting::LightingSystem::GetMainLightSource();
-	if (mainlight->type != LightType::Directional) {
-		shader->SetVec3("mainLightColor", Vector3::Zero());
-	} else {
-		shader->SetVec3("mainLightDirection", mainlight->Transform()->forward);
-		shader->SetFloat("ambientIntensity", mainlight->ambientIntensity);
-		shader->SetFloat("diffuseIntensity", mainlight->diffuseIntensity);
-		shader->SetFloat("specularIntensity", mainlight->specularIntensity);
-		shader->SetVec3("mainLightColor", mainlight->color.GetRGB());
+	if (mainlight != nullptr) {
+		if (mainlight->type != LightType::Directional) {
+			shader->SetVec3("mainLightColor", Vector3::Zero());
+		} else {
+			shader->SetVec3("mainLightDirection", mainlight->Transform()->forward);
+			shader->SetFloat("ambientIntensity", mainlight->ambientIntensity);
+			shader->SetFloat("diffuseIntensity", mainlight->diffuseIntensity);
+			shader->SetFloat("specularIntensity", mainlight->specularIntensity);
+			shader->SetVec3("mainLightColor", mainlight->color.GetRGB());
+		}
 	}
 }
 

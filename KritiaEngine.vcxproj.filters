@@ -266,9 +266,7 @@
       <Filter>Rendering\Source</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Rendering\SoftwareRendering.cpp">
-      <Filter>Rendering\Source</Filter>
-    </ClCompile>
+    <ClCompile Include="Rendering\SoftwareRendering.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Behaviour.h">

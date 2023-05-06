@@ -55,15 +55,6 @@ void KritiaEngine::Rendering::SoftwareRendering::SwapFramebuffer() {
 			DrawPixel(Vector2(i, j), frameBuffer[i][j]);
 		}
 	}
-	//for (int i = 0; i < shadowFramebuffers[0].size(); i++) {
-	//	for (int j = 0; j < shadowFramebuffers[0][i].size(); j++) {
-	//		if (shadowFramebuffers[0][i][j] < 1 && shadowFramebuffers[0][i][j]>0) {
-	//			shadowFramebuffers[0][i][j] *= 50;
-	//			float x = shadowFramebuffers[0][i][j];
-	//		}
-	//		DrawPixel(Vector2(i, j), Color(shadowFramebuffers[0][i][j], 0, 0, 1));
-	//	}
-	//}
 }
 
 void KritiaEngine::Rendering::SoftwareRendering::CreateShadowMap(Light* light) {
@@ -71,8 +62,6 @@ void KritiaEngine::Rendering::SoftwareRendering::CreateShadowMap(Light* light) {
 	shadowMap->loaded = true;
 	light->shadowMapFBO = shadowMapBufferCounter;
 	shadowMapBufferCounter++;
-	light->shadowMapID = texture2DCounter;
-	texture2DCounter++;
 	shadowFramebuffers[light->shadowMapFBO] = std::vector<std::vector<float>>();
 	shadowFramebuffers[light->shadowMapFBO].resize(Settings::ShadowWidth);
 	for (int i = 0; i < shadowFramebuffers[light->shadowMapFBO].size(); i++) {
@@ -386,28 +375,26 @@ void SoftwareRendering::FragmentShading(const std::shared_ptr<Material>& materia
 			} else {
 				texCoord = in.TexCoord;
 			}
-			Vector3 ambientComp = mainLight->ambientIntensity * mainLight->color.GetRGB() * material->albedo.GetRGB() * SampleTexture(material->mainTexture, texCoord).GetRGB();
-			float diffuseFactor = Mathf::Max(Vector3::Dot(norm, lightDir), 0.f);
-			Vector3 diffuseComp = diffuseFactor * mainLight->diffuseIntensity * mainLight->color.GetRGB() * material->albedo.GetRGB() * SampleTexture(material->mainTexture, texCoord).GetRGB();
+			Color finalColor = Color(0, 0, 0, 1);
+			if (mainLight->type == LightType::Directional) {
+				Vector3 ambientComp = mainLight->ambientIntensity * mainLight->color.GetRGB() * material->albedo.GetRGB() * SampleTexture(material->mainTexture, texCoord).GetRGB();
+				float diffuseFactor = Mathf::Max(Vector3::Dot(norm, lightDir), 0.f);
+				Vector3 diffuseComp = diffuseFactor * mainLight->diffuseIntensity * mainLight->color.GetRGB() * material->albedo.GetRGB() * SampleTexture(material->mainTexture, texCoord).GetRGB();
 
-			Vector3 halfwayDir = Vector3::Normalize(lightDir + viewDir);
-			float specularFactor = std::pow(Mathf::Max(Vector3::Dot(norm, halfwayDir), 0.f), material->shininess);
-			Vector3 specularComp = specularFactor * mainLight->specularIntensity * mainLight->color.GetRGB() * SampleTexture(material->specularMap, texCoord).GetRGB();
-			float shadow = ComputeMainShadow(material, in.FragPosLightSpace);
-			Color finalColor = Color((ambientComp + (1 - shadow) * (diffuseComp + specularComp)), 1.f);
-			if (shadow < 1 && diffuseFactor != 0) {
-				x++;
-			}
+				Vector3 halfwayDir = Vector3::Normalize(lightDir + viewDir);
+				float specularFactor = std::pow(Mathf::Max(Vector3::Dot(norm, halfwayDir), 0.f), material->shininess);
+				Vector3 specularComp = specularFactor * mainLight->specularIntensity * mainLight->color.GetRGB() * SampleTexture(material->specularMap, texCoord).GetRGB();
+				float shadow = ComputeMainShadow(material, in.FragPosLightSpace);
+				Color finalColor = Color((ambientComp + (1 - shadow) * (diffuseComp + specularComp)), 1.f);
+			} 
 			//std::vector<Light*> pointLights = LightingSystem::GetPointLightAroundPos(pos);
-			//std::vector<Light*> spotLights = LightingSystem::GetSpotLightAroundPos(pos);
+			std::vector<Light*> spotLights = LightingSystem::GetSpotLightAroundPos(pos);
 			//for (int j = 0; j < Mathf::Min((int)pointLights.size(), LightingSystem::MaxPointLightsForOneObject); j++) {
 			//	finalColor += ComputePointLight(material, pointLights[j], norm, in.FragPos, viewDir, texCoord, material->albedo.GetRGB(), in, viewPos);
 			//}
-			//for (int j = 0; j < Mathf::Min((int)spotLights.size(), LightingSystem::MaxSpotLightsForOneObject); j++) {
-			//	finalColor += ComputeSpotLight(material, spotLights[j], norm, in.FragPos, viewDir, texCoord, material->albedo.GetRGB(), in);
-			//}
-			//std::cout << ambientComp.x << " " << ambientComp.y << " " << ambientComp.z << std::endl;
-			//frameBuffer[(int)in.ScreenPosition.x][(int)in.ScreenPosition.y] = Color(norm, 1.f);
+			for (int j = 0; j < Mathf::Min((int)spotLights.size(), LightingSystem::MaxSpotLightsForOneObject); j++) {
+				finalColor += ComputeSpotLight(material, spotLights[j], norm, in.FragPos, viewDir, texCoord, material->albedo.GetRGB(), in);
+			}
 			frameBuffer[(int)in.ScreenPosition.x][(int)in.ScreenPosition.y] = finalColor;
 		}
 	}
@@ -466,6 +453,7 @@ Color SoftwareRendering::ComputePointLight(const std::shared_ptr<Material>& mate
 	float shadow = ComputePointShadow(material, pointLight, inField, viewPos);
 	return Color(ambient + (1 - shadow) * (diffuse + specular), 1.0);
 }
+
 Color SoftwareRendering::ComputeSpotLight(const std::shared_ptr<Material>& material, Light* spotLight, const Vector3& normal, const Vector3& fragPos, const Vector3& viewDir, const Vector2& texCoord, const Vector3& albedo, const ShadingInOutFields& inField) {
 	Vector3 lightDir = Vector3::Normalize(spotLight->Transform()->position - fragPos);
 	float theta = Vector3::Dot(lightDir, Vector3::Normalize(-spotLight->Transform()->forward));
@@ -534,31 +522,36 @@ float SoftwareRendering::ComputeSpotShadow(const std::shared_ptr<Material>& mate
 	Vector3 projCoords = Vector3(fragPosLightSpace) / fragPosLightSpace.w;
 	projCoords = projCoords * 0.5 + Vector3(0.5, 0.5, 0.5);
 	float shadow = 0;
-	//if (projCoords.z > 1.0) {
-	//	shadow = 1.0;
-	//} else {
-	//	float closestDepth = SampleTexture(shadowMap[spotLight->shadowMapID], Vector2(projCoords.x, projCoords.y)).r;
-	//	float currentDepth = projCoords.z;
-	//	Vector2 texelSize = 1.0 / shadowMap[LightingSystem::GetMainLightSource()->shadowMapID]->size;
-	//	for (int x = -1; x <= 1; ++x) {
-	//		for (int y = -1; y <= 1; ++y) {
-	//			float pcfDepth = SampleTexture(shadowMap[spotLight->shadowMapID], Vector2(projCoords.x, projCoords.y) + texelSize * Vector2(x, y)).r;
-	//			// perhaps need bias
-	//			shadow += currentDepth > pcfDepth ? 1.0 : 0.0;
-	//		}
-	//	}
-	//	shadow /= 9.0;
-	//}
+	if (projCoords.z > 1.0) {
+		shadow = 1.0;
+	} else {
+		float closestDepth = SampleShadowMap(spotLight, Vector2(projCoords.x, projCoords.y));
+		float currentDepth = projCoords.z;
+		Vector2 texelSize = 1.0 / Vector2(Settings::ShadowWidth, Settings::ShadowHeight);
+		for (int x = -1; x <= 1; ++x) {
+			for (int y = -1; y <= 1; ++y) {
+				float pcfDepth = SampleShadowMap(spotLight, Vector2(projCoords.x, projCoords.y) + texelSize * Vector2(x, y));
+				shadow += currentDepth - 0.005 > pcfDepth ? 1.0 : 0.0;
+			}
+		}
+		shadow /= 9.0;
+	}
 	return shadow;
 }
 
 
 float SoftwareRendering::SampleShadowMap(Light* light, Vector2 texCoord) {
-	if (texCoord.x > 1) {
+	while (texCoord.x >= 1) {
 		texCoord.x -= (int)texCoord.x;
 	}
-	if (texCoord.y > 1) {
+	while (texCoord.y >= 1) {
 		texCoord.y -= (int)texCoord.y;
+	}
+	while (texCoord.x < 0) {
+		texCoord.x = 0;
+	}
+	while (texCoord.y < 0) {
+		texCoord.y = 0;
 	}
 	return shadowFramebuffers[light->shadowMapFBO][int(texCoord.x * Settings::ShadowWidth)][int(texCoord.y * Settings::ShadowHeight)];
 }
