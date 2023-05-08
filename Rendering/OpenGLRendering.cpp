@@ -126,19 +126,19 @@ void KritiaEngine::Rendering::OpenGLRendering::UpdateGPUInstancingBuffer() {
 	}
 }
 
-unsigned int OpenGLRendering::LoadCubeMap(const std::vector<Texture>& cubeTextures) {
+unsigned int OpenGLRendering::LoadCubeMap(const std::vector<std::shared_ptr<Texture>>& cubeTextures) {
 	unsigned int id;
 	int width, height, nrChannels;
 	if (Settings::UseOpenGL) {
 		glGenTextures(1, &id);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, id);
 		for (unsigned int i = 0; i < cubeTextures.size(); i++) {
-			unsigned char* data = stbi_load(cubeTextures[i].path.c_str(), &width, &height, &nrChannels, 0);
+			unsigned char* data = stbi_load(cubeTextures[i]->path.c_str(), &width, &height, &nrChannels, 0);
 			if (data) {
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_SRGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 				stbi_image_free(data);
 			} else {
-				std::cout << "Cubemap texture failed to load at path: " << cubeTextures[i].path.c_str() << std::endl;
+				std::cout << "Cubemap texture failed to load at path: " << cubeTextures[i]->path.c_str() << std::endl;
 				stbi_image_free(data);
 			}
 		}
@@ -296,12 +296,12 @@ void OpenGLRendering::ApplyMaterialShaderOnRender(const Matrix4x4& model, const 
 	glBindTexture(GL_TEXTURE_2D, Lighting::LightingSystem::GetMainLightSource()->shadowMapID);
 }
 
-void OpenGLRendering::RenderSkybox(Matrix4x4 projection, Matrix4x4 view) {
+void OpenGLRendering::RenderSkybox(const Matrix4x4& projection, const Matrix4x4& view) {
 	// drop translation part
-	view = Matrix4x4((Matrix3x3)view);
+	Matrix4x4 view4 = Matrix4x4((Matrix3x3)view);
 	skyboxShader->Use();
 	skyboxShader->SetInt("skybox", 0);
-	skyboxShader->SetMat4("view", view);
+	skyboxShader->SetMat4("view", view4);
 	skyboxShader->SetMat4("projection", projection);
 	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
 	glActiveTexture(GL_TEXTURE0);
@@ -423,7 +423,7 @@ void KritiaEngine::Rendering::OpenGLRendering::CreateUniformBuffer(unsigned int 
 	}
 }
 
-void KritiaEngine::Rendering::OpenGLRendering::CreateSkybox(const std::vector<Texture>& skyboxTextures, unsigned int verticesSize, float* verticesPos) {
+void KritiaEngine::Rendering::OpenGLRendering::CreateSkybox(const std::vector<std::shared_ptr<Texture>>& skyboxTextures, unsigned int verticesSize, float* verticesPos) {
 	skyboxTextureID = LoadCubeMap(skyboxTextures);
 	skyboxShader = std::shared_ptr<Shader>(new Shader("./StandardShader/SkyboxShader.vs", "./StandardShader/SkyboxShader.fs"));
 	glGenVertexArrays(1, &skyboxVAO);

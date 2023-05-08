@@ -23,7 +23,7 @@ namespace KritiaEngine::Rendering {
 		/// <param name="cubeTextures">six textures</param>
 		/// <param name="id"></param>
 		/// <returns>the texture ID</returns>
-		static unsigned int LoadCubeMap(const std::vector<Texture>& cubeTextures);
+		static unsigned int LoadCubeMap(const std::vector<std::shared_ptr<Texture>>& cubeTextures);
 		/// <summary>
 		/// Load a 2D texture
 		/// </summary>
@@ -32,7 +32,7 @@ namespace KritiaEngine::Rendering {
 		/// <returns>the texture ID</returns>
 		static void Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel);
 		static unsigned int Load2DTextureFromPath(const std::string& path, bool alphaChannel, Vector2& size, int& channel);
-		static void RenderSkybox(Matrix4x4 projection, Matrix4x4 view);
+		static void RenderSkybox(const Matrix4x4& projection, const Matrix4x4& view);
 		static void SetupMesh(const std::shared_ptr<Mesh>& mesh);
 		/// <summary>
 		/// Shoule be called by RenderingProvider if using OpenGL. The projection and view matrices are set by using the uniform buffer.
@@ -54,7 +54,7 @@ namespace KritiaEngine::Rendering {
 		/// Only consider the main light source.
 		/// </summary>
 		static void CreateUniformBuffer(unsigned int bindingPoint);
-		static void CreateSkybox(const std::vector<Texture>& skyboxTextures, unsigned int verticesSize, float* verticesPos);
+		static void CreateSkybox(const std::vector<std::shared_ptr<Texture>>& skyboxTextures, unsigned int verticesSize, float* verticesPos);
 		static void SetMainLightProperties(const std::shared_ptr<Shader>& shader);
 		static void SetPointLightProperties(const Vector3& pos, const std::shared_ptr<Shader>& shader);
 		static void SetSpotLightProperties(const Vector3& pos, const std::shared_ptr<Shader>& shader);

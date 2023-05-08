@@ -17,7 +17,7 @@ bool KritiaEngine::Rendering::RenderingProvider::backFaceCullingEnabled = true;
 bool RenderingProvider::msaaEnabled = true;
 bool RenderingProvider::gammaCorrectionEnabled = true;
 bool RenderingProvider::shadowEnabled = true;
-std::vector<Texture> RenderingProvider::skyboxTextures = std::vector<Texture>();
+std::vector<std::shared_ptr<Texture>> RenderingProvider::skyboxTextures = std::vector<std::shared_ptr<Texture>>();
 Matrix4x4 RenderingProvider::projection;
 RenderingProvider::RenderingBackend RenderingProvider::backend = RenderingProvider::RenderingBackend::Software;
 
@@ -49,11 +49,11 @@ void KritiaEngine::Rendering::RenderingProvider::SwapFramebuffer(GLFWwindow* win
 	}
 }
 
-unsigned int KritiaEngine::Rendering::RenderingProvider::LoadCubeMap(const std::vector<Texture>& cubeTextures) {
+unsigned int KritiaEngine::Rendering::RenderingProvider::LoadCubeMap(const std::vector<std::shared_ptr<Texture>>& cubeTextures) {
 	if (backend == RenderingBackend::OpenGL) {
 		return OpenGLRendering::LoadCubeMap(cubeTextures);
 	} else if (backend == RenderingBackend::Software){
-		return 0;
+		return SoftwareRendering::LoadCubeMap(cubeTextures);
 	}
 }
 
@@ -66,16 +66,16 @@ void KritiaEngine::Rendering::RenderingProvider::CreateShadowMap(Light* light) {
 }
 
 void KritiaEngine::Rendering::RenderingProvider::CreateSkybox() {
-	skyboxTextures.push_back(Texture("./Assets/Textures/skybox/right.jpg"));
-	skyboxTextures.push_back(Texture("./Assets/Textures/skybox/left.jpg"));
-	skyboxTextures.push_back(Texture("./Assets/Textures/skybox/top.jpg"));
-	skyboxTextures.push_back(Texture("./Assets/Textures/skybox/bottom.jpg"));
-	skyboxTextures.push_back(Texture("./Assets/Textures/skybox/front.jpg"));
-	skyboxTextures.push_back(Texture("./Assets/Textures/skybox/back.jpg"));
+	skyboxTextures.push_back(std::make_shared<Texture>(Texture("./Assets/Textures/skybox/right.jpg")));
+	skyboxTextures.push_back(std::make_shared<Texture>(Texture("./Assets/Textures/skybox/left.jpg")));
+	skyboxTextures.push_back(std::make_shared<Texture>(Texture("./Assets/Textures/skybox/top.jpg")));
+	skyboxTextures.push_back(std::make_shared<Texture>(Texture("./Assets/Textures/skybox/bottom.jpg")));
+	skyboxTextures.push_back(std::make_shared<Texture>(Texture("./Assets/Textures/skybox/front.jpg")));
+	skyboxTextures.push_back(std::make_shared<Texture>(Texture("./Assets/Textures/skybox/back.jpg")));
 	if (backend == RenderingBackend::OpenGL) {
 		OpenGLRendering::CreateSkybox(skyboxTextures, sizeof(skyboxVertices), &skyboxVertices[0]);
 	} else if (backend == RenderingBackend::Software) {
-		
+		SoftwareRendering::CreateSkybox(skyboxTextures, sizeof(skyboxVertices), &skyboxVertices[0]);
 	}
 }
 
@@ -99,7 +99,7 @@ void KritiaEngine::Rendering::RenderingProvider::RenderSkybox(Matrix4x4 projecti
 	if (backend == RenderingBackend::OpenGL) {	
 		OpenGLRendering::RenderSkybox(projection, view);
 	} else if (backend == RenderingBackend::Software) {
-
+		SoftwareRendering::RenderSkybox(projection, view);
 	}
 }
 

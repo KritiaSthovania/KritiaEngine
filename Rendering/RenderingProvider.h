@@ -30,7 +30,7 @@ namespace KritiaEngine::Rendering{
 		/// <param name="cubeTextures">six textures</param>
 		/// <param name="id"></param>
 		/// <returns>the texture ID</returns>
-		static unsigned int LoadCubeMap(const std::vector<Texture>& cubeTextures);
+		static unsigned int LoadCubeMap(const std::vector<std::shared_ptr<Texture>>& cubeTextures);
 		/// <summary>
 		/// Load a 2D texture and return the id, call LoadCubeMap if you want to load a cube map.
 		/// </summary>
@@ -62,7 +62,7 @@ namespace KritiaEngine::Rendering{
 
 		static void CreateSkybox();
 		static float skyboxVertices[108];
-		static std::vector<Texture> skyboxTextures;
+		static std::vector<std::shared_ptr<Texture>> skyboxTextures;
 		static RenderingBackend backend;
 	};
 }

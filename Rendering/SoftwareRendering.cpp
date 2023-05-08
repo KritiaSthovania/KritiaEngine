@@ -1,8 +1,8 @@
 #include "SoftwareRendering.h"
 #include "../Component/Transform.h"
-#include "../CoreModule/Settings.h"
 #include "../CoreModule/Mathf.h"
 #include <stb/stb_image.h>
+
 using namespace KritiaEngine;
 using namespace KritiaEngine::Rendering;
 using namespace KritiaEngine::Lighting;
@@ -12,12 +12,14 @@ Matrix4x4 SoftwareRendering::projectionMatrix;
 std::vector<std::vector<Color>> SoftwareRendering::frameBuffer;
 std::vector<std::vector<float>> SoftwareRendering::depthBuffer;
 std::map<unsigned int, std::vector<std::vector<float>>> SoftwareRendering::shadowFramebuffers;
-std::map<unsigned int, std::shared_ptr<Texture>>  SoftwareRendering::shadowMap;
-std::map<unsigned int, std::vector<std::shared_ptr<Texture>>> SoftwareRendering::shadowMapPoint;
+std::map<unsigned int, SoftwareRendering::PointShadowMap> SoftwareRendering::pointShadowFramebuffers;
 std::map<unsigned int, unsigned char*> SoftwareRendering::textures;
 unsigned int SoftwareRendering::texture2DCounter = 0;
 unsigned int SoftwareRendering::shadowMapBufferCounter = 0;
 HDC SoftwareRendering::dc;
+unsigned int SoftwareRendering::skyboxTextureID = 0;
+float* SoftwareRendering::skyboxVertices = nullptr;
+int SoftwareRendering::skyboxVerticesSize = 0;
 
 Vector3 SoftwareRendering::sampleOffsetDirections[pointLightPcfSamples] = { Vector3(1, 1, 1), Vector3(1, -1, 1), Vector3(-1, -1, 1), Vector3(-1, 1, 1),
 		   Vector3(1, 1, -1), Vector3(1, -1, -1), Vector3(-1, -1, -1), Vector3(-1, 1, -1),
@@ -49,7 +51,7 @@ void SoftwareRendering::ClearFramebuffer() {
 	}
 }
 
-void KritiaEngine::Rendering::SoftwareRendering::SwapFramebuffer() {
+void SoftwareRendering::SwapFramebuffer() {
 	for (int i = 0; i < frameBuffer.size(); i++) {
 		for (int j = 0; j < frameBuffer[i].size(); j++) {
 			DrawPixel(Vector2(i, j), frameBuffer[i][j]);
@@ -57,9 +59,88 @@ void KritiaEngine::Rendering::SoftwareRendering::SwapFramebuffer() {
 	}
 }
 
-void KritiaEngine::Rendering::SoftwareRendering::CreateShadowMap(Light* light) {
-	std::shared_ptr<Texture> shadowMap = std::make_shared<Texture>(Texture());
-	shadowMap->loaded = true;
+void SoftwareRendering::CreateSkybox(const std::vector<std::shared_ptr<Texture>>& skyboxTextures, unsigned int verticesSize, float* verticesPos) {
+	skyboxTextureID = LoadCubeMap(skyboxTextures);
+	skyboxVertices = verticesPos;
+	skyboxVerticesSize = verticesSize;
+}
+
+void SoftwareRendering::RenderSkybox(const Matrix4x4& projection, const Matrix4x4& view) {
+	Matrix4x4 view4 = Matrix4x4((Matrix3x3)view);
+	std::vector<Vector3> vertices;
+	vertices.resize(skyboxVerticesSize);
+	for (int i = 0; i < skyboxVerticesSize; i += 3) {
+		vertices.push_back(Vector3(skyboxVertices[i], skyboxVertices[i + 1], skyboxVertices[i + 2]));
+	}
+	std::vector<SkyboxShadingInOutFields> vertexOut;
+	std::vector<SkyboxShadingInOutFields> fragmentIn;
+
+	for (int i = 0; i < vertices.size(); i++) {
+		VertexShadingSkybox(vertices[i], vertexOut, projection, view4);
+	}
+	for (int i = 0; i < vertexOut.size() - 2; i++) {
+		RasterizeSkybox(i, vertexOut, fragmentIn);
+	}
+	FragmentShadingSkybox(fragmentIn);
+}
+
+void SoftwareRendering::VertexShadingSkybox(const Vector3& vertex, std::vector<SkyboxShadingInOutFields>& vertexOut, const Matrix4x4& projection, const Matrix4x4& view) {
+	SkyboxShadingInOutFields out;
+	out.texCoord = vertex;
+	out.Position = projection * view * Vector4(vertex, 1.0);
+	out.Position.z = out.Position.w;
+	out.NDC = out.Position / out.Position.w;
+	vertexOut.push_back(out);
+}
+
+void SoftwareRendering::RasterizeSkybox(int startIndex, const std::vector<SkyboxShadingInOutFields>& vertexOut, std::vector<SkyboxShadingInOutFields>& fragmentIn) {
+	const Vector2 pixelSize = Vector2(1.f / Settings::ShadowWidth, 1.f / Settings::ShadowHeight);
+	Vector2 screenPos1 = ViewportTransform(vertexOut[startIndex].NDC);
+	Vector2 screenPos2 = ViewportTransform(vertexOut[startIndex + 1].NDC);
+	Vector2 screenPos3 = ViewportTransform(vertexOut[startIndex + 2].NDC);
+	float minX = Mathf::Min({ screenPos1.x, screenPos2.x, screenPos3.x });
+	float maxX = Mathf::Max({ screenPos1.x, screenPos2.x, screenPos3.x });
+	float minY = Mathf::Min({ screenPos1.y, screenPos2.y, screenPos3.y });
+	float maxY = Mathf::Max({ screenPos1.y, screenPos2.y, screenPos3.y });
+	// Pixel is always on positions with an integer subscript, so we iterate over integers
+	for (int i = Mathf::Max((int)minX, 0); i < (int)Mathf::Min((int)maxX, Settings::ShadowWidth); i++) {
+		for (int j = Mathf::Max((int)minY, 0); j < (int)Mathf::Min((int)maxY, Settings::ShadowHeight); j++) {
+			if (InTriangle(Vector2(i + pixelSize.x / 2, j + pixelSize.y / 2), screenPos1, screenPos2, screenPos3)) {
+				// For all pixels in the triangle, we interpolate the vertex and get one ShadingInOutFields for fragment shading
+				float lambda12 = std::abs(Vector2::Cross(screenPos1 - screenPos2, Vector2(i, j) - screenPos2) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
+				float lambda13 = std::abs(Vector2::Cross(screenPos3 - screenPos1, Vector2(i, j) - screenPos1) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
+				float lambda23 = std::abs(Vector2::Cross(screenPos2 - screenPos3, Vector2(i, j) - screenPos3) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
+				SkyboxShadingInOutFields in;
+				float z1 = vertexOut[startIndex].Position.z;
+				float z2 = vertexOut[startIndex + 1].Position.z;
+				float z3 = vertexOut[startIndex + 2].Position.z;
+				float z4 = 1 / (lambda12 / z3 + lambda13 / z2 + lambda23 / z1);
+				in.Position = z4 * (lambda12 * vertexOut[startIndex + 2].Position / z3 + lambda13 * vertexOut[startIndex + 1].Position / z2 + lambda23 * vertexOut[startIndex].Position / z1);
+				in.NDC = z4 * (lambda12 * vertexOut[startIndex + 2].NDC / z3 + lambda13 * vertexOut[startIndex + 1].NDC / z2 + lambda23 * vertexOut[startIndex].NDC / z1);
+				in.ScreenPosition = Vector2(i, j);
+				fragmentIn.push_back(in);
+			}
+		}
+	}
+}
+
+void SoftwareRendering::FragmentShadingSkybox(const std::vector<SkyboxShadingInOutFields>& inFields) {
+	for (int i = 0; i < inFields.size(); i++) {
+		SkyboxShadingInOutFields in = inFields[i];
+		float depth = inFields[i].NDC.z * 0.5 + 0.5;
+		if (depth > depthBuffer[(int)in.ScreenPosition.x][(int)in.ScreenPosition.y]) {
+			continue;
+		} else {
+			frameBuffer[(int)in.ScreenPosition.x][(int)in.ScreenPosition.y] = SampleSkybox(in.texCoord);
+		}
+	}
+}
+
+Color SoftwareRendering::SampleSkybox(const Vector3& texCoord) {
+	return SampleCubeMap(skyboxTextureID, texCoord);
+}
+
+void SoftwareRendering::CreateShadowMap(Light* light) {
 	light->shadowMapFBO = shadowMapBufferCounter;
 	shadowMapBufferCounter++;
 	shadowFramebuffers[light->shadowMapFBO] = std::vector<std::vector<float>>();
@@ -71,12 +152,42 @@ void KritiaEngine::Rendering::SoftwareRendering::CreateShadowMap(Light* light) {
 			shadowFramebuffers[light->shadowMapFBO][i][j] = 1;
 		}
 	}
+	light->shadowMapPointFBO = shadowMapBufferCounter;
+	shadowMapBufferCounter++;
+	pointShadowFramebuffers[light->shadowMapPointFBO] = PointShadowMap();
 }
 
 
 void SoftwareRendering::UpdateUniformBufferMatricesVP(const Matrix4x4& view, const Matrix4x4& projection) {
 	viewMatrix = view;
 	projectionMatrix = projection;
+}
+
+unsigned int SoftwareRendering::LoadCubeMap(const std::vector<std::shared_ptr<Texture>>& cubeTextures) {
+	int startID = 0;
+	for (int i = 0; i < cubeTextures.size(); i++) {
+		auto texture = cubeTextures[i];
+		if (!texture->loaded) {
+			unsigned int id = texture2DCounter;
+			texture2DCounter++;
+			if (i == 0) {
+				startID = id;
+			}
+			int width;
+			int height;
+			int nrChannels;
+			textures[id] = stbi_load(texture->path.c_str(), &width, &height, &nrChannels, 3);
+			if (textures[id]) {
+				texture->size = Vector2(width, height);
+				texture->channels = 3;
+			} else {
+				std::cout << "Failed to load texture at " << texture->path << std::endl;
+			}			
+			texture->ID = id;
+			texture->loaded = true;
+		}
+	}
+	return startID;
 }
 
 void SoftwareRendering::Load2DTexture(const std::shared_ptr<Texture>& texture, bool alphaChannel) {
@@ -108,7 +219,7 @@ void SoftwareRendering::Load2DTexture(const std::shared_ptr<Texture>& texture, b
 	}
 }
 
-unsigned int KritiaEngine::Rendering::SoftwareRendering::Load2DTexture(const std::string& path, bool alphaChannel, Vector2& size, int& channel) {
+unsigned int SoftwareRendering::Load2DTexture(const std::string& path, bool alphaChannel, Vector2& size, int& channel) {
 	unsigned int id = texture2DCounter;
 	texture2DCounter++;
 	int width;
@@ -136,12 +247,19 @@ unsigned int KritiaEngine::Rendering::SoftwareRendering::Load2DTexture(const std
 	return id;
 }
 
-void KritiaEngine::Rendering::SoftwareRendering::SetupRenderShadowMap(Light* light) {
+void SoftwareRendering::SetupRenderShadowMap(Light* light) {
 	for (int i = 0; i < shadowFramebuffers[light->shadowMapFBO].size(); i++) {
 		shadowFramebuffers[light->shadowMapFBO][i] = std::vector<float>();
 		shadowFramebuffers[light->shadowMapFBO][i].resize(Settings::ShadowHeight);
 		for (int j = 0; j < shadowFramebuffers[light->shadowMapFBO][i].size(); j++) {
 			shadowFramebuffers[light->shadowMapFBO][i][j] = 1;
+		}
+	}
+	for (int direction = 0; direction < 6; direction++) {
+		for (int i = 0; i < pointShadowFramebuffers[light->shadowMapPointFBO][direction].size(); i++) {
+			for (int j = 0; j < pointShadowFramebuffers[light->shadowMapPointFBO][direction][i].size(); j++) {
+				pointShadowFramebuffers[light->shadowMapPointFBO][direction][i][j] = 1;
+			}
 		}
 	}
 }
@@ -154,24 +272,23 @@ void SoftwareRendering::RenderShadowMap(const std::shared_ptr<MeshFilter>& meshF
 		for (int i = 0; i < mesh->submeshVertices[submeshIndex].size(); i++) {
 			VertexShadingShadow(mesh->submeshVertices[submeshIndex][i], light->GetLightMatrixVP(0), model, shadowVertexOut);
 		}
-		for (int i = 0; i < shadowVertexOut.size() - 2; i++) {
+		for (int i = 0; i < mesh->submeshIndices[submeshIndex].size() - 2; i++) {
 			RasterizeShadow(i, shadowVertexOut, shadowFragmentIn);
 		}
 		FragmentShadingShadow(shadowFragmentIn, light);
 	} else {
-		//shadowMapShaderPoint->Use();
-		//shadowMapShaderPoint->SetMat4("shadowMatrices[0]", light->GetLightMatrixVP(0));
-		//shadowMapShaderPoint->SetMat4("shadowMatrices[1]", light->GetLightMatrixVP(1));
-		//shadowMapShaderPoint->SetMat4("shadowMatrices[2]", light->GetLightMatrixVP(2));
-		//shadowMapShaderPoint->SetMat4("shadowMatrices[3]", light->GetLightMatrixVP(3));
-		//shadowMapShaderPoint->SetMat4("shadowMatrices[4]", light->GetLightMatrixVP(4));
-		//shadowMapShaderPoint->SetMat4("shadowMatrices[5]", light->GetLightMatrixVP(5));
-		//shadowMapShaderPoint->SetMat4("model", model);
-		//shadowMapShaderPoint->SetFloat("far_plane", Settings::FarPlaneDistance);
-		//shadowMapShaderPoint->SetVec3("lightPos", light->Transform()->position);
-		//glBindVertexArray(meshFilter->mesh->VAOs[submeshIndex]);
-		//glDrawElements(GL_TRIANGLES, meshFilter->mesh->submeshIndices[submeshIndex].size(), GL_UNSIGNED_INT, 0);
-		//glBindVertexArray(0);
+		auto mesh = meshFilter->mesh;
+		for (int direction = 0; direction < 6; direction++) {
+			std::vector<ShadowShadingInOutFields> shadowVertexOut;
+			std::vector<ShadowShadingInOutFields> shadowFragmentIn;
+			for (int i = 0; i < mesh->submeshVertices[submeshIndex].size(); i++) {
+				VertexShadingShadow(mesh->submeshVertices[submeshIndex][i], light->GetLightMatrixVP(direction), model, shadowVertexOut);
+			}
+			for (int i = 0; i < mesh->submeshIndices[submeshIndex].size() - 2; i++) {
+				RasterizeShadow(i, shadowVertexOut, shadowFragmentIn);
+			}
+			FragmentShadingPointShadow(shadowFragmentIn, light, direction);
+		}
 	}
 }
 
@@ -234,6 +351,19 @@ void SoftwareRendering::FragmentShadingShadow(const std::vector<ShadowShadingInO
 	}
 }
 
+void SoftwareRendering::FragmentShadingPointShadow(const std::vector<ShadowShadingInOutFields>& inFields, Light* light, int direction) {
+	for (int i = 0; i < inFields.size(); i++) {
+		ShadowShadingInOutFields in = inFields[i];
+		float depth = inFields[i].NDC.z * 0.5 + 0.5;
+		if (depth > pointShadowFramebuffers[light->shadowMapPointFBO][direction][(int)in.ScreenPosition.x][(int)in.ScreenPosition.y]) {
+			continue;
+		} else {
+			Vector3 depth = (Vector3)inFields[i].NDC * 0.5 + Vector3(0.5, 0.5, 0.5);
+			pointShadowFramebuffers[light->shadowMapPointFBO][direction][(int)in.ScreenPosition.x][(int)in.ScreenPosition.y] = depth.z;
+		}
+	}
+}
+
 void SoftwareRendering::SetupRenderSubmesh() {
 	for (int i = 0; i < Settings::ScreenWidth; i++) {
 		depthBuffer.push_back(std::vector<float>());
@@ -254,7 +384,7 @@ void SoftwareRendering::RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFil
 		Vector4 screenPos;
 		VertexShading(mesh->submeshVertices[submeshIndex][i], model, normalMatrix, screenPos, vertexOutFields);
 	}
-	for (int i = 0; i < vertexOutFields.size() - 2; i++) {
+	for (int i = 0; i < mesh->submeshIndices[submeshIndex].size() - 2; i++) {
 		Rasterize(i, vertexOutFields, fragmentInFields);
 	}
 	FragmentShading(material, fragmentInFields, viewPos, pos);
@@ -573,7 +703,11 @@ Color KritiaEngine::Rendering::SoftwareRendering::SampleTexture(const std::share
 	}
 }
 
-Color SoftwareRendering::SampleCubeTexture(const std::vector<std::shared_ptr<Texture>>& textures, const Vector3& direction) {
+Color SoftwareRendering::SampleCubeMap(const std::vector<std::shared_ptr<Texture>>& textures, const Vector3& direction) {
+	return Color();
+}
+
+Color SoftwareRendering::SampleCubeMap(unsigned int id, const Vector3& direction) {
 	return Color();
 }
 
