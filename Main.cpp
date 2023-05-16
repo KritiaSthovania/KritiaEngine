@@ -21,74 +21,81 @@ constexpr const char* title = "Kritia Engine";
 int main() 
 {
     Settings::Deserialize();
-    if (!InitializeWindow()) {
-        return -1;
+    if (!Settings::UseOpenGL && Settings::UseSoftwareRendering) {
+        std::cout << "UseOpenGL is set to false, please set it to true or change the property of visual studio project to call WinMain() to use the Software Rendering backend." << std::endl;
+    } else {
+        if (!InitializeWindow()) {
+            return -1;
+        }
+        InitializeCoreModules();
+        InitializeGUI();
+        // 游戏循环, Tick
+        while (!glfwWindowShouldClose(window)) {
+            Time::UpdateDeltaTime(glfwGetTime());
+            //执行一些特殊的输入控制
+            ProcessInput();
+            //执行所有Update函数，处理逻辑
+            Update();
+            //渲染
+            Render();
+            ResourceManager::CollectGarbage();
+        }
+        Settings::Serialize();
+        glfwDestroyWindow(window);
+        glfwTerminate();
     }
-    InitializeCoreModules();
-    InitializeGUI();
-    // 游戏循环, Tick
-    while (!glfwWindowShouldClose(window)) 
-    {
-        Time::UpdateDeltaTime(glfwGetTime());
-        //执行一些特殊的输入控制
-        ProcessInput();
-        //执行所有Update函数，处理逻辑
-        Update();
-        //渲染
-        Render();
-        ResourceManager::CollectGarbage();
-    }
-    Settings::Serialize();
-    glfwDestroyWindow(window);
-    glfwTerminate();
     return 0;
 }
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow) {
     Settings::Deserialize();
-    MSG msg;
-    WNDCLASS wndclass;
-    //对窗口类的各属性进行初始化
-    wndclass.style = CS_HREDRAW | CS_VREDRAW; /*窗口类的风格，CS前缀,C表示Class,S表示
-                    Style，这里使用了水平和垂直风格*/
-    wndclass.lpfnWndProc = WndProc;  /*这里将回到函数的名字赋值用以windows后面回调*/
-    wndclass.cbClsExtra = 0;  //附加参数，通常情况下为0
-    wndclass.cbWndExtra = 0;  //附加参数，通常情况下为0
-    wndclass.hInstance = hInstance;  //窗口句柄，这里将WinMain中的hInstance句柄赋值就可
-    wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION); /*窗口图标，LoadIcon()是加载图标，这里是加载一个系统资源图标，LoadIcon()的原型是HICON LoadIcon(HINSTANCE, LPCSTR);*/
-    wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);  /*加载鼠标，同上相似*/
-    wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);  /*窗口画刷，这里是使用的白色画刷，所以创建出来的窗口的背景颜色则是白色的*/
-    wndclass.lpszMenuName = NULL;  //窗口菜单名称，这里没有菜单，设为NULL
-    wndclass.lpszClassName = TEXT("KritiaEngineWindow");  //窗口类名称，这个窗口类名称可作为这个窗口的唯一标识
-    if (!RegisterClass(&wndclass)) {
-        return 0;
+    if (Settings::UseOpenGL) {
+        return main();
+    } else {
+        MSG msg;
+        WNDCLASS wndclass;
+        //对窗口类的各属性进行初始化
+        wndclass.style = CS_HREDRAW | CS_VREDRAW; /*窗口类的风格，CS前缀,C表示Class,S表示
+                        Style，这里使用了水平和垂直风格*/
+        wndclass.lpfnWndProc = WndProc;  /*这里将回到函数的名字赋值用以windows后面回调*/
+        wndclass.cbClsExtra = 0;  //附加参数，通常情况下为0
+        wndclass.cbWndExtra = 0;  //附加参数，通常情况下为0
+        wndclass.hInstance = hInstance;  //窗口句柄，这里将WinMain中的hInstance句柄赋值就可
+        wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION); /*窗口图标，LoadIcon()是加载图标，这里是加载一个系统资源图标，LoadIcon()的原型是HICON LoadIcon(HINSTANCE, LPCSTR);*/
+        wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);  /*加载鼠标，同上相似*/
+        wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);  /*窗口画刷，这里是使用的白色画刷，所以创建出来的窗口的背景颜色则是白色的*/
+        wndclass.lpszMenuName = NULL;  //窗口菜单名称，这里没有菜单，设为NULL
+        wndclass.lpszClassName = TEXT("KritiaEngineWindow");  //窗口类名称，这个窗口类名称可作为这个窗口的唯一标识
+        if (!RegisterClass(&wndclass)) {
+            return 0;
+        }
+
+        hwnd = CreateWindow(TEXT("KritiaEngineWindow"), TEXT("KritiaEngine"), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, Settings::ScreenWidth, Settings::ScreenHeight, NULL, NULL, hInstance, NULL);
+        ShowWindow(hwnd, iCmdShow);
+        UpdateWindow(hwnd);
+
+        InitializeCoreModules();
+        //InitializeGUI();
+        startTime = SYSTEMTIME();
+        GetLocalTime(&startTime);
+        while (GetMessage(&msg, hwnd, NULL, 0)) {
+            SYSTEMTIME time = SYSTEMTIME();
+            GetLocalTime(&time);
+            Time::UpdateDeltaTime(time.wMilliseconds - startTime.wMilliseconds);
+            //执行一些特殊的输入控制
+            //ProcessInput();
+            //翻译消息
+            TranslateMessage(&msg);
+            //派发消息
+            DispatchMessage(&msg);
+            //执行所有Update函数，处理逻辑
+            Update();
+            //渲染
+            Render();
+            ResourceManager::CollectGarbage();
+        }
+        return msg.wParam;
     } 
-
-    hwnd = CreateWindow(TEXT("KritiaEngineWindow"), TEXT("KritiaEngine"), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, Settings::ScreenWidth, Settings::ScreenHeight, NULL, NULL, hInstance, NULL);
-    ShowWindow(hwnd, iCmdShow);
-    UpdateWindow(hwnd);
-
-    InitializeCoreModules();
-    //InitializeGUI();
-    startTime = SYSTEMTIME();
-    GetLocalTime(&startTime);
-    while (GetMessage(&msg, hwnd, NULL, 0)) {
-        SYSTEMTIME time = SYSTEMTIME();
-        GetLocalTime(&time);
-        Time::UpdateDeltaTime(time.wMilliseconds - startTime.wMilliseconds);
-        //执行一些特殊的输入控制
-        //ProcessInput();
-        //翻译消息
-        TranslateMessage(&msg);
-        //派发消息
-        DispatchMessage(&msg);
-        //执行所有Update函数，处理逻辑
-        Update();
-        //渲染
-        Render();
-        ResourceManager::CollectGarbage();
-    }
-    return msg.wParam;
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {

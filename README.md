@@ -15,7 +15,7 @@
 - 未包含的第三方库推荐直接使用[vcpkg](git@github.com:microsoft/vcpkg.git)安装。
   
 ## Roadmap
-#### 准备完成的：
+### 准备完成的：
 - [x] 基本框架
 - Time, Input, Scene 等非常基础的功能
 - GameObject 以及 Component
@@ -29,16 +29,25 @@
 - 着色器 （透明、Bling-Phong)
 - GPU Instancing (但是没有性能提升，原因未知，可能是测试用的模型太简单）
 
+- [x] CPU渲染器
+- 仅支持了Windows平台，需要将Settings.json中的 *UseOpenGL* 改为 __false__，并且将 *UseSoftwareRendering* 改为 __true__。
+- 光照和阴影 （点光源、定向光、聚光）
+- 软光栅，固定渲染管线（Bling-Phong)
+- 2D贴图（Diffuse, Specular, Parallax, Normal)，立方体贴图，天空盒
+![CPU渲染器效果](/Image/ScreenShot_SoftwareRendering.png)
+
 - [x] GUI
 - 基于ImGui-Docking
+- 不支持CPU渲染器
 - Hierachy, Inspector, AssetExplorer, Console四个窗口以及MainMenuBar和Settings窗口
-- __移动、旋转以及缩放的Widget目前无法使用__，并且ImGuizmo的实现和我现在的实现不太方便耦合，考虑之后自己写一个代替。
+- __移动、旋转以及缩放的Widget目前有bug无法使用__。
 
 - [x] 资源管理
 - 支持材质（Material），模型网格（fbx，obj），贴图（png，jpg），预制体（Prefab）的导入
 - 用资源池进行资源管理以及垃圾回收: 基于最简单的Reference Counting，支持Material, Mesh以及Texture。预制体不会被回收，并且普通的GameObject会直接在Destory方法中析构。
 
-- [ ] CPU渲染器
+
+
 - [ ] 物理引擎: 考虑用第三方
 #### 大概率没时间去做的：
 - [ ] Play In Editor

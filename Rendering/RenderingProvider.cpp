@@ -75,7 +75,7 @@ void KritiaEngine::Rendering::RenderingProvider::CreateSkybox() {
 	if (backend == RenderingBackend::OpenGL) {
 		OpenGLRendering::CreateSkybox(skyboxTextures, sizeof(skyboxVertices), &skyboxVertices[0]);
 	} else if (backend == RenderingBackend::Software) {
-		SoftwareRendering::CreateSkybox(skyboxTextures, sizeof(skyboxVertices), &skyboxVertices[0]);
+		SoftwareRendering::CreateSkybox(skyboxTextures, sizeof(skyboxVertices) / sizeof(float), &skyboxVertices[0]);
 	}
 }
 

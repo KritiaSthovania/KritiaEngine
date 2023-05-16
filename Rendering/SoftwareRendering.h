@@ -115,7 +115,6 @@ namespace KritiaEngine::Rendering {
 		static void FragmentShading(const std::shared_ptr<Material>& material, const std::vector<ShadingInOutFields>& inFields, const Vector3& viewPos, const Vector3& pos);
 		static Color SampleTexture(const std::shared_ptr<Texture>& texture, Vector2 texCoord);
 		static Color SampleCubeMap(const std::vector<std::shared_ptr<Texture>>& textures, const Vector3& direction);
-		static Color SampleCubeMap(unsigned int id, const Vector3& direction);
 		static Vector2 ComputeParallaxMapping(const std::shared_ptr<Material>& material, const Vector2& texCoord, const Vector3& viewDir);
 		static float ComputeMainShadow(const std::shared_ptr<Material>& material, const Vector4& fragPosLightSpace);
 		static Color ComputePointLight(const std::shared_ptr<Material>& material, Light* pointLight, const Vector3& normal, const Vector3& fragPos, const Vector3& viewDir, const Vector2& texCoord, const Vector3& albedo, const ShadingInOutFields& inField, const Vector3& viewPos);
@@ -140,6 +139,7 @@ namespace KritiaEngine::Rendering {
 		static unsigned int skyboxTextureID;
 		static float* skyboxVertices;
 		static int skyboxVerticesSize;
+		static const std::vector<std::shared_ptr<Texture>>* skyboxTextures;
 	};
 }
 
