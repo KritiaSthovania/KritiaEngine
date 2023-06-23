@@ -39,7 +39,7 @@ KritiaEngine::Material::Material(const std::shared_ptr<Shader>& shader) {
 
 void Material::Initialize() {
 	if (!initialized) {
-		if (Settings::UseOpenGL) {
+		if (Settings::renderingBackend == Rendering::RenderingProvider::RenderingBackend::OpenGL) {
 			shader->Use();
 			shader->UniformBlockBinding(shader->GetUniformBlockIndex("MatricesVP"), static_cast<unsigned int>(RenderingProvider::UniformBindingPoint::MatricesVP));
 		}
@@ -63,30 +63,30 @@ void Material::Initialize() {
 		}
 		if (normalMap != nullptr) {
 			RenderingProvider::Load2DTexture(normalMap, false);
-			if (Settings::UseOpenGL) {
+			if (Settings::renderingBackend == Rendering::RenderingProvider::RenderingBackend::OpenGL) {
 				shader->SetBool("hasNormalMap", true);
 			}
 		} else {
-			if (Settings::UseOpenGL) {
+			if (Settings::renderingBackend == Rendering::RenderingProvider::RenderingBackend::OpenGL) {
 				shader->SetBool("hasNormalMap", false);
 			}
 
 		}
 		if (parallaxMap != nullptr) {
 			RenderingProvider::Load2DTexture(parallaxMap, false);
-			if (Settings::UseOpenGL) {
+			if (Settings::renderingBackend == Rendering::RenderingProvider::RenderingBackend::OpenGL) {
 				shader->SetBool("hasParallaxMap", true);
 				shader->SetFloat("heightScale", 0.1f);
 				shader->SetInt("depthLayers", 10);
 			}
 
 		} else {
-			if (Settings::UseOpenGL) {
+			if (Settings::renderingBackend == Rendering::RenderingProvider::RenderingBackend::OpenGL) {
 				shader->SetBool("hasParallaxMap", false);
 			}
 
 		}
-		if (Settings::UseOpenGL) {
+		if (Settings::renderingBackend == Rendering::RenderingProvider::RenderingBackend::OpenGL) {
 			shader->SetInt("mainTexture", diffuseSamplerIndex);
 			shader->SetInt("specularMap", specularSamplerIndex);
 			shader->SetInt("normalMap", normalSamplerIndex);
@@ -112,7 +112,7 @@ void Material::Initialize() {
 }
 
 void KritiaEngine::Material::SetPropertiesOnRender() {
-	if (Settings::UseOpenGL) {
+	if (Settings::renderingBackend == Rendering::RenderingProvider::RenderingBackend::OpenGL) {
 		shader->Use();
 		shader->SetFloat("shininess", shininess);
 		shader->SetVec3("albedo", albedo.GetRGB());
@@ -267,7 +267,7 @@ void KritiaEngine::Material::OnInspector() {
 		if (path != "") {
 			normalMap = ResourceManager::GetTexture(path);
 			RenderingProvider::Load2DTexture(normalMap, false);
-			if (Settings::UseOpenGL) {
+			if (Settings::renderingBackend == Rendering::RenderingProvider::RenderingBackend::OpenGL) {
 				shader->Use();
 				shader->SetBool("hasNormalMap", true);
 			}
@@ -284,7 +284,7 @@ void KritiaEngine::Material::OnInspector() {
 		if (path != "") {
 			parallaxMap = ResourceManager::GetTexture(path);
 			RenderingProvider::Load2DTexture(parallaxMap, false);
-			if (Settings::UseOpenGL) {
+			if (Settings::renderingBackend == Rendering::RenderingProvider::RenderingBackend::OpenGL) {
 				shader->Use();
 				shader->SetBool("hasParallaxMap", true);
 				shader->SetFloat("heightScale", 0.1f);

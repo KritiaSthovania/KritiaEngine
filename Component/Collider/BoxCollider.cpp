@@ -9,6 +9,11 @@ KritiaEngine::BoxCollider::BoxCollider(GameObject* gameObject) {
     this->gameObject = gameObject;
     center = Vector3(0, 0, 0);
     size = Vector3(1, 1, 1);
+    Bound bound = Bound();
+    if (gameObject->GetComponent<MeshFilter>() != nullptr && gameObject->GetComponent<MeshFilter>()->mesh != nullptr) {
+        bound = gameObject->GetComponent<MeshFilter>()->mesh->bound;
+    }
+    collisionShape = new btBoxShape(btVector3(bound.GetExtent().x * Transform()->scale.x, bound.GetExtent().y * Transform()->scale.y, bound.GetExtent().z * Transform()->scale.z));
     UpdateBound();
     UpdateBoundingVolume();
     Manager::PhysicsManager::AddCollider(this);

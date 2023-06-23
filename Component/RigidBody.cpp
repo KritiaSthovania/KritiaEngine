@@ -5,8 +5,15 @@ using namespace KritiaEngine;
 using namespace KritiaEngine::Manager;
 RigidBody::RigidBody(GameObject* gameObject) {
 	this->gameObject = gameObject;
-	PhysicsManager::AddRigidBody(this);
 	ComputeInertiaTensor();
+	btTransform transform;
+	transform.setOrigin(btVector3(Transform()->position.x, Transform()->position.y, Transform()->position.z));
+	transform.setRotation(btQuaternion(Transform()->rotation.x, Transform()->rotation.y, Transform()->rotation.z, Transform()->rotation.w));
+	ms = new btDefaultMotionState(transform);
+	if (dynamic_cast<BoxCollider*>(gameObject->GetComponent<BoxCollider>().get()) != nullptr) {
+		collider = gameObject->GetComponent<BoxCollider>();
+	}
+	PhysicsManager::AddRigidBody(this);
 }
 
 void KritiaEngine::RigidBody::AddForce(const Vector3& force) {
@@ -25,23 +32,24 @@ void KritiaEngine::RigidBody::AddForceAndTorque(const Vector3& position, const V
 	AddTorque(position, force);
 }
 
+void KritiaEngine::RigidBody::SetKinematic(bool kinematic) {
+	if (kinematic) {
+		isKinematic = true;
+		mass = 1.0;
+	} else {
+		mass = 0.0;
+		isKinematic = false;
+	}
+}
+
 void KritiaEngine::RigidBody::ComputeInertiaTensor() {
 	if (mass > 0) {
 		if (gameObject->GetComponent<BoxCollider>() != nullptr) {
 			collider = gameObject->GetComponent<BoxCollider>();
 			boxColliderSize = dynamic_cast<BoxCollider*>(collider.get())->size;
-			if (gameObject->GetComponent<MeshFilter>() != nullptr) {
-				meshFilter = gameObject->GetComponent<MeshFilter>();
-				if (gameObject->GetComponent<MeshFilter>()->mesh != nullptr) {
-					mesh = gameObject->GetComponent<MeshFilter>()->mesh;
-					float compX = dynamic_cast<BoxCollider*>(collider.get())->size.x * mesh->bound.size.x * Transform()->scale.x;
-					float compY = dynamic_cast<BoxCollider*>(collider.get())->size.y * mesh->bound.size.y * Transform()->scale.y;
-					float compZ = dynamic_cast<BoxCollider*>(collider.get())->size.z * mesh->bound.size.z * Transform()->scale.z;
-					inertiaTensor = mass * Vector3(compY * compY + compZ * compZ, compX * compX + compZ * compZ, compX * compX + compY * compY) / 12.f;
-				}
-			} else {
-				inertiaTensor = Vector3::Zero();
-			}
+			btVector3 localInertia(0, 0, 0);
+			collider->collisionShape->calculateLocalInertia(mass, localInertia);
+			inertiaTensor = Vector3(localInertia.x(), localInertia.y(), localInertia.z());
 		} else {
 			inertiaTensor = Vector3::Zero();
 		}
@@ -52,27 +60,26 @@ void KritiaEngine::RigidBody::ComputeInertiaTensor() {
 }
 
 void KritiaEngine::RigidBody::PhysicsUpdate() {
-	if (meshFilter != gameObject->GetComponent<MeshFilter>() || (gameObject->GetComponent<MeshFilter>()!= nullptr && mesh != gameObject->GetComponent<MeshFilter>()->mesh) || cachedMass != mass || ColliderChanged()) {
-		ComputeInertiaTensor();
-		cachedMass = mass;
+	if (!initialized) {
+		initialized = true;
+		btRigidBody::btRigidBodyConstructionInfo info(btScalar(mass), ms, collider->collisionShape, btVector3(inertiaTensor.x, inertiaTensor.y, inertiaTensor.z));
+		btRB = new btRigidBody(info);
+		PhysicsManager::AddRigidBodyBullet(this);
 	}
-	if (!isKinematic) {
-		// semi-implicit euler
-		accelaration = 1.f / mass * force;
-		if (useGravity) {
-			accelaration += PhysicsManager::gravityAccelaration;
+	if (collider->isTrigger) {
+		//
+	} else {
+		if (!isKinematic) {
+			if (!useGravity) {
+				btRB->setGravity(btVector3(0, 0, 0));
+			} else {
+				btRB->setGravity(btVector3(PhysicsManager::gravityAccelaration.x, PhysicsManager::gravityAccelaration.y, PhysicsManager::gravityAccelaration.z));
+			}
+			Transform()->position = Vector3(btRB->getWorldTransform().getOrigin().x(), btRB->getWorldTransform().getOrigin().y(), btRB->getWorldTransform().getOrigin().z());
+			Transform()->rotation = Quaternion(btRB->getWorldTransform().getRotation().x(), btRB->getWorldTransform().getRotation().y(), btRB->getWorldTransform().getRotation().z(), btRB->getWorldTransform().getRotation().w());
 		}
-		lastVelocity = velocity;
-		velocity += accelaration * PhysicsManager::stepSize;
-		Transform()->position += velocity * PhysicsManager::stepSize;
-		angularAccelaration = GetInertiaTensorInverseWorld() * torque;
-		lastAngularVelocity = angularVelocity;
-		angularVelocity += angularAccelaration * PhysicsManager::stepSize;
-		Quaternion omegaTilde = Quaternion(angularVelocity.x, angularVelocity.y, angularVelocity.z, 0);
-		Transform()->rotation += 0.5 * omegaTilde * Transform()->rotation * PhysicsManager::stepSize;
-		Transform()->rotation = Quaternion::Normalize(Transform()->rotation);
-		ClearForceAndTorque();
 	}
+
 }
 
 void KritiaEngine::RigidBody::ClearForceAndTorque() {
@@ -124,6 +131,8 @@ std::string KritiaEngine::RigidBody::GetInspectorLabel() {
 }
 
 void KritiaEngine::RigidBody::OnObjectDestroy() {
+	delete btRB;
+	delete ms;
 	Component::OnObjectDestroy();
 	PhysicsManager::RemoveRigidBody(this);
 }

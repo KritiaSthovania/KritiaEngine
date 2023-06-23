@@ -109,7 +109,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <OpenMPSupport>true</OpenMPSupport>
@@ -140,6 +140,7 @@
     <ClCompile Include="Component\Collider\BoundingVolume.cpp" />
     <ClCompile Include="Component\Collider\BoxCollider.cpp" />
     <ClCompile Include="Component\Collider\Collider.cpp" />
+    <ClCompile Include="Component\DeformableBody.cpp" />
     <ClCompile Include="Component\ComponentFactory.cpp" />
     <ClCompile Include="Editor\EditorWindows\ConsoleWindow.cpp" />
     <ClCompile Include="CoreModule\Manager\BehaviourManager.cpp" />
@@ -194,11 +195,13 @@
     <ClCompile Include="CoreModule\Manager\ResourceManager.cpp" />
     <ClCompile Include="Component\RigidBody.cpp" />
     <ClCompile Include="Rendering\SoftwareRendering.cpp" />
+    <ClCompile Include="Rendering\VulkanRendering.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Collider\BoundingVolume.h" />
     <ClInclude Include="Component\Collider\BoxCollider.h" />
     <ClInclude Include="Component\Collider\Collider.h" />
+    <ClInclude Include="Component\DeformableBody.h" />
     <ClInclude Include="Component\ComponentFactory.h" />
     <ClInclude Include="Editor\EditorWindows\ConsoleWindow.h" />
     <ClInclude Include="CoreModule\Interface\IInspectable.h" />
@@ -262,6 +265,7 @@
     <ClInclude Include="CoreModule\Manager\ResourceManager.h" />
     <ClInclude Include="Component\RigidBody.h" />
     <ClInclude Include="Rendering\SoftwareRendering.h" />
+    <ClInclude Include="Rendering\VulkanRendering.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

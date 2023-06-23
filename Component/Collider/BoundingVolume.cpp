@@ -22,20 +22,21 @@ void KritiaEngine::BoundingVolumeOBB::CheckCollision(Collision* collision, Bound
 			collision->gameObject = otherTransform->gameObject;
 
 			// Approximation of the contact point, may need refinement
-			Vector3 verticesSum = Vector3::Zero();
-			Vector3 otherVerticesSum = Vector3::Zero();
-			for (int i = 0; i < vertices.size(); i++) {
-				verticesSum += vertices[i];
-				otherVerticesSum += other->vertices[i];
-			}
-			Vector3 position = 1.f / 8 * verticesSum;
-			Vector3 otherPosition = 1.f / 8 * otherVerticesSum;
-			Vector3 normal = Vector3::Zero();
-			if (collision->selfCollider->gameObject->GetComponent<RigidBody>()!= nullptr) {
-				normal = Vector3::Normalize(position - otherPosition);
-			}
-			ContactPoint p(normal, position, collision->selfCollider, collision->otherCollider);
-			collision->contactPoints.push_back(p);
+			//Vector3 verticesSum = Vector3::Zero();
+			//Vector3 otherVerticesSum = Vector3::Zero();
+			//for (int i = 0; i < vertices.size(); i++) {
+			//	verticesSum += vertices[i];
+			//	otherVerticesSum += other->vertices[i];
+			//}
+			//Vector3 position = 1.f / 8 * verticesSum;
+			//Vector3 otherPosition = 1.f / 8 * otherVerticesSum;
+			//Vector3 normal = Vector3::Zero();
+			//if (collision->selfCollider->gameObject->GetComponent<RigidBody>()!= nullptr) {
+			//	normal = Vector3::Normalize(position - otherPosition);
+			//}
+			//ContactPoint p(normal, position, collision->selfCollider, collision->otherCollider);
+			//collision->contactPoints.push_back(p);
+			GJK(collision, other, selfTransform, otherTransform);
 		}
 		else {
 			child1->CheckCollision(collision, other, selfTransform, otherTransform);
@@ -43,6 +44,11 @@ void KritiaEngine::BoundingVolumeOBB::CheckCollision(Collision* collision, Bound
 		}
 	} 
 }
+
+void KritiaEngine::BoundingVolumeOBB::GJK(Collision* collision, BoundingVolumeOBB* other, const std::shared_ptr<Transform>& selfTransform, const std::shared_ptr<Transform>& otherTransform) {
+
+}
+
 
 float KritiaEngine::BoundingVolumeOBB::ProjectPoint(const Vector3& point, const Vector3& axis) {
 	Vector3 projectedPoint = Vector3::Project(point, axis);
@@ -94,6 +100,7 @@ bool KritiaEngine::BoundingVolumeOBB::Collided(BoundingVolumeOBB* other, const s
 
 	return collided;
 }
+
 
 void KritiaEngine::BoundingVolumeOBB::CreateChildren(int maximumDepth, int currentDepth) {
 	// Vertices Order OBB: ForwardBottomLeft, ForwardBottomRight, ForwardTopLeft, ForwardTopRight, BackBottomLeft, BackBottomRight, BackTopLeft, BackTopRight. (Aligned with BoxCollider::PointPos)

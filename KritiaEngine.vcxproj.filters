@@ -266,7 +266,15 @@
       <Filter>Rendering\Source</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Rendering\SoftwareRendering.cpp" />
+    <ClCompile Include="Rendering\VulkanRendering.cpp">
+      <Filter>Rendering\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\DeformableBody.cpp">
+      <Filter>Component\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\SoftwareRendering.cpp">
+      <Filter>Rendering\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\Behaviour.h">
@@ -465,11 +473,19 @@
     <ClInclude Include="Rendering\SoftwareRendering.h">
       <Filter>Rendering\Header</Filter>
     </ClInclude>
+    <ClInclude Include="Component\DeformableBody.h">
+      <Filter>Component\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\VulkanRendering.h">
+      <Filter>Rendering\Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="includes\nfd\nfd.lib" />
+    <Library Include="includes\nfd\nfd.lib">
+      <Filter>includes\nfd</Filter>
+    </Library>
   </ItemGroup>
 </Project>

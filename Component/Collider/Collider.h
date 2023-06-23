@@ -3,10 +3,12 @@
 #include "../Behaviour.h"
 #include "../../CoreModule/Utilities.h"
 #include "../../CoreModule/Manager/PhysicsManager.h"
-
+#include <bullet/btBulletDynamicsCommon.h>
 namespace KritiaEngine {
+	class RigidBody;
 	class Collider : public Behaviour {
 		friend class KritiaEngine::Manager::PhysicsManager;
+		friend class KritiaEngine::RigidBody;
 	public:
 		const Bound& GetBound() const;
 		bool isTrigger = false;
@@ -18,11 +20,15 @@ namespace KritiaEngine {
 		virtual void OnInspector() override;
 		virtual std::string SerializeToJson() override;
 		virtual void DeserializeFromJson(const json& json) override;
+		// ---- bullet ----
+		btCollisionShape* collisionShape;
+
 	private:
 		Collision CheckCollision(Collider* other);
 		virtual void OnObjectDestroy() override;
 		virtual void UpdateBound() = 0;
 		virtual void UpdateBoundingVolume() = 0;
+
 
 	};
 }

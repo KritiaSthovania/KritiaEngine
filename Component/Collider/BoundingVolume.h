@@ -13,6 +13,7 @@ namespace KritiaEngine {
 		virtual void CreateChildren(int maximumDepth, int currentDepth) = 0;
 		virtual void UpdateChildren(int maximumDepth, int currentDepth) = 0;
 		virtual void CheckCollision(Collision* collision, BoundingVolume* other, const std::shared_ptr<Transform>& selfTransform, const std::shared_ptr<Transform>& otherTransform) = 0;
+
 	};
 
 	class BoundingVolumeOBB : public BoundingVolume {
@@ -27,6 +28,7 @@ namespace KritiaEngine {
 		void GetInterval(const std::vector<Vector3>& vertices, const Vector3& axis, float* min, float* max);
 		bool IntervalOverlapped(BoundingVolumeOBB* other, const Vector3& axis);
 		bool Collided(BoundingVolumeOBB* other, const std::shared_ptr<Transform>& selfTransform, const std::shared_ptr<Transform>& otherTransform);
+		void GJK(Collision* collision, BoundingVolumeOBB* other, const std::shared_ptr<Transform>& selfTransform, const std::shared_ptr<Transform>& otherTransform);
 	};
 }
 

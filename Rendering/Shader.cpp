@@ -1,5 +1,6 @@
 #include "Shader.h"
 #include "../CoreModule/Settings.h"
+#include "RenderingProvider.h"
 #include <fstream>
 KritiaEngine::Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
@@ -17,7 +18,7 @@ KritiaEngine::Shader::Shader(const char* vertexPath, const char* fragmentPath, c
 
 void KritiaEngine::Shader::LoadShaderFile(const char* vertexPath, const char* fragmentPath)
 {
-    if (Settings::UseOpenGL) {
+    if (Settings::renderingBackend == Rendering::RenderingProvider::RenderingBackend::OpenGL) {
 
         // 1. retrieve the vertex/fragment source code from filePath
         std::string vertexCode;
@@ -73,7 +74,7 @@ void KritiaEngine::Shader::LoadShaderFile(const char* vertexPath, const char* fr
 }
 
 void KritiaEngine::Shader::LoadShaderFile(const char* vertexPath, const char* fragmentPath, const char* geometryPath) {
-    if (Settings::UseOpenGL) {
+    if (Settings::renderingBackend == Rendering::RenderingProvider::RenderingBackend::OpenGL) {
         // 1. retrieve the vertex/fragment source code from filePath
         std::string vertexCode;
         std::string fragmentCode;

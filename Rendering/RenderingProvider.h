@@ -18,6 +18,7 @@ namespace KritiaEngine::Rendering{
 		};
 		enum class RenderingBackend {
 			OpenGL,
+			Vulkan,
 			Software
 		};
 

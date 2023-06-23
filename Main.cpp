@@ -21,7 +21,7 @@ constexpr const char* title = "Kritia Engine";
 int main() 
 {
     Settings::Deserialize();
-    if (!Settings::UseOpenGL && Settings::UseSoftwareRendering) {
+    if (Settings::renderingBackend == RenderingProvider::RenderingBackend::Software) {
         std::cout << "UseOpenGL is set to false, please set it to true or change the property of visual studio project to call WinMain() to use the Software Rendering backend." << std::endl;
     } else {
         if (!InitializeWindow()) {
@@ -40,6 +40,7 @@ int main()
             Render();
             ResourceManager::CollectGarbage();
         }
+        PhysicsManager::Clear();
         Settings::Serialize();
         glfwDestroyWindow(window);
         glfwTerminate();
@@ -49,7 +50,7 @@ int main()
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow) {
     Settings::Deserialize();
-    if (Settings::UseOpenGL) {
+    if (Settings::renderingBackend == RenderingProvider::RenderingBackend::OpenGL) {
         return main();
     } else {
         MSG msg;
@@ -94,6 +95,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
             Render();
             ResourceManager::CollectGarbage();
         }
+        PhysicsManager::Clear();
         return msg.wParam;
     } 
 }
@@ -124,7 +126,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 void Render() {
     RenderingProvider::ClearFramebuffer();
     RendererManager::Render();
-    if (Settings::UseOpenGL) {
+    if (Settings::renderingBackend == RenderingProvider::RenderingBackend::OpenGL) {
         ImguiManager::RenderGUI();
     }
     RenderingProvider::SwapFramebuffer(window);
@@ -148,7 +150,7 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
 bool InitializeWindow()
 {
     //初始化窗口
-    if (Settings::UseOpenGL) {
+    if (Settings::renderingBackend == RenderingProvider::RenderingBackend::OpenGL) {
         glfwInit();
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -174,9 +176,7 @@ bool InitializeWindow()
 
         glfwSwapInterval(1);
         return true;
-    } else if (Settings::UseSoftwareRendering) {
-
-    }
+    } 
     return false;
 }
 
@@ -185,7 +185,7 @@ void InitializeGUI() {
 }
 
 void ProcessInput() {
-    if (Settings::UseOpenGL) {
+    if (Settings::renderingBackend == RenderingProvider::RenderingBackend::OpenGL) {
         if (Input::GetKeyDown(GLFW_KEY_ESCAPE)) {
             glfwSetWindowShouldClose(window, true);
         }
@@ -193,17 +193,15 @@ void ProcessInput() {
         Input::ResetMouseOffset();
         //检查事件，交换缓冲
         glfwPollEvents();
-    } else if(Settings::UseSoftwareRendering){
-
-    }
+    } 
 
 }
 
 // 初始化所有核心模块
 void InitializeCoreModules() {
+    PhysicsManager::Initialize();
     Input::Initialize(window);
     RenderingProvider::Initialize(hwnd);
     SceneManager::Initialize(editor);
-    PhysicsManager::Initialize();
 }
 

@@ -532,16 +532,16 @@ float* KritiaEngine::Matrix4x4::GetPtr() {
 	return entries[0];
 }
 
-Matrix4x4 KritiaEngine::Matrix4x4::Perspective(float fovy, float aspect, float near, float far)
+Matrix4x4 KritiaEngine::Matrix4x4::Perspective(float fovy, float aspect, float n, float f)
 {
 	if (Settings::UseGLM) {
-		return Matrix4x4(glm::perspective(glm::radians(fovy), aspect, near, far));
+		return Matrix4x4(glm::perspective(glm::radians(fovy), aspect, n, f));
 	}
 }
 
-Matrix4x4 KritiaEngine::Matrix4x4::Ortho(float left, float right, float bottom, float top, float near, float far) {
+Matrix4x4 KritiaEngine::Matrix4x4::Ortho(float left, float right, float bottom, float top, float n, float f) {
 	if (Settings::UseGLM) {
-		return glm::ortho(left, right, bottom, top, near, far);
+		return glm::ortho(left, right, bottom, top, n, f);
 	}
 }
 

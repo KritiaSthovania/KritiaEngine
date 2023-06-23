@@ -22,11 +22,11 @@ Matrix4x4 RenderingProvider::projection;
 RenderingProvider::RenderingBackend RenderingProvider::backend = RenderingProvider::RenderingBackend::Software;
 
 void KritiaEngine::Rendering::RenderingProvider::Initialize(HWND hwnd) {
-	if (Settings::UseOpenGL) {
+	if (Settings::renderingBackend == RenderingBackend::OpenGL) {
 		backend = RenderingBackend::OpenGL;
 		OpenGLRendering::Initialize();
 		OpenGLRendering::CreateUniformBuffer(static_cast<unsigned int>(UniformBindingPoint::MatricesVP));
-	} else if (Settings::UseSoftwareRendering) {
+	} else if (Settings::renderingBackend == RenderingBackend::Software) {
 		backend = RenderingBackend::Software;
 		SoftwareRendering::Initialize(hwnd);
 	}

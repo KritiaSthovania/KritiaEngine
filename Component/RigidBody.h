@@ -2,6 +2,7 @@
 #include "Component.h"
 #include "../CoreModule/Utilities.h"
 #include "MeshFilter.h"
+#include <bullet/btBulletDynamicsCommon.h>
 
 namespace KritiaEngine::Manager {
 	class PhysicsManager;
@@ -12,14 +13,14 @@ namespace KritiaEngine {
 		friend class Manager::PhysicsManager;
 	public:
 		RigidBody(GameObject* gameObject);
-
-		float mass = 1;
+		float mass = 0;
 		Vector3 inertiaTensor = Vector3::Zero();
 		bool isKinematic = false;
 		bool useGravity = true;
 		void AddForce(const Vector3& force);
 		void AddTorque(const Vector3& position, const Vector3& force);
 		void AddForceAndTorque(const Vector3& position, const Vector3& force);
+		void SetKinematic(bool kinematic);
 		const Vector3& GetVelocity() const {
 			return velocity;
 		}
@@ -32,7 +33,8 @@ namespace KritiaEngine {
 		void ClearForceAndTorque();
 		bool ColliderChanged();
 		Matrix3x3 GetInertiaTensorInverseWorld();
-		float cachedMass = 0;
+		//float cachedMass = 0;
+		bool initialized = false;
 		Vector3 force = Vector3::Zero();
 		Vector3 torque = Vector3::Zero();
 		Vector3 velocity = Vector3::Zero();
@@ -41,8 +43,6 @@ namespace KritiaEngine {
 		Vector3 lastAngularVelocity = Vector3::Zero();
 		Vector3 accelaration = Vector3::Zero();
 		Vector3 angularAccelaration = Vector3::Zero();
-		std::shared_ptr<MeshFilter> meshFilter = nullptr;
-		std::shared_ptr<Mesh> mesh = nullptr;
 		std::shared_ptr<Collider> collider = nullptr;
 		// to check if collider has changed
 		Vector3 boxColliderSize = Vector3(1, 1, 1);
@@ -53,6 +53,10 @@ namespace KritiaEngine {
 		virtual void DeserializeFromJson(const json& json) override;
 		virtual std::string GetInspectorLabel() override;
 		virtual void OnObjectDestroy() override;
+
+		// -------bullet-------
+		btRigidBody* btRB;
+		btDefaultMotionState* ms;
 	};
 }
 

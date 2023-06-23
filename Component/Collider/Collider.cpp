@@ -16,6 +16,7 @@ Collision KritiaEngine::Collider::CheckCollision(Collider* other) {
 
 void KritiaEngine::Collider::OnObjectDestroy() {
 	Component::OnObjectDestroy();
+	delete collisionShape;
 	PhysicsManager::RemoveCollider(this);
 }
 

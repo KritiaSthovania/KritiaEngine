@@ -1,5 +1,6 @@
 #pragma once
 #include "Interface/ISerializable.h"
+#include "../Rendering/RenderingProvider.h"
 
 namespace KritiaEngine{
 	class Settings : public IJsonSerializable, public IJsonDeserializable {
@@ -8,8 +9,7 @@ namespace KritiaEngine{
 		static int ScreenHeight;
 		static float NearPlaneDistance;
 		static float FarPlaneDistance;
-		static bool UseOpenGL;
-		static bool UseSoftwareRendering;
+		static KritiaEngine::Rendering::RenderingProvider::RenderingBackend renderingBackend;
 		static bool UseGLM;
 		static int ShadowWidth, ShadowHeight;
 		static std::string LastOpenedScenePath;

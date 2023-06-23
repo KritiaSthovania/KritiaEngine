@@ -129,7 +129,7 @@ void KritiaEngine::Rendering::OpenGLRendering::UpdateGPUInstancingBuffer() {
 unsigned int OpenGLRendering::LoadCubeMap(const std::vector<std::shared_ptr<Texture>>& cubeTextures) {
 	unsigned int id;
 	int width, height, nrChannels;
-	if (Settings::UseOpenGL) {
+	if (Settings::renderingBackend == Rendering::RenderingProvider::RenderingBackend::OpenGL) {
 		glGenTextures(1, &id);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, id);
 		for (unsigned int i = 0; i < cubeTextures.size(); i++) {

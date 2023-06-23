@@ -12,6 +12,7 @@ float PhysicsManager::stepSize = 0.02f;
 float PhysicsManager::timer = 0;
 Vector3 PhysicsManager::gravityAccelaration = Vector3(0, -9.81, 0);
 std::list<Collider*> PhysicsManager::colliders = std::list<Collider*>();
+std::list<DeformableBody*> PhysicsManager::deformableBodies = std::list<DeformableBody*>();
 std::list<RigidBody*> PhysicsManager::rigidBodies = std::list<RigidBody*>();
 std::list<Collision> PhysicsManager::collisions = std::list<Collision>();
 std::list<std::pair<Collider*, Collider*>> PhysicsManager::collisionPair = std::list<std::pair<Collider*, Collider*>>();
@@ -19,22 +20,64 @@ std::vector<AABBPoint> PhysicsManager::pointsX = std::vector<AABBPoint>();
 std::vector<AABBPoint> PhysicsManager::pointsY = std::vector<AABBPoint>();
 std::vector<AABBPoint> PhysicsManager::pointsZ = std::vector<AABBPoint>();
 
+// bullet
+btDiscreteDynamicsWorld* PhysicsManager::dynamicsWorld;
+btDefaultCollisionConfiguration* PhysicsManager::collisionConfiguration;
+btCollisionDispatcher* PhysicsManager::dispatcher;
+btBroadphaseInterface* PhysicsManager::broadPhase;
+btSequentialImpulseConstraintSolver* PhysicsManager::solver;
+btAlignedObjectArray<btCollisionShape*>* PhysicsManager::collisionShapes;
+
+void KritiaEngine::Manager::PhysicsManager::Initialize() {
+	SortAABB();
+	collisionConfiguration = new btDefaultCollisionConfiguration();
+	dispatcher = new btCollisionDispatcher(collisionConfiguration);
+	broadPhase = new btDbvtBroadphase();
+	solver = new btSequentialImpulseConstraintSolver();
+	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadPhase, solver, collisionConfiguration);
+	dynamicsWorld->setGravity(btVector3(gravityAccelaration.x, gravityAccelaration.y, gravityAccelaration.z));
+	collisionShapes = new btAlignedObjectArray<btCollisionShape*>();
+}
+
+void KritiaEngine::Manager::PhysicsManager::Clear() {
+	delete dynamicsWorld;
+	delete solver;
+	delete broadPhase;
+	delete dispatcher;
+	delete collisionConfiguration;
+}
+
 void KritiaEngine::Manager::PhysicsManager::AddRigidBody(RigidBody* rigidBody) {
 	rigidBodies.push_back(rigidBody);
 }
 
+void KritiaEngine::Manager::PhysicsManager::AddRigidBodyBullet(RigidBody* rigidBody) {
+	dynamicsWorld->addRigidBody(rigidBody->btRB);
+}
+
 void KritiaEngine::Manager::PhysicsManager::RemoveRigidBody(RigidBody* rigidBody) {
 	rigidBodies.remove(rigidBody);
+	dynamicsWorld->removeRigidBody(rigidBody->btRB);
+}
+
+void KritiaEngine::Manager::PhysicsManager::AddDeformableBody(DeformableBody* deformableBody) {
+	deformableBodies.push_back(deformableBody);
+}
+
+void KritiaEngine::Manager::PhysicsManager::RemoveDeformableBody(DeformableBody* deformableBody) {
+	deformableBodies.remove(deformableBody);
 }
 
 void KritiaEngine::Manager::PhysicsManager::AddCollider(Collider* collider) {
 	colliders.push_back(collider);
-	pointsX.push_back(AABBPoint(collider, MinMax::Min, collider->GetBound().GetMin().x));
-	pointsX.push_back(AABBPoint(collider, MinMax::Max, collider->GetBound().GetMax().x));
-	pointsY.push_back(AABBPoint(collider, MinMax::Min, collider->GetBound().GetMin().y));
-	pointsY.push_back(AABBPoint(collider, MinMax::Max, collider->GetBound().GetMax().y));
-	pointsZ.push_back(AABBPoint(collider, MinMax::Min, collider->GetBound().GetMin().z));
-	pointsZ.push_back(AABBPoint(collider, MinMax::Max, collider->GetBound().GetMax().z));
+	//pointsX.push_back(AABBPoint(collider, MinMax::Min, collider->GetBound().GetMin().x));
+	//pointsX.push_back(AABBPoint(collider, MinMax::Max, collider->GetBound().GetMax().x));
+	//pointsY.push_back(AABBPoint(collider, MinMax::Min, collider->GetBound().GetMin().y));
+	//pointsY.push_back(AABBPoint(collider, MinMax::Max, collider->GetBound().GetMax().y));
+	//pointsZ.push_back(AABBPoint(collider, MinMax::Min, collider->GetBound().GetMin().z));
+	//pointsZ.push_back(AABBPoint(collider, MinMax::Max, collider->GetBound().GetMax().z));
+
+	collisionShapes->push_back(collider->collisionShape);
 }
 
 void KritiaEngine::Manager::PhysicsManager::RemoveCollider(Collider* collider) {
@@ -44,20 +87,19 @@ void KritiaEngine::Manager::PhysicsManager::RemoveCollider(Collider* collider) {
 
 void KritiaEngine::Manager::PhysicsManager::PhysicsUpdate() {
 	if (timer > stepSize) {
-		CheckCollision();
-		ResolveCollision();
+		//CheckCollision();
+		//ResolveCollision();
+		dynamicsWorld->stepSimulation(stepSize, 10);
 		for (RigidBody* rb : rigidBodies) {
 			rb->PhysicsUpdate();
+		}
+		for (DeformableBody* db : deformableBodies) {
+			db->PhysicsUpdate();
 		}
 	}
 	collisionPair.clear();
 	timer += Time::deltaTime;
 }
-
-void KritiaEngine::Manager::PhysicsManager::Initialize() {
-	SortAABB();
-}
-
 
 void KritiaEngine::Manager::PhysicsManager::CheckCollision() {
 	SortAABB();
