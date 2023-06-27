@@ -93,6 +93,9 @@ void Material::Initialize() {
 			shader->SetInt("parallaxMap", parallaxSamplerIndex);
 			shader->SetInt("shadowMap", shadowSamplerIndex);
 			shader->SetFloat("shininess", shininess);
+			shader->SetFloat("metallic", metallic);
+			shader->SetFloat("roughness", roughness);
+			shader->SetFloat("ao", ao);
 			shader->SetVec3("albedo", albedo.GetRGB());
 			for (int i = 0; i < Lighting::LightingSystem::MaxPointLightsForOneObject; i++) {
 				std::string str = "pointLights[" + std::to_string(i) + "]" + ".shadowMapCube";
@@ -113,13 +116,27 @@ void Material::Initialize() {
 
 void KritiaEngine::Material::SetPropertiesOnRender() {
 	if (Settings::renderingBackend == Rendering::RenderingProvider::RenderingBackend::OpenGL) {
+		if (PBR != cachedPBR) {
+			cachedPBR = PBR;
+			if (PBR) {
+				shader = std::shared_ptr<Shader>(new KritiaEngine::Shader((EditorApplication::currentProjectFolderPath + "/StandardShader/PBRVertexShader.vs").c_str(), (EditorApplication::currentProjectFolderPath + "/StandardShader/PBRFragmentShader.fs").c_str()));
+				initialized = false;
+				Initialize();
+			} else {
+				shader = std::shared_ptr<Shader>(new KritiaEngine::Shader((EditorApplication::currentProjectFolderPath + "/StandardShader/BlinnPhongShader.vs").c_str(), (EditorApplication::currentProjectFolderPath + "/StandardShader/BlinnPhongShader.fs").c_str()));
+				initialized = false;
+				Initialize();
+			}
+		}
 		shader->Use();
 		shader->SetFloat("shininess", shininess);
 		shader->SetVec3("albedo", albedo.GetRGB());
+		shader->SetFloat("metallic", metallic);
+		shader->SetFloat("roughness", roughness);
+		shader->SetFloat("ao", ao);
 		shader->SetFloat("farPlaneDistance", Settings::FarPlaneDistance);
 		shader->SetBool("instancing", GPUInstancingEnabled);
 	}
-
 }
 
 std::string KritiaEngine::Material::SerializeToJson() {
@@ -138,6 +155,10 @@ std::string KritiaEngine::Material::SerializeToJson() {
 	json["Path"] = path;
 	json["Albedo"] = { albedo.r, albedo.g, albedo.b };
 	json["Shininess"] = shininess;
+	json["PBR"] = PBR;
+	json["Metallic"] = metallic;
+	json["Roughness"] = roughness;
+	json["AO"] = ao;
 	json["GPUInstancingEnabled"] = GPUInstancingEnabled;
 	json["MainTexture"] = mainTexture == nullptr ? "Null" : mainTexture->SerializeToJson();
 	json["SpecularMap"] = specularMap == nullptr ? "Null" : specularMap->SerializeToJson();
@@ -159,7 +180,11 @@ std::shared_ptr<Material> KritiaEngine::Material::DeserializeFromJson(const json
 	mat->guid = json["Guid"];
 	mat->path = json["Path"];
 	mat->albedo = Color(json["Albedo"][0], json["Albedo"][1], json["Albedo"][2], 1);
+	mat->PBR = json["PBR"];
 	mat->shininess = json["Shininess"];
+	mat->metallic = json["Metallic"];
+	mat->roughness = json["Roughness"];
+	mat->ao = json["AO"];
 	mat->GPUInstancingEnabled = json["GPUInstancingEnabled"];
 	if (json["MainTexture"] != "Null") {
 		nlohmann::ordered_json mainTexJson = json::parse((std::string)json["MainTexture"]);
@@ -219,6 +244,10 @@ void KritiaEngine::Material::OnInspector() {
 	}
 	ImguiAlias::ColorField3("Albedo", &albedo.r);
 	ImguiAlias::FloatField("Shininess", &shininess);
+	ImguiAlias::BoolField("PBR", &PBR);
+	ImguiAlias::FloatField("Metallic", &metallic);
+	ImguiAlias::FloatField("Roughness", &roughness);
+	ImguiAlias::FloatField("AO", &ao);
 	ImguiAlias::BoolField("GPUInstancingEnabled", &GPUInstancingEnabled);
 	// TODO: Drag And Drop
 	ImGui::Text("Main Texture ");

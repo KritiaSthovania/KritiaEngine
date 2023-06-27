@@ -28,9 +28,11 @@
 - 2D贴图（Diffuse, Specular, Parallax, Normal)，立方体贴图，天空盒
 - 着色器 （透明、Bling-Phong)
 - GPU Instancing (但是没有性能提升，原因未知，可能是测试用的模型太简单）
+- 为点光源实现了基本的PBR
+![PBR](/Image/ScreenShot_PBR.png)
 
 - [x] CPU渲染器
-- 仅支持了Windows平台，需要将Settings.json中的 *UseOpenGL* 改为 __false__，并且将 *UseSoftwareRendering* 改为 __true__。
+- 仅支持了Windows平台，需要将Settings.json中的 *RenderingBackend* 改为 __Software__。
 - 光照和阴影 （点光源、定向光、聚光）
 - 软光栅，固定渲染管线（Bling-Phong)
 - 2D贴图（Diffuse, Specular, Parallax, Normal)，立方体贴图，天空盒
@@ -48,8 +50,10 @@
 
 - [x] 物理引擎
 - 简单集成了[Bullet](https://github.com/bulletphysics/bullet3)（刚体和箱型碰撞体）。
-#### 低优先级：
-- [ ] Play In Editor
+
+- [x] Play In Editor
+- 点击Play可以启动物理引擎和MonoBehaviour，但是暂时没有单独的GameMode。
+### 低优先级：
 - [ ] 脚本
 
 ## 参考资料

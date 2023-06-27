@@ -86,40 +86,6 @@ void Scene::InitializeLighting() {
 }
 
 void Scene::InitializeGameObjects() {
-    // 暂时不读取文件
-    // 生成导入的人物模型：
-    //std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(new Mesh());
-    //AssetDatabase::ImportModel("./Assets/Models/rock/rock.obj", mesh);
-    ////mesh->submeshMaterials[0]->GPUInstancingEnabled = true;
-    //for (int i = 0; i < 5000; i++) {
-    //    std::shared_ptr<GameObject> object = std::shared_ptr<GameObject>(new GameObject());
-    //    std::shared_ptr<MeshFilter> meshFilter = object->AddComponent<MeshFilter>();
-    //    meshFilter->mesh = mesh;
-    //    std::shared_ptr<MeshRenderer> renderer = object->AddComponent<MeshRenderer>();
-    //    object->Transform()->scale = Vector3(1, 1, 1);
-    //    float randomx = rand() / (double)(RAND_MAX) * 10 - 5;
-    //    float randomz = rand() / (double)(RAND_MAX) * 10 - 5;
-    //    object->Transform()->position = Vector3(randomx, -5, randomz);
-    //    rootGameObjects.push_back(object);
-    //}
-
-    //std::shared_ptr<GameObject> object = std::shared_ptr<GameObject>(new GameObject());
-    //std::shared_ptr<MeshFilter> meshFilter = object->AddComponent<MeshFilter>();
-    //std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(new Mesh());
-    //AssetDatabase::ImportModel("./Assets/Models/gameboard.obj", mesh);
-    //meshFilter->mesh = mesh;
-    ////A default material
-    //std::shared_ptr<Material> material = std::shared_ptr<Material>(new Material("New Material", std::shared_ptr<Shader>(new KritiaEngine::Shader("./StandardShader/TransparentShader.vs", "./StandardShader/TransparentShader.fs"))));
-    //material->albedo = Color(1.0f, 1.f, 1.f, 1);
-    //material->shininess = 32;
-    //material->mainTexture = std::shared_ptr<Texture>(new Texture("./Assets/Textures/blending_transparent_window.png"));
-    //material->renderMode = Material::Transparent;
-    //mesh->submeshMaterials[0] = material;
-    //std::shared_ptr<MeshRenderer> renderer = object->AddComponent<MeshRenderer>();
-    //object->Transform()->scale = Vector3(0.5, 0.5, 0.5);
-    //object->Transform()->position = Vector3(0, 0, 0);
-    //rootGameObjects.push_back(object);
-
     GameObject* object2 = new GameObject("Cube");
     std::shared_ptr<MeshFilter> meshFilter2 = object2->AddComponent<MeshFilter>();
     //mesh->Vertices = vertices_map;
@@ -129,7 +95,7 @@ void Scene::InitializeGameObjects() {
     meshFilter2->mesh = mesh2;
     std::shared_ptr<MeshRenderer> renderer2 = object2->AddComponent<MeshRenderer>();
     object2->Transform()->scale = Vector3(1, 1, 1);
-    object2->Transform()->position = Vector3(0, -2, 0);
+    object2->Transform()->position = Vector3(0, 0, 0);
     object2->Transform()->rotation = Quaternion::FromEuler(0, 0, 0);
 
     GameObject* obj3 = new GameObject("Floor");
@@ -137,7 +103,7 @@ void Scene::InitializeGameObjects() {
     meshFilter3->mesh = mesh2;
     std::shared_ptr<MeshRenderer> renderer3 = obj3->AddComponent<MeshRenderer>();
     obj3->Transform()->scale = Vector3(10, 0.1, 10);
-    obj3->Transform()->position = Vector3(0, -3, 0);
+    obj3->Transform()->position = Vector3(0, -2, 0);
 }
 
 void KritiaEngine::SceneManagement::Scene::SerializeToFile() {

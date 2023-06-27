@@ -44,6 +44,12 @@ namespace KritiaEngine {
 		/// Specular shininess
 		/// </summary>
 		float shininess = 32;
+		// PBR
+		float metallic = 0;
+		float roughness = 0;
+		float ao = 0;
+		bool PBR = false;
+		bool cachedPBR = false;
 		RenderMode renderMode = RenderMode::Opaque;
 		/// <summary>
 		/// The main texture, either diffuse map or transparent texture.
