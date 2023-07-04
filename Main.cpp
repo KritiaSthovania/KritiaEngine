@@ -8,6 +8,7 @@
 #include "CoreModule/Manager/ResourceManager.h"
 #include "CoreModule/Manager/PhysicsManager.h"
 #include "Editor/EditorApplication.h"
+#include "Rendering/VulkanRendering.h"
 
 using namespace KritiaEngine;
 using namespace KritiaEngine::SceneManagement;
@@ -179,7 +180,7 @@ bool InitializeWindow()
             glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
             window = glfwCreateWindow(Settings::ScreenWidth, Settings::ScreenHeight, title, nullptr, nullptr);
-
+            glfwSetWindowSizeCallback(window, VulkanRendering::OnWindowResized);
             if (window == NULL) {
                 std::cout << "Failed to create GLFW window" << std::endl;
                 glfwTerminate();

@@ -20,6 +20,8 @@ namespace KritiaEngine::Rendering {
 
 	class VulkanRendering {
 		friend class RenderingProvider;
+	public:
+		static void OnWindowResized(GLFWwindow* window, int width, int height);
 	private:
 
 		/// <summary>
@@ -46,6 +48,7 @@ namespace KritiaEngine::Rendering {
 		static void CreateCommandBuffers();
 		static void CreateRenderPass();
 		static void CreateSemaphores();
+		static void RecreateSwapChain();
 		static void SetupDebugCallback();
 		static VkResult CreateDebugReportCallbackEXT(VkInstance instance, const VkDebugReportCallbackCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugReportCallbackEXT* pCallback);
 		static void DestroyDebugReportCallbackEXT(VkInstance instance, VkDebugReportCallbackEXT callback, const VkAllocationCallbacks* pAllocator);
@@ -71,9 +74,11 @@ namespace KritiaEngine::Rendering {
 
 			return buffer;
 		}
-
 		static void Cleanup();
+		static void CleanupSwapChain();
 
+		static int width;
+		static int height;
 		static GLFWwindow* window;
 		static VkInstance instance;
 		static VkDebugReportCallbackEXT callback;

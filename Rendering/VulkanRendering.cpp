@@ -7,6 +7,8 @@ using namespace KritiaEngine;
 using namespace KritiaEngine::Rendering;
 using namespace KritiaEngine::Editor;
 
+int VulkanRendering::width = Settings::ScreenWidth;
+int VulkanRendering::height = Settings::ScreenHeight;
 VkInstance VulkanRendering::instance;
 VkPhysicalDevice VulkanRendering::physicalDevice = VK_NULL_HANDLE;
 VkDebugReportCallbackEXT VulkanRendering::callback;
@@ -346,7 +348,7 @@ VkExtent2D KritiaEngine::Rendering::VulkanRendering::ChooseSwapExtent(const VkSu
 	if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
 		return capabilities.currentExtent;
 	} else {
-		VkExtent2D actualExtent = { Settings::ScreenWidth, Settings::ScreenHeight };
+		VkExtent2D actualExtent = { width, height };
 
 		actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
 		actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
@@ -511,7 +513,12 @@ void KritiaEngine::Rendering::VulkanRendering::CreateSemaphores() {
 void KritiaEngine::Rendering::VulkanRendering::SetupRenderingFrame() {
 	vkQueueWaitIdle(presentQueue);
 	uint32_t imageIndex;
-	vkAcquireNextImageKHR(device, swapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+	VkResult result = vkAcquireNextImageKHR(device, swapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
+		RecreateSwapChain();
+	} else if (result != VK_SUCCESS) {
+		throw std::runtime_error("failed to present swap chain image!");
+	}
 	VkSubmitInfo submitInfo = {};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -548,6 +555,7 @@ void KritiaEngine::Rendering::VulkanRendering::SetupRenderingFrame() {
 void KritiaEngine::Rendering::VulkanRendering::EndRenderingFrame() {
 
 }
+
 
 void KritiaEngine::Rendering::VulkanRendering::CreateGraphicsPipeline() {
 	std::vector<char> vertShaderCode = readFile(EditorApplication::currentProjectFolderPath + "/StandardShader/VkTestShaderVert.spv");
@@ -715,6 +723,16 @@ VkShaderModule KritiaEngine::Rendering::VulkanRendering::CreateShaderModule(cons
 	return shaderModule;
 }
 
+void KritiaEngine::Rendering::VulkanRendering::RecreateSwapChain() {
+	vkDeviceWaitIdle(device);
+	CreateSwapChain();
+	CreateImageViews();
+	CreateRenderPass();
+	CreateGraphicsPipeline();
+	CreateFramebuffers();
+	CreateCommandBuffers();
+}
+
 std::vector<const char*> KritiaEngine::Rendering::VulkanRendering::GetRequiredExtensions() {
 	std::vector<const char*> extensions;
 
@@ -768,6 +786,14 @@ void KritiaEngine::Rendering::VulkanRendering::DestroyDebugReportCallbackEXT(VkI
 	}
 }
 
+void KritiaEngine::Rendering::VulkanRendering::OnWindowResized(GLFWwindow* window, int width, int height) {
+	if (width == 0 || height == 0) return;
+	VulkanRendering::width = width;
+	VulkanRendering::height = height;
+	CleanupSwapChain();
+	RecreateSwapChain();
+}
+
 void KritiaEngine::Rendering::VulkanRendering::Cleanup() {
 	vkDeviceWaitIdle(device);
 	if (enableValidationLayers) {
@@ -789,6 +815,22 @@ void KritiaEngine::Rendering::VulkanRendering::Cleanup() {
 	vkDestroyDevice(device, nullptr);
 	vkDestroySurfaceKHR(instance, surface, nullptr);
 	vkDestroyInstance(instance, nullptr);
+}
 
+void KritiaEngine::Rendering::VulkanRendering::CleanupSwapChain() {
+	vkDeviceWaitIdle(device);
+	for (size_t i = 0; i < swapChainFramebuffers.size(); i++) {
+		vkDestroyFramebuffer(device, swapChainFramebuffers[i], nullptr);
+	}
+	for (size_t i = 0; i < swapChainImageViews.size(); i++) {
+		vkDestroyImageView(device, swapChainImageViews[i], nullptr);
+	}
+
+	vkFreeCommandBuffers(device, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+
+	vkDestroyPipeline(device, graphicsPipeline, nullptr);
+	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+	vkDestroyRenderPass(device, renderPass, nullptr);
+	vkDestroySwapchainKHR(device, swapChain, nullptr);
 	
 }
