@@ -22,9 +22,10 @@ namespace KritiaEngine::Rendering{
 			Software
 		};
 
-		static void Initialize(HWND hwnd);
-		static void ClearFramebuffer();
-		static void SwapFramebuffer(GLFWwindow* window);
+		static void Initialize(HWND hwnd, GLFWwindow* window);
+		static void Cleanup();
+		static void SetupRenderingFrame();
+		static void EndRenderingFrame(GLFWwindow* window);
 		/// <summary>
 		/// Load a cube map
 		/// </summary>

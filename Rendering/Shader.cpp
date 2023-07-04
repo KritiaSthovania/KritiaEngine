@@ -140,6 +140,10 @@ void KritiaEngine::Shader::LoadShaderFile(const char* vertexPath, const char* fr
         glDeleteShader(fragment);
         glDeleteShader(geometry);
         loaded = true;
+    } else if (Settings::renderingBackend == Rendering::RenderingProvider::RenderingBackend::Vulkan) {
+        VkVertexCode = ReadFile(vertexPath);
+        VkFragmentCode = ReadFile(fragmentPath);
+        loaded = true;
     }
     
 }
@@ -214,6 +218,22 @@ void KritiaEngine::Shader::CheckCompileErrors(unsigned int shader, std::string t
             std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
         }
     }
+}
+
+std::vector<char> KritiaEngine::Shader::ReadFile(const std::string& filename) {
+    std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+    if (!file.is_open()) {
+        throw std::runtime_error("failed to open file!");
+    }
+
+    size_t fileSize = (size_t)file.tellg();
+    std::vector<char> buffer(fileSize);
+    file.seekg(0);
+    file.read(buffer.data(), fileSize);
+    file.close();
+
+    return buffer;
 }
 
 std::string KritiaEngine::Shader::SerializeToJson() {

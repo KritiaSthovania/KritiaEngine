@@ -42,6 +42,7 @@ int main()
         }
         PhysicsManager::Clear();
         Settings::Serialize();
+        RenderingProvider::Cleanup();
         glfwDestroyWindow(window);
         glfwTerminate();
     }
@@ -124,12 +125,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
 //渲染循环
 void Render() {
-    RenderingProvider::ClearFramebuffer();
+    RenderingProvider::SetupRenderingFrame();
     RendererManager::Render();
     if (Settings::renderingBackend == RenderingProvider::RenderingBackend::OpenGL) {
         ImguiManager::RenderGUI();
     }
-    RenderingProvider::SwapFramebuffer(window);
+    RenderingProvider::EndRenderingFrame(window);
 }
 
 void Update() {
@@ -150,31 +151,53 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
 bool InitializeWindow()
 {
     //初始化窗口
-    if (Settings::renderingBackend == RenderingProvider::RenderingBackend::OpenGL) {
+    if (Settings::renderingBackend == RenderingProvider::RenderingBackend::OpenGL || Settings::renderingBackend == RenderingProvider::RenderingBackend::Vulkan) {
         glfwInit();
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        if (RenderingProvider::msaaEnabled) {
-            glfwWindowHint(GLFW_SAMPLES, 4);
+        if (Settings::renderingBackend == RenderingProvider::RenderingBackend::OpenGL) {
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+            if (RenderingProvider::msaaEnabled) {
+                glfwWindowHint(GLFW_SAMPLES, 4);
+            }
+
+            window = glfwCreateWindow(Settings::ScreenWidth, Settings::ScreenHeight, title, NULL, NULL);
+            if (window == NULL) {
+                std::cout << "Failed to create GLFW window" << std::endl;
+                glfwTerminate();
+                return false;
+            }
+       
+            glfwMakeContextCurrent(window);
+            if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+                std::cout << "Failed to initialize GLAD" << std::endl;
+                return false;
+            }
+            glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
+        } else {
+            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+            glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+
+            window = glfwCreateWindow(Settings::ScreenWidth, Settings::ScreenHeight, title, nullptr, nullptr);
+
+            if (window == NULL) {
+                std::cout << "Failed to create GLFW window" << std::endl;
+                glfwTerminate();
+                return false;
+            }
         }
 
-        window = glfwCreateWindow(Settings::ScreenWidth, Settings::ScreenHeight, title, NULL, NULL);
-        if (window == NULL) {
-            std::cout << "Failed to create GLFW window" << std::endl;
-            glfwTerminate();
-            return false;
-        }
-        glfwMakeContextCurrent(window);
-        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-            std::cout << "Failed to initialize GLAD" << std::endl;
-            return false;
-        }
-        glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
+
         glfwSetCursorPosCallback(window, Input::MouseCursorPosCallback);
         glfwSetScrollCallback(window, Input::MouseScrollCallback);
 
         glfwSwapInterval(1);
+
+        if (Settings::renderingBackend == RenderingProvider::RenderingBackend::Vulkan) {
+            uint32_t extensionCount = 0;
+            vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+            std::cout << extensionCount << " vulkan extensions supported" << std::endl;
+        }
         return true;
     } 
     return false;
@@ -185,7 +208,7 @@ void InitializeGUI() {
 }
 
 void ProcessInput() {
-    if (Settings::renderingBackend == RenderingProvider::RenderingBackend::OpenGL) {
+    if (Settings::renderingBackend == RenderingProvider::RenderingBackend::OpenGL || Settings::renderingBackend == RenderingProvider::RenderingBackend::Vulkan) {
         if (Input::GetKeyDown(GLFW_KEY_ESCAPE)) {
             glfwSetWindowShouldClose(window, true);
         }
@@ -201,7 +224,7 @@ void ProcessInput() {
 void InitializeCoreModules() {
     PhysicsManager::Initialize();
     Input::Initialize(window);
-    RenderingProvider::Initialize(hwnd);
+    RenderingProvider::Initialize(hwnd, window);
     SceneManager::Initialize(editor);
 }
 

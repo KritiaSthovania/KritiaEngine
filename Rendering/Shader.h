@@ -45,6 +45,9 @@ namespace KritiaEngine {
         virtual void DeserializeFromPath(const std::string& path) override;
 
         virtual void DeserializeFromJson(const json& json) override;
+
+        std::vector<char> VkVertexCode;
+        std::vector<char> VkFragmentCode;
     private:
         bool loaded = false;
         GLuint id;
@@ -54,6 +57,7 @@ namespace KritiaEngine {
         // utility function for checking shader compilation/linking errors.
         // ------------------------------------------------------------------------
         void CheckCompileErrors(unsigned int shader, std::string type);
+        std::vector<char> ReadFile(const std::string& filename);
     };
 }
 

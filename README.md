@@ -11,7 +11,7 @@
 - 已包含：
 [stb_image.h](https://github.com/nothings/stb/blob/master/stb_image.h), [imgui-docking](https://github.com/ocornut/imgui/tree/docking), [nlohmann json](https://github.com/nlohmann/json), [NativeFileDialog-Extended](https://github.com/btzy/nativefiledialog-extended), [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo)
 - 未包含：
-[glfw](https://www.glfw.org/), [glm](https://github.com/g-truc/glm), [glad](https://glad.dav1d.de/), [assimp](https://github.com/assimp/assimp), [boost](https://www.boost.org/)，[bullet](https://github.com/bulletphysics/bullet3)
+[glfw](https://www.glfw.org/), [glm](https://github.com/g-truc/glm), [glad](https://glad.dav1d.de/), [vulkan](https://vulkan.lunarg.com/), [assimp](https://github.com/assimp/assimp), [boost](https://www.boost.org/)，[bullet](https://github.com/bulletphysics/bullet3)
 - 未包含的第三方库推荐直接使用[vcpkg](git@github.com:microsoft/vcpkg.git)安装。
   
 ## Roadmap

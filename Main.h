@@ -1,4 +1,5 @@
 #pragma once
+#define GLFW_INCLUDE_VULKAN
 #include <pch.h>
 #include <windows.h>
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);

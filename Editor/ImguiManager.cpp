@@ -37,8 +37,13 @@ void KritiaEngine::Editor::GUI::ImguiManager::Initialize(GLFWwindow* window, boo
 	IO.FontGlobalScale = UIScaleFactor;
 	IO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	ImGui::StyleColorsDark();
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init(GlslVersion);
+	if (Settings::renderingBackend == KritiaEngine::Rendering::RenderingProvider::RenderingBackend::OpenGL) {
+		ImGui_ImplGlfw_InitForOpenGL(window, true);
+		ImGui_ImplOpenGL3_Init(GlslVersion);
+	} else {
+		//ImGui_ImplGlfw_InitForVulkan(window, true);
+	}
+
 	CreateEditorWindows();
 }
 

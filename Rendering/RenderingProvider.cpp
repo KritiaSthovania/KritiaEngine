@@ -7,6 +7,7 @@
 #include "../Component/Transform.h"
 #include "OpenGLRendering.h"
 #include "SoftwareRendering.h"
+#include "VulkanRendering.h"
 
 using namespace KritiaEngine::Rendering;
 using namespace KritiaEngine;
@@ -21,7 +22,7 @@ std::vector<std::shared_ptr<Texture>> RenderingProvider::skyboxTextures = std::v
 Matrix4x4 RenderingProvider::projection;
 RenderingProvider::RenderingBackend RenderingProvider::backend = RenderingProvider::RenderingBackend::Software;
 
-void KritiaEngine::Rendering::RenderingProvider::Initialize(HWND hwnd) {
+void KritiaEngine::Rendering::RenderingProvider::Initialize(HWND hwnd, GLFWwindow* window) {
 	if (Settings::renderingBackend == RenderingBackend::OpenGL) {
 		backend = RenderingBackend::OpenGL;
 		OpenGLRendering::Initialize();
@@ -29,19 +30,30 @@ void KritiaEngine::Rendering::RenderingProvider::Initialize(HWND hwnd) {
 	} else if (Settings::renderingBackend == RenderingBackend::Software) {
 		backend = RenderingBackend::Software;
 		SoftwareRendering::Initialize(hwnd);
+	} else if (Settings::renderingBackend == RenderingBackend::Vulkan) {
+		backend = RenderingBackend::Vulkan;
+		VulkanRendering::Initialize(window);
 	}
 	CreateSkybox();
 }
 
-void KritiaEngine::Rendering::RenderingProvider::ClearFramebuffer() {
+void KritiaEngine::Rendering::RenderingProvider::Cleanup() {
+	if (backend == RenderingBackend::Vulkan) {
+		VulkanRendering::Cleanup();
+	}
+}
+
+void KritiaEngine::Rendering::RenderingProvider::SetupRenderingFrame() {
 	if (backend == RenderingBackend::OpenGL) {
 		OpenGLRendering::ClearFramebuffer();
 	} else if (backend == RenderingBackend::Software) {
 		SoftwareRendering::ClearFramebuffer();
+	} else if (backend == RenderingBackend::Vulkan) {
+		VulkanRendering::SetupRenderingFrame();
 	}
 }
 
-void KritiaEngine::Rendering::RenderingProvider::SwapFramebuffer(GLFWwindow* window) {
+void KritiaEngine::Rendering::RenderingProvider::EndRenderingFrame(GLFWwindow* window) {
 	if (backend == RenderingBackend::OpenGL) {
 		OpenGLRendering::SwapFramebuffer(window);
 	} else if (backend == RenderingBackend::Software) {
