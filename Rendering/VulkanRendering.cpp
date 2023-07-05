@@ -1,4 +1,4 @@
-#include "VulkanRendering.h"
+Ôªø#include "VulkanRendering.h"
 #include "../CoreModule/Settings.h"
 #include "../Editor/EditorApplication.h"
 #include <set>
@@ -30,9 +30,12 @@ VkPipelineLayout VulkanRendering::pipelineLayout;
 VkPipeline VulkanRendering::graphicsPipeline;
 VkPhysicalDeviceFeatures VulkanRendering::deviceFeatures = {};
 VkCommandPool VulkanRendering::commandPool;
-std::vector<VkCommandBuffer> VulkanRendering::commandBuffers = std::vector<VkCommandBuffer>();
+VkCommandBuffer VulkanRendering::commandBuffer;
 VkSemaphore VulkanRendering::imageAvailableSemaphore;
 VkSemaphore VulkanRendering::renderFinishedSemaphore;
+uint32_t VulkanRendering::currentSwapChainImageIndex = 0;
+std::vector<VkBuffer*> VulkanRendering::vertexBuffers = std::vector<VkBuffer*>();
+std::vector<VkDeviceMemory*> VulkanRendering::vertexBufferMemories = std::vector<VkDeviceMemory*>();
 
 #ifdef NDEBUG
 constexpr bool enableValidationLayers = false;
@@ -54,7 +57,7 @@ void KritiaEngine::Rendering::VulkanRendering::Initialize(GLFWwindow* window) {
 	CreateGraphicsPipeline();
 	CreateFramebuffers();
 	CreateCommandPool();
-	CreateCommandBuffers();
+	CreateCommandBuffer();
 	CreateSemaphores();
 }
 
@@ -384,10 +387,10 @@ void KritiaEngine::Rendering::VulkanRendering::CreateRenderPass() {
 	VkAttachmentDescription colorAttachment = {};
 	colorAttachment.format = swapChainImageFormat;
 	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	// —’…´∫Õ…Ó∂»
+	// È¢úËâ≤ÂíåÊ∑±Â∫¶
 	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	// ƒ£∞Â
+	// Ê®°Êùø
 	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
 
@@ -460,45 +463,42 @@ void KritiaEngine::Rendering::VulkanRendering::CreateCommandPool() {
 	}
 }
 
-void KritiaEngine::Rendering::VulkanRendering::CreateCommandBuffers() {
-	commandBuffers.resize(swapChainFramebuffers.size());
+void KritiaEngine::Rendering::VulkanRendering::CreateCommandBuffer() {
 	VkCommandBufferAllocateInfo allocInfo = {};
 	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	allocInfo.commandPool = commandPool;
 	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
+	allocInfo.commandBufferCount = 1;
 
-	if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
+	if (vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer) != VK_SUCCESS) {
 		throw std::runtime_error("failed to allocate command buffers!");
 	}
 
-	for (size_t i = 0; i < commandBuffers.size(); i++) {
-		VkCommandBufferBeginInfo beginInfo = {};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-		beginInfo.pInheritanceInfo = nullptr; // Optional
+}
 
-		vkBeginCommandBuffer(commandBuffers[i], &beginInfo);
+void KritiaEngine::Rendering::VulkanRendering::BeginCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+	VkCommandBufferBeginInfo beginInfo = {};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+	beginInfo.pInheritanceInfo = nullptr; // Optional
 
-		VkRenderPassBeginInfo renderPassInfo = {};
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = renderPass;
-		renderPassInfo.framebuffer = swapChainFramebuffers[i];
-		renderPassInfo.renderArea.offset = { 0, 0 };
-		renderPassInfo.renderArea.extent = swapChainExtent;
-		VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
-		renderPassInfo.clearValueCount = 1;
-		renderPassInfo.pClearValues = &clearColor;
-		vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
-		vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
-		vkCmdEndRenderPass(commandBuffers[i]);
-		if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
-			throw std::runtime_error("failed to record command buffer!");
-		}
+	if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
+		throw std::runtime_error("failed to begin recording command buffer!");
 	}
+}
 
-
+void KritiaEngine::Rendering::VulkanRendering::BeginRenderPass(uint32_t imageIndex) {
+	VkRenderPassBeginInfo renderPassInfo = {};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = renderPass;
+	renderPassInfo.framebuffer = swapChainFramebuffers[imageIndex];
+	renderPassInfo.renderArea.offset = { 0, 0 };
+	renderPassInfo.renderArea.extent = swapChainExtent;
+	VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues = &clearColor;
+	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);	
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 }
 
 void KritiaEngine::Rendering::VulkanRendering::CreateSemaphores() {
@@ -512,12 +512,21 @@ void KritiaEngine::Rendering::VulkanRendering::CreateSemaphores() {
 
 void KritiaEngine::Rendering::VulkanRendering::SetupRenderingFrame() {
 	vkQueueWaitIdle(presentQueue);
-	uint32_t imageIndex;
-	VkResult result = vkAcquireNextImageKHR(device, swapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+	VkResult result = vkAcquireNextImageKHR(device, swapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &currentSwapChainImageIndex);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
 		RecreateSwapChain();
 	} else if (result != VK_SUCCESS) {
 		throw std::runtime_error("failed to present swap chain image!");
+	}
+	vkResetCommandBuffer(commandBuffer, 0);
+	BeginCommandBuffer(commandBuffer, currentSwapChainImageIndex);
+	BeginRenderPass(currentSwapChainImageIndex);
+}
+
+void KritiaEngine::Rendering::VulkanRendering::EndRenderingFrame() {
+	vkCmdEndRenderPass(commandBuffer);
+	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
+		throw std::runtime_error("failed to record command buffer!");
 	}
 	VkSubmitInfo submitInfo = {};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -528,7 +537,7 @@ void KritiaEngine::Rendering::VulkanRendering::SetupRenderingFrame() {
 	submitInfo.pWaitSemaphores = waitSemaphores;
 	submitInfo.pWaitDstStageMask = waitStages;
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &commandBuffers[imageIndex];
+	submitInfo.pCommandBuffers = &commandBuffer;
 
 	VkSemaphore signalSemaphores[] = { renderFinishedSemaphore };
 	submitInfo.signalSemaphoreCount = 1;
@@ -546,16 +555,11 @@ void KritiaEngine::Rendering::VulkanRendering::SetupRenderingFrame() {
 	VkSwapchainKHR swapChains[] = { swapChain };
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = swapChains;
-	presentInfo.pImageIndices = &imageIndex;
+	presentInfo.pImageIndices = &currentSwapChainImageIndex;
 	presentInfo.pResults = nullptr; // Optional
 	vkQueuePresentKHR(presentQueue, &presentInfo);
 	vkQueueWaitIdle(presentQueue);
 }
-
-void KritiaEngine::Rendering::VulkanRendering::EndRenderingFrame() {
-
-}
-
 
 void KritiaEngine::Rendering::VulkanRendering::CreateGraphicsPipeline() {
 	std::vector<char> vertShaderCode = readFile(EditorApplication::currentProjectFolderPath + "/StandardShader/VkTestShaderVert.spv");
@@ -582,9 +586,10 @@ void KritiaEngine::Rendering::VulkanRendering::CreateGraphicsPipeline() {
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	vertexInputInfo.vertexBindingDescriptionCount = 0;
-	vertexInputInfo.pVertexBindingDescriptions = nullptr; // Optional
+	auto bindingDescription = Mesh::Vertex::getBindingDescription();
+	vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
 	vertexInputInfo.vertexAttributeDescriptionCount = 0;
-	vertexInputInfo.pVertexAttributeDescriptions = nullptr; // Optional
+	vertexInputInfo.pVertexAttributeDescriptions = Mesh::Vertex::getAttributeDescriptions().data();
 
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
 	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -709,6 +714,144 @@ void KritiaEngine::Rendering::VulkanRendering::CreateGraphicsPipeline() {
 	vkDestroyShaderModule(device, vertShaderModule, nullptr);
 }
 
+void KritiaEngine::Rendering::VulkanRendering::SetupMesh(const std::shared_ptr<Mesh>& mesh) {
+	for (int i = 0; i < mesh->submeshVertices.size(); i++) {
+		SetupSubmesh(mesh, i);
+	}
+
+	mesh->isSetup = true;
+}
+
+void KritiaEngine::Rendering::VulkanRendering::RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos) {
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
+	VkBuffer vertexBuffers[] = { meshFilter->mesh->submeshVertexBuffers[submeshIndex] };
+	VkDeviceSize offsets[] = { 0 };
+	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+	vkCmdBindIndexBuffer(commandBuffer, meshFilter->mesh->submeshIndexBuffers[submeshIndex], 0, VK_INDEX_TYPE_UINT32);
+	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(meshFilter->mesh->submeshIndices[submeshIndex].size()), 1, 0, 0, 0);
+}
+
+void KritiaEngine::Rendering::VulkanRendering::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
+	VkBufferCreateInfo bufferInfo = {};
+	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	bufferInfo.size = size;
+	bufferInfo.usage = usage;
+	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create buffer!");
+	}
+
+	VkMemoryRequirements memRequirements;
+	vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
+
+	VkMemoryAllocateInfo allocInfo = {};
+	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	allocInfo.allocationSize = memRequirements.size;
+	allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, properties);
+
+	if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
+		throw std::runtime_error("failed to allocate buffer memory!");
+	}
+
+	vkBindBufferMemory(device, buffer, bufferMemory, 0);
+}
+
+void KritiaEngine::Rendering::VulkanRendering::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
+	VkCommandBufferAllocateInfo allocInfo = {};
+	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandPool = commandPool;
+	allocInfo.commandBufferCount = 1;
+
+	VkCommandBuffer commandBuffer;
+	vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
+
+	VkCommandBufferBeginInfo beginInfo = {};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+	vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+	VkBufferCopy copyRegion{};
+	copyRegion.srcOffset = 0; // Optional
+	copyRegion.dstOffset = 0; // Optional
+	copyRegion.size = size;
+	vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+	vkEndCommandBuffer(commandBuffer);
+
+	VkSubmitInfo submitInfo{};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &commandBuffer;
+
+	vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+	vkQueueWaitIdle(graphicsQueue);
+
+	vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
+}
+
+void KritiaEngine::Rendering::VulkanRendering::SetupSubmesh(const std::shared_ptr<Mesh>& mesh, int submeshIndex) {
+	CreateVertexBuffer(mesh->submeshVertices[submeshIndex], mesh->submeshVertexBuffers[submeshIndex], mesh->submeshVertexBufferMemories[submeshIndex]);
+	CreateIndexBuffer(mesh->submeshIndices[submeshIndex], mesh->submeshIndexBuffers[submeshIndex], mesh->submeshIndexBufferMemories[submeshIndex]);
+}
+
+void KritiaEngine::Rendering::VulkanRendering::CreateVertexBuffer(const std::vector<Mesh::Vertex> vertices, VkBuffer& vertexBuffer, VkDeviceMemory& vertexBufferMemory) {
+	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+	VkBuffer stagingBuffer;
+	VkDeviceMemory stagingBufferMemory;
+	CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+	void* data;
+	vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+	memcpy(data, vertices.data(), (size_t)bufferSize);
+	vkUnmapMemory(device, stagingBufferMemory);
+
+	CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
+	CopyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+	vkDestroyBuffer(device, stagingBuffer, nullptr);
+	vkFreeMemory(device, stagingBufferMemory, nullptr);
+	vertexBuffers.push_back(&vertexBuffer);
+	vertexBufferMemories.push_back(&vertexBufferMemory);
+}
+
+void KritiaEngine::Rendering::VulkanRendering::CreateIndexBuffer(const std::vector<unsigned int> indices, VkBuffer& indexBuffer, VkDeviceMemory& indexBufferMemory) {
+	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+
+	VkBuffer stagingBuffer;
+	VkDeviceMemory stagingBufferMemory;
+	CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+	void* data;
+	vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+	memcpy(data, indices.data(), (size_t)bufferSize);
+	vkUnmapMemory(device, stagingBufferMemory);
+
+	CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
+
+	CopyBuffer(stagingBuffer, indexBuffer, bufferSize);
+
+	vkDestroyBuffer(device, stagingBuffer, nullptr);
+	vkFreeMemory(device, stagingBufferMemory, nullptr);
+	vertexBuffers.push_back(&indexBuffer);
+	vertexBufferMemories.push_back(&indexBufferMemory);
+}
+
+uint32_t KritiaEngine::Rendering::VulkanRendering::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+	VkPhysicalDeviceMemoryProperties memProperties;
+	vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+
+	for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+		if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+			return i;
+		}
+	}
+
+	throw std::runtime_error("failed to find suitable memory type!");
+}
+
 VkShaderModule KritiaEngine::Rendering::VulkanRendering::CreateShaderModule(const std::vector<char>& code) {
 	VkShaderModuleCreateInfo createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -730,7 +873,7 @@ void KritiaEngine::Rendering::VulkanRendering::RecreateSwapChain() {
 	CreateRenderPass();
 	CreateGraphicsPipeline();
 	CreateFramebuffers();
-	CreateCommandBuffers();
+	CreateCommandBuffer();
 }
 
 std::vector<const char*> KritiaEngine::Rendering::VulkanRendering::GetRequiredExtensions() {
@@ -805,6 +948,12 @@ void KritiaEngine::Rendering::VulkanRendering::Cleanup() {
 	for (size_t i = 0; i < swapChainFramebuffers.size(); i++) {
 		vkDestroyFramebuffer(device, swapChainFramebuffers[i], nullptr);
 	}
+	for (auto vertexBuffer : vertexBuffers) {
+		vkDestroyBuffer(device, *vertexBuffer, nullptr);
+	}
+	for (auto memory : vertexBufferMemories) {
+		vkFreeMemory(device, *memory, nullptr);
+	}
 	vkDestroyCommandPool(device, commandPool, nullptr);
 	vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
 	vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
@@ -826,7 +975,7 @@ void KritiaEngine::Rendering::VulkanRendering::CleanupSwapChain() {
 		vkDestroyImageView(device, swapChainImageViews[i], nullptr);
 	}
 
-	vkFreeCommandBuffers(device, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+	vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 
 	vkDestroyPipeline(device, graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);

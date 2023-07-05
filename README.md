@@ -60,3 +60,5 @@
 - [Learn OpenGL CN](https://learnopengl-cn.github.io/)
 - [GAMES104](https://games-cn.org/games104/)
 - [Unity](https://docs.unity3d.com/2022.2/Documentation/ScriptReference/index.html)
+- [极客Vulkan教程](https://geek-docs.com/vulkan/vulkan-tutorial/vulkan-tutorial-index.html)
+- [Vulkan Tutorial](https://vulkan-tutorial.com)

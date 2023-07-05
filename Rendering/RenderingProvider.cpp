@@ -58,6 +58,8 @@ void KritiaEngine::Rendering::RenderingProvider::EndRenderingFrame(GLFWwindow* w
 		OpenGLRendering::SwapFramebuffer(window);
 	} else if (backend == RenderingBackend::Software) {
 		SoftwareRendering::SwapFramebuffer();
+	} else if (backend == RenderingBackend::Vulkan) {
+		VulkanRendering::EndRenderingFrame();
 	}
 }
 
@@ -120,6 +122,8 @@ void KritiaEngine::Rendering::RenderingProvider::SetupMesh(const std::shared_ptr
 		OpenGLRendering::SetupMesh(mesh);
 	} else if (backend == RenderingBackend::Software) {
 
+	} else if (backend == RenderingBackend::Vulkan) {
+		VulkanRendering::SetupMesh(mesh);
 	}
 }
 
@@ -128,6 +132,8 @@ void KritiaEngine::Rendering::RenderingProvider::RenderSubmesh(const std::shared
 		OpenGLRendering::RenderSubmesh(meshFilter, material, submeshIndex, model, viewPos, pos);
 	} else if (backend == RenderingBackend::Software) {
 		SoftwareRendering::RenderSubmesh(meshFilter, material, submeshIndex, model, viewPos, pos);
+	} else if (backend == RenderingBackend::Vulkan) {
+		VulkanRendering::RenderSubmesh(meshFilter, material, submeshIndex, model, viewPos, pos);
 	}
 }
 

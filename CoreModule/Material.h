@@ -10,6 +10,7 @@
 namespace KritiaEngine::Rendering {
 	class RenderingProvider;
 	class OpenGLRendering;
+	class VulkanRendering;
 }
 
 namespace KritiaEngine::Editor::GUI {

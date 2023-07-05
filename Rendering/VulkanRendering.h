@@ -1,5 +1,6 @@
 #pragma once
 #define GLFW_INCLUDE_VULKAN
+#include "../CoreModule/Mesh.h"
 #include <pch.h>
 #include <vulkan/vulkan.h>
 #include <fstream>
@@ -45,7 +46,11 @@ namespace KritiaEngine::Rendering {
 		static void CreateImageViews();
 		static void CreateFramebuffers();
 		static void CreateCommandPool();
-		static void CreateCommandBuffers();
+		static void CreateCommandBuffer();
+		static void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+		static void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+		static void BeginCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+		static void BeginRenderPass(uint32_t imageIndex);
 		static void CreateRenderPass();
 		static void CreateSemaphores();
 		static void RecreateSwapChain();
@@ -60,6 +65,13 @@ namespace KritiaEngine::Rendering {
 		static VkShaderModule CreateShaderModule(const std::vector<char>& code);
 		static void SetupRenderingFrame();
 		static void EndRenderingFrame();
+		static void SetupMesh(const std::shared_ptr<Mesh>& mesh);
+		static void RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos);
+		// Create buffers and allocate memories
+		static void SetupSubmesh(const std::shared_ptr<Mesh>& mesh, int submeshIndex);
+		static void CreateVertexBuffer(const std::vector<Mesh::Vertex> vertices, VkBuffer& vertexBuffer, VkDeviceMemory& vertexBufferMemory);
+		static void CreateIndexBuffer(const std::vector<unsigned int> indices, VkBuffer& indexBuffer, VkDeviceMemory& indexBufferMemory);
+		static uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 		static std::vector<char> readFile(const std::string& filename) {
 			std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
@@ -74,6 +86,8 @@ namespace KritiaEngine::Rendering {
 
 			return buffer;
 		}
+
+		// Clear
 		static void Cleanup();
 		static void CleanupSwapChain();
 
@@ -98,13 +112,16 @@ namespace KritiaEngine::Rendering {
 		static VkPhysicalDeviceFeatures deviceFeatures;
 		static VkRenderPass renderPass;
 		static VkCommandPool commandPool;
-		static std::vector<VkCommandBuffer> commandBuffers;
+		static VkCommandBuffer commandBuffer;
 
 		// Render
 		static VkPipelineLayout pipelineLayout;
 		static VkPipeline graphicsPipeline;
 		static VkSemaphore imageAvailableSemaphore;
 		static VkSemaphore renderFinishedSemaphore;
+		static uint32_t currentSwapChainImageIndex;
+		static std::vector<VkBuffer*> vertexBuffers;
+		static std::vector<VkDeviceMemory*> vertexBufferMemories;
 
 		static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugReportFlagsEXT flags,
 			VkDebugReportObjectTypeEXT objType,

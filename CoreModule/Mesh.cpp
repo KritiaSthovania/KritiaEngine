@@ -3,14 +3,21 @@
 #include "../Editor/ImguiAlias.h"
 #include "../Editor/EditorApplication.h"
 #include "../Editor/AssetDatabase.h"
+#include "../Rendering/RenderingProvider.h"
 #include <fstream>
 using namespace KritiaEngine;
 using ImguiAlias = KritiaEngine::Editor::GUI::ImguiAlias;
 
-KritiaEngine::Mesh::Mesh(const std::vector<std::vector<Vertex>>& vertices, const std::vector<std::vector<unsigned int>>& indices, const std::vector<std::shared_ptr<Material>>& materials) {
+KritiaEngine::Mesh::Mesh(const std::vector<std::vector<Vertex>>& vertices, const std::vector<std::vector<unsigned int>>& indices, const std::vector<std::shared_ptr<Material>>& materials):
+submeshVertexBuffers(), submeshVertexBufferMemories(), submeshIndexBuffers(), submeshIndexBufferMemories()
+{
     this->submeshVertices = vertices;
     this->submeshIndices = indices;
-    submeshMaterials = materials;
+    submeshVertexBuffers.resize(vertices.size());
+    submeshVertexBufferMemories.resize(vertices.size());
+    submeshIndexBuffers.resize(vertices.size());
+    submeshIndexBufferMemories.resize(vertices.size());
+;    submeshMaterials = materials;
     bound.center = Vector3(0, 0, 0);
     bound.size = Vector3(1, 1, 1);
 }
