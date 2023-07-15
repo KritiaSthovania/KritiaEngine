@@ -90,13 +90,16 @@ namespace KritiaEngine {
 		static Mesh Cube();
 		static std::vector<float> GetDefaultCubeVertices();
 
-		std::vector<unsigned int> VAOs, VBOs, EBOs;
 		bool isSetup = false;
 		bool isPrimitive = false;
+		// OpenGL
+		std::vector<unsigned int> VAOs, VBOs, EBOs;
+		// Vulkan
 		std::vector<VkBuffer> submeshVertexBuffers;
 		std::vector<VkDeviceMemory> submeshVertexBufferMemories;
 		std::vector<VkBuffer> submeshIndexBuffers;
 		std::vector<VkDeviceMemory> submeshIndexBufferMemories;
+
 	};
 
 }

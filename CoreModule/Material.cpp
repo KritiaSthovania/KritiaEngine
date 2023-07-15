@@ -17,13 +17,22 @@ using namespace KritiaEngine::Manager;
 KritiaEngine::Material::Material()
 {
 	name = "Default Diffuse Material";
-	shader = std::shared_ptr<Shader>(new KritiaEngine::Shader((EditorApplication::currentProjectFolderPath + "/StandardShader/BlinnPhongShader.vs").c_str(), (EditorApplication::currentProjectFolderPath + "/StandardShader/BlinnPhongShader.fs").c_str()));
+	if (Settings::renderingBackend == RenderingProvider::RenderingBackend::OpenGL) {
+		shader = std::shared_ptr<Shader>(new KritiaEngine::Shader((EditorApplication::currentProjectFolderPath + "/StandardShader/BlinnPhongShader.vs").c_str(), (EditorApplication::currentProjectFolderPath + "/StandardShader/BlinnPhongShader.fs").c_str()));
+	} else if (Settings::renderingBackend == RenderingProvider::RenderingBackend::Vulkan) {
+		shader = std::shared_ptr<Shader>(new KritiaEngine::Shader((EditorApplication::currentProjectFolderPath + "/StandardShader/VkTestShaderVert.spv").c_str(), (EditorApplication::currentProjectFolderPath + "/StandardShader/VkTestShaderFrag.spv").c_str()));
+	}
+	
 }
 
 KritiaEngine::Material::Material(const char* name)
 {
 	this->name = name;
-	shader = std::shared_ptr<Shader>(new KritiaEngine::Shader((EditorApplication::currentProjectFolderPath + "/StandardShader/BlinnPhongShader.vs").c_str(), (EditorApplication::currentProjectFolderPath + "/StandardShader/BlinnPhongShader.fs").c_str()));
+	if (Settings::renderingBackend == RenderingProvider::RenderingBackend::OpenGL) {
+		shader = std::shared_ptr<Shader>(new KritiaEngine::Shader((EditorApplication::currentProjectFolderPath + "/StandardShader/BlinnPhongShader.vs").c_str(), (EditorApplication::currentProjectFolderPath + "/StandardShader/BlinnPhongShader.fs").c_str()));
+	} else if (Settings::renderingBackend == RenderingProvider::RenderingBackend::Vulkan) {
+		shader = std::shared_ptr<Shader>(new KritiaEngine::Shader((EditorApplication::currentProjectFolderPath + "/StandardShader/VkTestShaderVert.spv").c_str(), (EditorApplication::currentProjectFolderPath + "/StandardShader/VkTestShaderFrag.spv").c_str()));
+	}
 }
 
 KritiaEngine::Material::Material(const char* name, const std::shared_ptr<Shader>& shader)
@@ -39,10 +48,11 @@ KritiaEngine::Material::Material(const std::shared_ptr<Shader>& shader) {
 
 void Material::Initialize() {
 	if (!initialized) {
+		RenderingProvider::InitializeMaterial(this);
 		if (Settings::renderingBackend == Rendering::RenderingProvider::RenderingBackend::OpenGL) {
 			shader->Use();
 			shader->UniformBlockBinding(shader->GetUniformBlockIndex("MatricesVP"), static_cast<unsigned int>(RenderingProvider::UniformBindingPoint::MatricesVP));
-		}
+		} 
 
 		if (mainTexture != nullptr) {
 

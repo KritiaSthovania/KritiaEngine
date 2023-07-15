@@ -1,9 +1,14 @@
 #pragma once
 #define GLFW_INCLUDE_VULKAN
 #include "../CoreModule/Mesh.h"
+#include "../Component/MeshFilter.h"
 #include <pch.h>
 #include <vulkan/vulkan.h>
 #include <fstream>
+#include <unordered_set>
+
+using namespace KritiaEngine;
+
 namespace KritiaEngine::Rendering {
 	struct QueueFamilyIndices {
 		int graphicsFamily = -1;
@@ -61,7 +66,7 @@ namespace KritiaEngine::Rendering {
 		/// <summary>
 		/// Render
 		/// </summary>
-		static void CreateGraphicsPipeline();
+		static void CreateGraphicsPipeline(Material* material);
 		static VkShaderModule CreateShaderModule(const std::vector<char>& code);
 		static void SetupRenderingFrame();
 		static void EndRenderingFrame();
@@ -71,6 +76,12 @@ namespace KritiaEngine::Rendering {
 		static void SetupSubmesh(const std::shared_ptr<Mesh>& mesh, int submeshIndex);
 		static void CreateVertexBuffer(const std::vector<Mesh::Vertex> vertices, VkBuffer& vertexBuffer, VkDeviceMemory& vertexBufferMemory);
 		static void CreateIndexBuffer(const std::vector<unsigned int> indices, VkBuffer& indexBuffer, VkDeviceMemory& indexBufferMemory);
+		static void CreateUniformBuffer(VkDeviceSize bufferSize, VkBuffer& uniformBuffer, VkDeviceMemory& uniformBufferMemory);
+		static void UpdateUniformBufferMatricesVP(const Matrix4x4& view, const Matrix4x4& projection);
+		static void UpdateUniformBuffer(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos, VkBuffer& uniformBuffer, VkDeviceMemory& uniformBufferMemory);
+		static void CreateDescriptorSetLayout(VkDescriptorSetLayout& descriptorSetLayout);
+		static void CreateDescriptorPool(Material* material);
+		static void CreateDescriptorSet(MeshFilter* meshFilter, Material* material);
 		static uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 		static std::vector<char> readFile(const std::string& filename) {
 			std::ifstream file(filename, std::ios::ate | std::ios::binary);
@@ -115,13 +126,21 @@ namespace KritiaEngine::Rendering {
 		static VkCommandBuffer commandBuffer;
 
 		// Render
-		static VkPipelineLayout pipelineLayout;
-		static VkPipeline graphicsPipeline;
 		static VkSemaphore imageAvailableSemaphore;
 		static VkSemaphore renderFinishedSemaphore;
 		static uint32_t currentSwapChainImageIndex;
-		static std::vector<VkBuffer*> vertexBuffers;
-		static std::vector<VkDeviceMemory*> vertexBufferMemories;
+
+		static Matrix4x4 projectionMatrix;
+		static Matrix4x4 viewMatrix;
+
+		// for destroying
+		static std::vector<VkBuffer*> buffers;
+		static std::vector<VkDeviceMemory*> bufferMemories;
+		static std::vector<VkDescriptorSetLayout*> descriptorSetLayouts;
+		static std::vector<VkPipeline*> graphicPipelines;
+		static std::vector<VkPipelineLayout*> pipelineLayouts;
+		static std::vector<VkDescriptorPool*> descriptorPools;
+		static std::unordered_set<Material*> materials;
 
 		static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugReportFlagsEXT flags,
 			VkDebugReportObjectTypeEXT objType,

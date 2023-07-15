@@ -292,7 +292,7 @@ void SoftwareRendering::RenderShadowMap(const std::shared_ptr<MeshFilter>& meshF
 				VertexShadingShadow(mesh->submeshVertices[submeshIndex][i], light->GetLightMatrixVP(direction), model, shadowVertexOut);
 			}
 			for (int i = 0; i < mesh->submeshIndices[submeshIndex].size() - 2; i++) {
-				RasterizeShadow(i, shadowVertexOut, shadowFragmentIn);
+				RasterizeShadow(mesh->submeshIndices[submeshIndex][i], shadowVertexOut, shadowFragmentIn);
 			}
 			FragmentShadingPointShadow(shadowFragmentIn, light, direction);
 		}
@@ -392,10 +392,10 @@ void SoftwareRendering::RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFil
 		VertexShading(mesh->submeshVertices[submeshIndex][i], model, normalMatrix, screenPos, vertexOutFields);
 	}
 	for (int i = 0; i < mesh->submeshIndices[submeshIndex].size() - 2; i++) {
-		Rasterize(i, vertexOutFields, fragmentInFields);
+		Rasterize(mesh->submeshIndices[submeshIndex][i], vertexOutFields, fragmentInFields);
 	}
 	FragmentShading(material, fragmentInFields, viewPos, pos);
-	
+
 }
 
 void SoftwareRendering::VertexShading(const Mesh::Vertex& vertex, const Matrix4x4& model, const Matrix3x3& normalMatrix, Vector4& screenPos, std::vector<ShadingInOutFields>& vertexOut) {
@@ -429,8 +429,8 @@ void SoftwareRendering::Rasterize(int startIndex, const std::vector<ShadingInOut
 	float minY = Mathf::Min({ screenPos1.y, screenPos2.y, screenPos3.y });
 	float maxY = Mathf::Max({ screenPos1.y, screenPos2.y, screenPos3.y });
 	// Pixel is always on positions with an integer subscript, so we iterate over integers
-	for (int i = Mathf::Max((int)minX, 0); i < (int)Mathf::Min((int)maxX, Settings::ScreenWidth); i++) {
-		for (int j = Mathf::Max((int)minY, 0); j < (int)Mathf::Min((int)maxY, Settings::ScreenHeight); j++) {
+	for (int i = Mathf::Max((int)minX, 0); i < (int)Mathf::Min((int)maxX, Settings::ScreenWidth - 1); i++) {
+		for (int j = Mathf::Max((int)minY, 0); j < (int)Mathf::Min((int)maxY, Settings::ScreenHeight - 1); j++) {
 			if (InTriangle(Vector2(i + pixelSize.x / 2, j + pixelSize.y / 2), screenPos1, screenPos2, screenPos3)) {
 				// For all pixels in the triangle, we interpolate the vertex and get one ShadingInOutFields for fragment shading
 				float lambda12 = std::abs(Vector2::Cross(screenPos1 - screenPos2, Vector2(i, j) - screenPos2) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));

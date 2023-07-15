@@ -70,6 +70,10 @@ void KritiaEngine::Shader::LoadShaderFile(const char* vertexPath, const char* fr
         glDeleteShader(vertex);
         glDeleteShader(fragment);
         loaded = true;
+    } else if (Settings::renderingBackend == Rendering::RenderingProvider::RenderingBackend::Vulkan) {
+        VkVertexCode = ReadFile(vertexPath);
+        VkFragmentCode = ReadFile(fragmentPath);
+        loaded = true;
     }
 }
 

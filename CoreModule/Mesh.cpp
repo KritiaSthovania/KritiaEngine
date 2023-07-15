@@ -4,6 +4,7 @@
 #include "../Editor/EditorApplication.h"
 #include "../Editor/AssetDatabase.h"
 #include "../Rendering/RenderingProvider.h"
+#include "Settings.h"
 #include <fstream>
 using namespace KritiaEngine;
 using ImguiAlias = KritiaEngine::Editor::GUI::ImguiAlias;
@@ -46,7 +47,7 @@ KritiaEngine::Mesh KritiaEngine::Mesh::Cube() {
     submeshVertices.push_back(vertices);
     std::vector<std::vector<unsigned int>> submeshIndices = std::vector<std::vector<unsigned int>>();
     submeshIndices.push_back(indices);
-    std::shared_ptr<Material> material = std::shared_ptr<Material>(new Material(std::shared_ptr<Shader>(new KritiaEngine::Shader("./StandardShader/BlinnPhongShader.vs", "./StandardShader/BlinnPhongShader.fs"))));
+    std::shared_ptr<Material> material = std::shared_ptr<Material>(new Material());
     material->albedo = Color(1.0f, 1.f, 1.f, 1);
     material->shininess = 32;
     material->renderMode = Material::RenderMode::Opaque;

@@ -122,6 +122,9 @@ void MeshRenderer::Initialize() {
 	meshFilter = gameObject->GetComponent<MeshFilter>();
 	meshFilter->SetupMesh();
 	InitializeMaterial();
+	for (int i = 0; i < materialSize; i++) {
+		RenderingProvider::InitializeMeshFilter(meshFilter, materials[i]);
+	}
 	initialized = true;
 }
 

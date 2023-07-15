@@ -1,6 +1,7 @@
 ﻿#include "VulkanRendering.h"
 #include "../CoreModule/Settings.h"
 #include "../Editor/EditorApplication.h"
+#include "../Component/MeshFilter.h"
 #include <set>
 
 using namespace KritiaEngine;
@@ -26,16 +27,21 @@ std::vector<VkFramebuffer> VulkanRendering::swapChainFramebuffers = std::vector<
 VkFormat VulkanRendering::swapChainImageFormat;
 VkExtent2D VulkanRendering::swapChainExtent;
 VkRenderPass VulkanRendering::renderPass;
-VkPipelineLayout VulkanRendering::pipelineLayout;
-VkPipeline VulkanRendering::graphicsPipeline;
 VkPhysicalDeviceFeatures VulkanRendering::deviceFeatures = {};
 VkCommandPool VulkanRendering::commandPool;
 VkCommandBuffer VulkanRendering::commandBuffer;
 VkSemaphore VulkanRendering::imageAvailableSemaphore;
 VkSemaphore VulkanRendering::renderFinishedSemaphore;
 uint32_t VulkanRendering::currentSwapChainImageIndex = 0;
-std::vector<VkBuffer*> VulkanRendering::vertexBuffers = std::vector<VkBuffer*>();
-std::vector<VkDeviceMemory*> VulkanRendering::vertexBufferMemories = std::vector<VkDeviceMemory*>();
+Matrix4x4 VulkanRendering::projectionMatrix;
+Matrix4x4 VulkanRendering::viewMatrix;
+std::vector<VkBuffer*> VulkanRendering::buffers = std::vector<VkBuffer*>();
+std::vector<VkDeviceMemory*> VulkanRendering::bufferMemories = std::vector<VkDeviceMemory*>();
+std::vector<VkDescriptorSetLayout*> VulkanRendering::descriptorSetLayouts = std::vector<VkDescriptorSetLayout*>();
+std::vector<VkPipeline*> VulkanRendering::graphicPipelines = std::vector<VkPipeline*>();
+std::vector<VkPipelineLayout*> VulkanRendering::pipelineLayouts = std::vector<VkPipelineLayout*>();
+std::vector<VkDescriptorPool*> VulkanRendering::descriptorPools = std::vector<VkDescriptorPool*>();
+std::unordered_set<Material*> VulkanRendering::materials = std::unordered_set<Material*>();
 
 #ifdef NDEBUG
 constexpr bool enableValidationLayers = false;
@@ -54,7 +60,6 @@ void KritiaEngine::Rendering::VulkanRendering::Initialize(GLFWwindow* window) {
 	CreateSwapChain();
 	CreateImageViews();
 	CreateRenderPass();
-	CreateGraphicsPipeline();
 	CreateFramebuffers();
 	CreateCommandPool();
 	CreateCommandBuffer();
@@ -473,7 +478,6 @@ void KritiaEngine::Rendering::VulkanRendering::CreateCommandBuffer() {
 	if (vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer) != VK_SUCCESS) {
 		throw std::runtime_error("failed to allocate command buffers!");
 	}
-
 }
 
 void KritiaEngine::Rendering::VulkanRendering::BeginCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
@@ -498,7 +502,6 @@ void KritiaEngine::Rendering::VulkanRendering::BeginRenderPass(uint32_t imageInd
 	renderPassInfo.clearValueCount = 1;
 	renderPassInfo.pClearValues = &clearColor;
 	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);	
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 }
 
 void KritiaEngine::Rendering::VulkanRendering::CreateSemaphores() {
@@ -561,13 +564,11 @@ void KritiaEngine::Rendering::VulkanRendering::EndRenderingFrame() {
 	vkQueueWaitIdle(presentQueue);
 }
 
-void KritiaEngine::Rendering::VulkanRendering::CreateGraphicsPipeline() {
-	std::vector<char> vertShaderCode = readFile(EditorApplication::currentProjectFolderPath + "/StandardShader/VkTestShaderVert.spv");
-	std::vector<char> fragShaderCode = readFile(EditorApplication::currentProjectFolderPath + "/StandardShader/VkTestShaderFrag.spv");
+void KritiaEngine::Rendering::VulkanRendering::CreateGraphicsPipeline(Material* material) {
 	VkShaderModule vertShaderModule;
 	VkShaderModule fragShaderModule;
-	vertShaderModule = CreateShaderModule(vertShaderCode);
-	fragShaderModule = CreateShaderModule(fragShaderCode);
+	vertShaderModule = CreateShaderModule(material->shader->VkVertexCode);
+	fragShaderModule = CreateShaderModule(material->shader->VkFragmentCode);
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
 	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -585,10 +586,10 @@ void KritiaEngine::Rendering::VulkanRendering::CreateGraphicsPipeline() {
 
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputInfo.vertexBindingDescriptionCount = 0;
+	vertexInputInfo.vertexBindingDescriptionCount = 1;
 	auto bindingDescription = Mesh::Vertex::getBindingDescription();
 	vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
-	vertexInputInfo.vertexAttributeDescriptionCount = 0;
+	vertexInputInfo.vertexAttributeDescriptionCount = 4;
 	vertexInputInfo.pVertexAttributeDescriptions = Mesh::Vertex::getAttributeDescriptions().data();
 
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
@@ -622,7 +623,7 @@ void KritiaEngine::Rendering::VulkanRendering::CreateGraphicsPipeline() {
 	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 	rasterizer.lineWidth = 1.0f;
 	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterizer.depthBiasEnable = VK_FALSE;
 	rasterizer.depthBiasConstantFactor = 0.0f; // Optional
 	rasterizer.depthBiasClamp = 0.0f; // Optional
@@ -680,13 +681,15 @@ void KritiaEngine::Rendering::VulkanRendering::CreateGraphicsPipeline() {
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = 0; // Optional
-	pipelineLayoutInfo.pSetLayouts = nullptr; // Optional
+	pipelineLayoutInfo.setLayoutCount = 1; // 
+	pipelineLayoutInfo.pSetLayouts = &material->descriptorSetLayoutVertex;
 	pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
 	pipelineLayoutInfo.pPushConstantRanges = 0; // Optional
-	if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
+	if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &material->pipelineLayout) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create pipeline layout!");
 	}
+
+	pipelineLayouts.push_back(&material->pipelineLayout);
 
 	VkGraphicsPipelineCreateInfo pipelineInfo = {};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -700,16 +703,18 @@ void KritiaEngine::Rendering::VulkanRendering::CreateGraphicsPipeline() {
 	pipelineInfo.pDepthStencilState = nullptr; // Optional
 	pipelineInfo.pColorBlendState = &colorBlending;
 	pipelineInfo.pDynamicState = nullptr; // Optional
-	pipelineInfo.layout = pipelineLayout;
+	pipelineInfo.layout = material->pipelineLayout;
 	pipelineInfo.renderPass = renderPass;
 	pipelineInfo.subpass = 0;
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 	pipelineInfo.basePipelineIndex = -1; // Optional
 
-	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
+	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &material->graphicsPipeline) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create graphics pipeline!");
 	}
 
+	graphicPipelines.push_back(&material->graphicsPipeline);
+	materials.insert(material);
 	vkDestroyShaderModule(device, fragShaderModule, nullptr);
 	vkDestroyShaderModule(device, vertShaderModule, nullptr);
 }
@@ -723,12 +728,14 @@ void KritiaEngine::Rendering::VulkanRendering::SetupMesh(const std::shared_ptr<M
 }
 
 void KritiaEngine::Rendering::VulkanRendering::RenderSubmesh(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos) {
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+	UpdateUniformBuffer(meshFilter, material, submeshIndex, model, viewPos, pos, meshFilter->uniformBufferVertex[material.get()], meshFilter->uniformBufferMemoryVertex[material.get()]);
 
-	VkBuffer vertexBuffers[] = { meshFilter->mesh->submeshVertexBuffers[submeshIndex] };
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->graphicsPipeline);
+	VkBuffer buffers[] = { meshFilter->mesh->submeshVertexBuffers[submeshIndex] };
 	VkDeviceSize offsets[] = { 0 };
-	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+	vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
 	vkCmdBindIndexBuffer(commandBuffer, meshFilter->mesh->submeshIndexBuffers[submeshIndex], 0, VK_INDEX_TYPE_UINT32);
+	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->pipelineLayout, 0, 1, &meshFilter->descriptorSetVertex[material.get()], 0, nullptr);
 	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(meshFilter->mesh->submeshIndices[submeshIndex].size()), 1, 0, 0, 0);
 }
 
@@ -813,8 +820,8 @@ void KritiaEngine::Rendering::VulkanRendering::CreateVertexBuffer(const std::vec
 	CopyBuffer(stagingBuffer, vertexBuffer, bufferSize);
 	vkDestroyBuffer(device, stagingBuffer, nullptr);
 	vkFreeMemory(device, stagingBufferMemory, nullptr);
-	vertexBuffers.push_back(&vertexBuffer);
-	vertexBufferMemories.push_back(&vertexBufferMemory);
+	buffers.push_back(&vertexBuffer);
+	bufferMemories.push_back(&vertexBufferMemory);
 }
 
 void KritiaEngine::Rendering::VulkanRendering::CreateIndexBuffer(const std::vector<unsigned int> indices, VkBuffer& indexBuffer, VkDeviceMemory& indexBufferMemory) {
@@ -835,9 +842,108 @@ void KritiaEngine::Rendering::VulkanRendering::CreateIndexBuffer(const std::vect
 
 	vkDestroyBuffer(device, stagingBuffer, nullptr);
 	vkFreeMemory(device, stagingBufferMemory, nullptr);
-	vertexBuffers.push_back(&indexBuffer);
-	vertexBufferMemories.push_back(&indexBufferMemory);
+	buffers.push_back(&indexBuffer);
+	bufferMemories.push_back(&indexBufferMemory);
 }
+
+void KritiaEngine::Rendering::VulkanRendering::CreateUniformBuffer(VkDeviceSize bufferSize, VkBuffer& uniformBuffer, VkDeviceMemory& uniformBufferMemory) {
+	CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffer, uniformBufferMemory);
+	buffers.push_back(&uniformBuffer);
+	bufferMemories.push_back(&uniformBufferMemory);
+}
+
+void KritiaEngine::Rendering::VulkanRendering::UpdateUniformBuffer(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material, int submeshIndex, const Matrix4x4& model, const Vector3& viewPos, const Vector3& pos, VkBuffer& uniformBuffer, VkDeviceMemory& uniformBufferMemory) {
+	UniformBufferObjectVertex ubov = {};
+	ubov.model = model;
+	ubov.projection = projectionMatrix;
+	ubov.view = viewMatrix;
+	ubov.projection[1][1] *= -1;
+	Matrix3x3 normalMatrix = Matrix3x3({ model.GetEntry(0, 0), model.GetEntry(1, 0), model.GetEntry(2, 0),
+										 model.GetEntry(0, 1), model.GetEntry(1, 1), model.GetEntry(2, 1),
+										 model.GetEntry(0, 2), model.GetEntry(1, 2), model.GetEntry(2, 2) }).Inverse().Transpose();
+	ubov.normalMatrix = normalMatrix;
+	ubov.lightSpaceMatrix = Lighting::LightingSystem::GetMainLightSource()->GetLightMatrixVP(0);
+
+	void* data;
+	vkMapMemory(device, uniformBufferMemory, 0, sizeof(ubov), 0, &data);
+	memcpy(data, &ubov, sizeof(ubov));
+	vkUnmapMemory(device, uniformBufferMemory);
+}
+
+void VulkanRendering::UpdateUniformBufferMatricesVP(const Matrix4x4& view, const Matrix4x4& projection) {
+	viewMatrix = view;
+	projectionMatrix = projection;
+}
+
+void KritiaEngine::Rendering::VulkanRendering::CreateDescriptorSetLayout(VkDescriptorSetLayout& descriptorSetLayout) {
+	VkDescriptorSetLayoutBinding uboLayoutBinding = {};
+	uboLayoutBinding.binding = 0;
+	uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	uboLayoutBinding.descriptorCount = 1;
+	uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+
+	VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	layoutInfo.bindingCount = 1;
+	layoutInfo.pBindings = &uboLayoutBinding;
+
+	if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create descriptor set layout!");
+	}
+
+	descriptorSetLayouts.push_back(&descriptorSetLayout);
+}
+
+void KritiaEngine::Rendering::VulkanRendering::CreateDescriptorPool(Material* material) {
+	VkDescriptorPoolSize poolSize = {};
+	poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	poolSize.descriptorCount = 2;
+
+	VkDescriptorPoolCreateInfo poolInfo = {};
+	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	poolInfo.poolSizeCount = 1;
+	poolInfo.pPoolSizes = &poolSize;
+	poolInfo.maxSets = 2;
+
+	if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &material->descriptorPool) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create descriptor pool!");
+	}
+
+	descriptorPools.push_back(&material->descriptorPool);
+}
+
+void KritiaEngine::Rendering::VulkanRendering::CreateDescriptorSet(MeshFilter* meshFilter, Material* material) {
+	VkDescriptorSetLayout layouts[] = { material->descriptorSetLayoutVertex };
+	VkDescriptorSet* sets = &meshFilter->descriptorSetVertex[material];
+	VkDescriptorSetAllocateInfo allocInfo = {};
+	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	allocInfo.descriptorPool = material->descriptorPool;
+	allocInfo.descriptorSetCount = 1;
+	allocInfo.pSetLayouts = layouts;
+	auto result =  vkAllocateDescriptorSets(device, &allocInfo, sets);
+	if ( result != VK_SUCCESS) {
+		throw std::runtime_error("failed to allocate descriptor set!");
+	}
+
+	VkDescriptorBufferInfo bufferInfo = {};
+	bufferInfo.buffer = meshFilter->uniformBufferVertex[material];
+	bufferInfo.offset = 0;
+	bufferInfo.range = sizeof(UniformBufferObjectVertex);
+
+	VkWriteDescriptorSet descriptorWrite = {};
+	descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	descriptorWrite.dstSet = meshFilter->descriptorSetVertex[material];
+	descriptorWrite.dstBinding = 0;
+	descriptorWrite.dstArrayElement = 0;
+	descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorWrite.descriptorCount = 1;
+	descriptorWrite.pBufferInfo = &bufferInfo;
+	descriptorWrite.pImageInfo = nullptr; // Optional
+	descriptorWrite.pTexelBufferView = nullptr; // Optional
+	vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+}
+
 
 uint32_t KritiaEngine::Rendering::VulkanRendering::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
 	VkPhysicalDeviceMemoryProperties memProperties;
@@ -871,7 +977,9 @@ void KritiaEngine::Rendering::VulkanRendering::RecreateSwapChain() {
 	CreateSwapChain();
 	CreateImageViews();
 	CreateRenderPass();
-	CreateGraphicsPipeline();
+	for (auto material : materials) {
+		CreateGraphicsPipeline(material);
+	}
 	CreateFramebuffers();
 	CreateCommandBuffer();
 }
@@ -948,17 +1056,27 @@ void KritiaEngine::Rendering::VulkanRendering::Cleanup() {
 	for (size_t i = 0; i < swapChainFramebuffers.size(); i++) {
 		vkDestroyFramebuffer(device, swapChainFramebuffers[i], nullptr);
 	}
-	for (auto vertexBuffer : vertexBuffers) {
+	for (auto vertexBuffer : buffers) {
 		vkDestroyBuffer(device, *vertexBuffer, nullptr);
 	}
-	for (auto memory : vertexBufferMemories) {
+	for (auto memory : bufferMemories) {
 		vkFreeMemory(device, *memory, nullptr);
+	}
+	for (auto layout : descriptorSetLayouts) {
+		vkDestroyDescriptorSetLayout(device, *layout, nullptr);
+	}
+	for (auto pipeline : graphicPipelines) {
+		vkDestroyPipeline(device, *pipeline, nullptr);
+	}
+	for (auto pipelineLayout : pipelineLayouts) {
+		vkDestroyPipelineLayout(device, *pipelineLayout, nullptr);
+	}
+	for (auto pool : descriptorPools) {
+		vkDestroyDescriptorPool(device, *pool, nullptr);
 	}
 	vkDestroyCommandPool(device, commandPool, nullptr);
 	vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
 	vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
-	vkDestroyPipeline(device, graphicsPipeline, nullptr);
-	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 	vkDestroyRenderPass(device, renderPass, nullptr);
 	vkDestroySwapchainKHR(device, swapChain, nullptr);
 	vkDestroyDevice(device, nullptr);
@@ -971,14 +1089,21 @@ void KritiaEngine::Rendering::VulkanRendering::CleanupSwapChain() {
 	for (size_t i = 0; i < swapChainFramebuffers.size(); i++) {
 		vkDestroyFramebuffer(device, swapChainFramebuffers[i], nullptr);
 	}
+	swapChainFramebuffers.clear();
 	for (size_t i = 0; i < swapChainImageViews.size(); i++) {
 		vkDestroyImageView(device, swapChainImageViews[i], nullptr);
 	}
-
+	swapChainImageViews.clear();
 	vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 
-	vkDestroyPipeline(device, graphicsPipeline, nullptr);
-	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+	for (auto pipeline : graphicPipelines) {
+		vkDestroyPipeline(device, *pipeline, nullptr);
+	}
+	graphicPipelines.clear();
+	for (auto pipelineLayout : pipelineLayouts) {
+		vkDestroyPipelineLayout(device, *pipelineLayout, nullptr);
+	}
+	pipelineLayouts.clear();
 	vkDestroyRenderPass(device, renderPass, nullptr);
 	vkDestroySwapchainKHR(device, swapChain, nullptr);
 	

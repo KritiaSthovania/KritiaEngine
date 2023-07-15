@@ -79,6 +79,23 @@ void KritiaEngine::Rendering::RenderingProvider::CreateShadowMap(Light* light) {
 	}
 }
 
+void KritiaEngine::Rendering::RenderingProvider::InitializeMaterial(Material* material) {
+	if (backend == RenderingBackend::Vulkan) {
+		VulkanRendering::CreateDescriptorPool(material);
+		VulkanRendering::CreateDescriptorSetLayout(material->descriptorSetLayoutVertex);
+		VulkanRendering::CreateGraphicsPipeline(material);
+		//VulkanRendering::CreateUniformBuffer(sizeof(UniformBufferObjectVertex), material->uniformBufferVertex, material->uniformBufferMemoryVertex);
+
+	}
+}
+
+void KritiaEngine::Rendering::RenderingProvider::InitializeMeshFilter(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material) {
+	if (backend == RenderingBackend::Vulkan) {
+		VulkanRendering::CreateUniformBuffer(sizeof(UniformBufferObjectVertex), meshFilter->uniformBufferVertex[material.get()], meshFilter->uniformBufferMemoryVertex[material.get()]);
+		VulkanRendering::CreateDescriptorSet(meshFilter.get(), material.get());
+	}
+}
+
 void KritiaEngine::Rendering::RenderingProvider::CreateSkybox() {
 	skyboxTextures.push_back(std::make_shared<Texture>(Texture("./Assets/Textures/skybox/right.jpg")));
 	skyboxTextures.push_back(std::make_shared<Texture>(Texture("./Assets/Textures/skybox/left.jpg")));
@@ -151,6 +168,8 @@ void KritiaEngine::Rendering::RenderingProvider::UpdateUniformBufferMatricesVP(c
 		OpenGLRendering::UpdateUniformBufferMatricesVP(view, projection);
 	} else if (backend == RenderingBackend::Software) {
 		SoftwareRendering::UpdateUniformBufferMatricesVP(view, projection);
+	} else if (backend == RenderingBackend::Vulkan) {
+		VulkanRendering::UpdateUniformBufferMatricesVP(view, projection);
 	}
 }
 

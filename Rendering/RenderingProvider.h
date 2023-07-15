@@ -53,6 +53,8 @@ namespace KritiaEngine::Rendering{
 		static void SetupRenderShadowMap(Light* light);
 		static void SetupRenderSubmesh();
 		static void CreateShadowMap(Light* light);
+		static void InitializeMaterial(Material* material);
+		static void InitializeMeshFilter(const std::shared_ptr<MeshFilter>& meshFilter, const std::shared_ptr<Material>& material);
 		static bool depthTestEnabled;
 		static bool blendEnabled;
 		static bool backFaceCullingEnabled;

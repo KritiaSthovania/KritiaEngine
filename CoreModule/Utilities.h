@@ -99,4 +99,13 @@ namespace KritiaEngine {
 		GameObject* gameObject;
 		std::vector<ContactPoint> contactPoints;
 	};
+
+	// for vulkan
+	struct UniformBufferObjectVertex {
+		glm::mat4 model;
+		glm::mat4 view;
+		glm::mat4 projection;
+		glm::mat3 normalMatrix;
+		glm::mat4 lightSpaceMatrix;
+	};
 }

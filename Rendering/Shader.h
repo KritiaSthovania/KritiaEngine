@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <vulkan/vulkan.h>
 #include "../CoreModule/MathStructs.h"
 #include "../CoreModule/Utilities.h"
 #include "../CoreModule/Object.h"
@@ -46,6 +47,7 @@ namespace KritiaEngine {
 
         virtual void DeserializeFromJson(const json& json) override;
 
+        // Vulkan
         std::vector<char> VkVertexCode;
         std::vector<char> VkFragmentCode;
     private:
@@ -58,6 +60,8 @@ namespace KritiaEngine {
         // ------------------------------------------------------------------------
         void CheckCompileErrors(unsigned int shader, std::string type);
         std::vector<char> ReadFile(const std::string& filename);
+       
+
     };
 }
 

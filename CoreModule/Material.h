@@ -6,6 +6,8 @@
 #include "Texture.h"
 #include "Interface/ISerializable.h"
 #include "Interface/IInspectable.h"
+#include <vulkan/vulkan.h>
+
 
 namespace KritiaEngine::Rendering {
 	class RenderingProvider;
@@ -23,10 +25,12 @@ namespace KritiaEngine::Manager {
 
 namespace KritiaEngine {
 	class Mesh;
+
 	class Material : public Object, IJsonSerializable, IFileSerializable, IInspectable
 	{
 		friend class KritiaEngine::Rendering::RenderingProvider;
 		friend class KritiaEngine::Rendering::OpenGLRendering;
+		friend class KritiaEngine::Rendering::VulkanRendering;
 		friend class KritiaEngine::Editor::GUI::ProjectFileExplorer;
 		friend class KritiaEngine::Manager::ResourceManager;
 		friend class MeshRenderer;
@@ -78,6 +82,12 @@ namespace KritiaEngine {
 
 		// Í¨¹ý Inspectable ¼Ì³Ð
 		virtual void OnInspector() override;
+
+		VkDescriptorSetLayout descriptorSetLayoutVertex;
+		UniformBufferObjectVertex ubov;
+		VkPipelineLayout pipelineLayout;
+		VkPipeline graphicsPipeline;
+		VkDescriptorPool descriptorPool;
 	};
 }
 
