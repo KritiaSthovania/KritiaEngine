@@ -5,6 +5,7 @@ namespace KritiaEngine {
 	{
 	public:
 		bool enabled = true;
+		virtual ~Behaviour() = default;
 	protected:
 		virtual void OnInspector() override;
 

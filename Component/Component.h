@@ -20,6 +20,7 @@ namespace KritiaEngine {
 	public:
 		Component();
 		Component(GameObject* gameObject);
+		virtual ~Component() = default;
 		/// <summary>
 		/// Get the transform of this component's gameObject
 		/// </summary>
@@ -29,6 +30,7 @@ namespace KritiaEngine {
 		// Ù–‘
 		GameObject* gameObject;
 	protected:
+		std::weak_ptr<Component> selfPointer;
 		virtual void OnObjectDestroy() override;
 	private:
 		// If this component is attached to BehaviourManager, this update function will always be called.
@@ -38,7 +40,7 @@ namespace KritiaEngine {
 		virtual std::string SerializeToJson() override = 0;
 		virtual void DeserializeFromJson(const json& json) override = 0;
 		virtual std::string GetInspectorLabel () = 0;
-		std::string inspectorLabel;
+		std::string inspectorLabel;	
 	};
 }
 

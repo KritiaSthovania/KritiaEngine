@@ -6,6 +6,7 @@ namespace KritiaEngine {
 		friend class KritiaEngine::Manager::BehaviourManager;
 	protected:
 		MonoBehaviour(GameObject *gameObject);
+		virtual ~MonoBehaviour() = default;
 		//在渲染第一帧前调用
 		virtual void Awake() = 0;
 		virtual void Start() = 0;

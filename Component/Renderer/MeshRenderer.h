@@ -13,6 +13,7 @@ namespace KritiaEngine {
 	public:
 		MeshRenderer(GameObject* gameObject);
 		std::vector<std::shared_ptr<Material>> materials;
+		bool containTransparentMaterial = false;
 	protected:
 		void Render(const std::shared_ptr<KritiaEngine::Camera>& camera);
 		void RenderShadowMap(Light* light);
@@ -27,8 +28,7 @@ namespace KritiaEngine {
 		// Update materials if there are new ones.
 		void UpdateMaterial();
 		bool initialized = false;
-		bool preInitialized = false;
-		bool containTransparentMaterial = false;
+		bool preInitialized = false;		
 		// indicate whether there are new materials
 		int materialSize = 0;
 

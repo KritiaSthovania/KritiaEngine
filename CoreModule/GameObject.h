@@ -47,11 +47,13 @@ namespace KritiaEngine {
 		template <typename T> std::shared_ptr<T> AddComponent() {
 			std::shared_ptr<T> component = std::shared_ptr<T>(new T(this));
 			components.push_back(component);
+			RegisterComponent(component);
 			return component;
 		}
 		void SetActive(bool isActive);
 		bool isActive = true;
 	private:
+		void RegisterComponent(const std::shared_ptr<Component>& comp);
 		std::list<std::shared_ptr<Component>> components;
 		std::vector<std::shared_ptr<Component>> componentToDestroy;
 		std::vector<std::shared_ptr<Component>> componentToDelete;

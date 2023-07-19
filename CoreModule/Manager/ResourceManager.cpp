@@ -88,8 +88,8 @@ GameObject* KritiaEngine::Manager::ResourceManager::GetPrefab(const json& json) 
 	} else {
 		GameObject* gameObject = GameObject::DeserializeAsPrefab(json);
 		prefabs[json["Guid"]] = gameObject;
-		RendererManager::RemoveMeshRenderer(gameObject->GetComponent<MeshRenderer>().get(), false);
-		RendererManager::RemoveMeshRenderer(gameObject->GetComponent<MeshRenderer>().get(), true);
+		RendererManager::RemoveMeshRenderer(gameObject->GetComponent<MeshRenderer>(), false);
+		RendererManager::RemoveMeshRenderer(gameObject->GetComponent<MeshRenderer>(), true);
 		for (std::shared_ptr<Component> comp : gameObject->components) {
 			if (typeid(comp.get()) == typeid(MonoBehaviour)) {
 				BehaviourManager::RemoveMonoBehaviour(dynamic_cast<MonoBehaviour*>(comp.get()));

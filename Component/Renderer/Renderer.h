@@ -11,7 +11,8 @@ namespace KritiaEngine{
 	class Renderer : public Component {
 		friend class KritiaEngine::Manager::RendererManager;
 	protected:
-		virtual void Render(const std::shared_ptr<Camera>& camera) = 0;
+		virtual ~Renderer() = default;
+ 		virtual void Render(const std::shared_ptr<Camera>& camera) = 0;
 		virtual void RenderShadowMap(Light* light) = 0;
 	};
 

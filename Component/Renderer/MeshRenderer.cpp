@@ -16,7 +16,7 @@ using namespace KritiaEngine::Editor;
 MeshRenderer::MeshRenderer(GameObject* gameObject) {
 	this->gameObject = gameObject;
 	PreInitializeMaterial();
-	RendererManager::AddMeshRenderer(this, containTransparentMaterial);
+	//RendererManager::AddMeshRenderer(this, containTransparentMaterial);
 }
 
 void KritiaEngine::MeshRenderer::PreInitializeMaterial() {
@@ -44,7 +44,7 @@ void MeshRenderer::InitializeMaterial() {
 				if (this->gameObject->GetComponent<MeshFilter>()->mesh->submeshMaterials[i]->renderMode == Material::RenderMode::Transparent) {
 					// Move the renderer to the transparent queue
 					if (!containTransparentMaterial) {
-						RendererManager::MoveMeshRendererToTransparentQueue(this);
+						RendererManager::MoveMeshRendererToTransparentQueue(std::weak_ptr<MeshRenderer>(std::static_pointer_cast<MeshRenderer>(selfPointer.lock())));
 						containTransparentMaterial = true;
 					}
 				}
@@ -58,7 +58,7 @@ void MeshRenderer::InitializeMaterial() {
 		if (materials[i]->renderMode == Material::RenderMode::Transparent) {
 			if (!containTransparentMaterial) {
 				// Move the renderer to the transparent queue
-				RendererManager::MoveMeshRendererToTransparentQueue(this);
+				RendererManager::MoveMeshRendererToTransparentQueue(std::weak_ptr<MeshRenderer>(std::static_pointer_cast<MeshRenderer>(selfPointer.lock())));
 				containTransparentMaterial = true;
 			}
 		}
@@ -73,7 +73,7 @@ void KritiaEngine::MeshRenderer::UpdateMaterial() {
 			materials[i]->Initialize();
 			if (materials[i]->renderMode == Material::RenderMode::Transparent) {
 				if (!containTransparentMaterial) {
-					RendererManager::MoveMeshRendererToTransparentQueue(this);
+					RendererManager::MoveMeshRendererToTransparentQueue(std::weak_ptr<MeshRenderer>(std::static_pointer_cast<MeshRenderer>(selfPointer.lock())));
 					containTransparentMaterial = true;
 				}
 			}
@@ -130,7 +130,7 @@ void MeshRenderer::Initialize() {
 
 void KritiaEngine::MeshRenderer::OnObjectDestroy() {
 	Component::OnObjectDestroy();
-	RendererManager::RemoveMeshRenderer(this, containTransparentMaterial);
+	RendererManager::RemoveMeshRenderer(std::weak_ptr<MeshRenderer>(std::static_pointer_cast<MeshRenderer>(selfPointer.lock())), containTransparentMaterial);
 }
 
 void MeshRenderer::Render(const std::shared_ptr<KritiaEngine::Camera>& camera) {

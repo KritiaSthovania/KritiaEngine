@@ -6,11 +6,11 @@
 using namespace KritiaEngine::Manager;
 using namespace KritiaEngine;
 using namespace KritiaEngine::Rendering;
-std::list<Renderer*> RendererManager::opaqueRenderQueue = std::list<Renderer*>();
-std::list<Renderer*> RendererManager::transparentRenderQueue = std::list<Renderer*>();
+std::list<std::weak_ptr<Renderer>> RendererManager::opaqueRenderQueue = std::list<std::weak_ptr<Renderer>>();
+std::list<std::weak_ptr<Renderer>> RendererManager::transparentRenderQueue = std::list<std::weak_ptr<Renderer>>();
 
 
-void KritiaEngine::Manager::RendererManager::AddMeshRenderer(MeshRenderer* renderer, bool transparent) {
+void KritiaEngine::Manager::RendererManager::AddMeshRenderer(const std::weak_ptr<MeshRenderer>& renderer, bool transparent) {
 	if (transparent) {
 		transparentRenderQueue.push_back(renderer);
 	} else {
@@ -18,16 +18,18 @@ void KritiaEngine::Manager::RendererManager::AddMeshRenderer(MeshRenderer* rende
 	}
 }
 
-void KritiaEngine::Manager::RendererManager::RemoveMeshRenderer(MeshRenderer* renderer, bool transparent) {
-	if (transparent) {
-		transparentRenderQueue.remove(renderer);
+void KritiaEngine::Manager::RendererManager::RemoveMeshRenderer(const std::weak_ptr<MeshRenderer>& renderer, bool transparent) {
+	auto comp = [renderer](const std::weak_ptr<Renderer>& p)-> bool {	return renderer.lock() == p.lock(); };
+	if (transparent) {	
+		transparentRenderQueue.remove_if(comp);
 	} else {
-		opaqueRenderQueue.remove(renderer);
+		opaqueRenderQueue.remove_if(comp);
 	}
 }
 
-void KritiaEngine::Manager::RendererManager::MoveMeshRendererToTransparentQueue(MeshRenderer* renderer) {
-	opaqueRenderQueue.remove(renderer);
+void KritiaEngine::Manager::RendererManager::MoveMeshRendererToTransparentQueue(const std::weak_ptr<MeshRenderer>& renderer) {
+	auto comp = [renderer](const std::weak_ptr<Renderer>& p)-> bool {return renderer.lock() == p.lock(); };
+	opaqueRenderQueue.remove_if(comp);
 	transparentRenderQueue.push_back(renderer);
 }
 
@@ -38,17 +40,17 @@ void KritiaEngine::Manager::RendererManager::Render() {
 	// Render shadow map only for opaque objects
 	for (auto light : Lighting::LightingSystem::Lights) {
 		RenderingProvider::SetupRenderShadowMap(light);
-		for (auto renderer : opaqueRenderQueue) {
-			if (renderer->gameObject->isActive) {
-				renderer->RenderShadowMap(light);
+		for (auto &renderer : opaqueRenderQueue) {
+			if (renderer.lock()->gameObject->isActive) {
+				renderer.lock()->RenderShadowMap(light);
 			}
 		}
 	}
 	// Render opaque objects from near to far
 	RenderingProvider::SetupRenderSubmesh();
-	for (auto renderer : opaqueRenderQueue) {
-		if (renderer->gameObject->isActive) {
-			renderer->Render(Camera::current);
+	for (auto &renderer : opaqueRenderQueue) {
+		if (renderer.lock()->gameObject->isActive) {
+			renderer.lock()->Render(Camera::current);
 		}
 	}
 	RenderingProvider::RenderGPUInstances(false);
@@ -56,8 +58,8 @@ void KritiaEngine::Manager::RendererManager::Render() {
 	transparentRenderQueue.sort(CompareRenderer);
 	// Render transparent objects from far to near
 	for (auto iter = transparentRenderQueue.rbegin(); iter != transparentRenderQueue.rend(); iter++) {
-		if ((*iter)->gameObject->isActive) {
-			(*iter)->Render(Camera::current);
+		if ((*iter).lock()->gameObject->isActive) {
+			(*iter).lock()->Render(Camera::current);
 		}
 	}
 	RenderingProvider::RenderGPUInstances(true);
@@ -68,8 +70,12 @@ void KritiaEngine::Manager::RendererManager::Clear() {
 	transparentRenderQueue.clear();
 }
 
-bool KritiaEngine::Manager::RendererManager::CompareRenderer(Renderer * left, Renderer * right) {
-	return Vector3::Magnitude(left->Transform()->position - Camera::current->GetPosition()) < Vector3::Magnitude(right->Transform()->position - Camera::current->GetPosition());
+bool KritiaEngine::Manager::RendererManager::ComparePtr(const std::weak_ptr<Renderer>& left, const std::weak_ptr<Renderer>& right) {
+	return left.lock() == right.lock();
+}
+
+bool KritiaEngine::Manager::RendererManager::CompareRenderer(const std::weak_ptr<Renderer>& left, const std::weak_ptr<Renderer>& right) {
+	return Vector3::Magnitude(left.lock()->Transform()->position - Camera::current->GetPosition()) < Vector3::Magnitude(right.lock()->Transform()->position - Camera::current->GetPosition());
 }
 
 void KritiaEngine::Manager::RendererManager::RenderSkybox() {

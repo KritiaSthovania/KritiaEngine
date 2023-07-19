@@ -14,13 +14,13 @@ using namespace nlohmann::literals;
 using json = nlohmann::ordered_json;
 
 KritiaEngine::GameObject::GameObject() {
-	components.push_back(std::shared_ptr<KritiaEngine::Transform>(new KritiaEngine::Transform(this)));
+	AddComponent<KritiaEngine::Transform>();
 	this->name = "New GameObject";
 	SceneManagement::SceneManager::GetActiveScene()->GetRootGameObjects().push_back(this);
 }
 
 KritiaEngine::GameObject::GameObject(const char* name) {
-	components.push_back(std::shared_ptr<KritiaEngine::Transform>(new KritiaEngine::Transform(this)));
+	AddComponent<KritiaEngine::Transform>();
 	this->name = name;
 	SceneManagement::SceneManager::GetActiveScene()->GetRootGameObjects().push_back(this);
 }
@@ -33,6 +33,14 @@ std::shared_ptr<KritiaEngine::Transform> KritiaEngine::GameObject::Transform()
 void KritiaEngine::GameObject::GameObject::SetActive(bool isActive)
 {
 	this->isActive = isActive;
+}
+
+void KritiaEngine::GameObject::RegisterComponent(const std::shared_ptr<Component>& comp) {
+	std::string label = comp->GetInspectorLabel();
+	if (label == "MeshRenderer") {
+		comp->selfPointer = std::weak_ptr<Component>(comp);
+		RendererManager::AddMeshRenderer(std::static_pointer_cast<MeshRenderer>(comp), std::static_pointer_cast<MeshRenderer>(comp)->containTransparentMaterial);
+	}
 }
 
 std::string KritiaEngine::GameObject::SerializeToJson() {
