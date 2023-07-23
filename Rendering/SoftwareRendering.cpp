@@ -107,31 +107,38 @@ void SoftwareRendering::RasterizeSkybox(int startIndex, const std::vector<Skybox
 	float maxX = Mathf::Max({ screenPos1.x, screenPos2.x, screenPos3.x });
 	float minY = Mathf::Min({ screenPos1.y, screenPos2.y, screenPos3.y });
 	float maxY = Mathf::Max({ screenPos1.y, screenPos2.y, screenPos3.y });
-	// Pixel is always on positions with an integer subscript, so we iterate over integers
-	for (int i = Mathf::Max((int)minX, 0); i < (int)Mathf::Min((int)maxX, Settings::ScreenWidth); i++) {
-		for (int j = Mathf::Max((int)minY, 0); j < (int)Mathf::Min((int)maxY, Settings::ScreenWidth); j++) {
-			if (InTriangle(Vector2(i + pixelSize.x / 2, j + pixelSize.y / 2), screenPos1, screenPos2, screenPos3)) {
-				// For all pixels in the triangle, we interpolate the vertex and get one ShadingInOutFields for fragment shading
-				float lambda12 = std::abs(Vector2::Cross(screenPos1 - screenPos2, Vector2(i, j) - screenPos2) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
-				float lambda13 = std::abs(Vector2::Cross(screenPos3 - screenPos1, Vector2(i, j) - screenPos1) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
-				float lambda23 = std::abs(Vector2::Cross(screenPos2 - screenPos3, Vector2(i, j) - screenPos3) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
-				SkyboxShadingInOutFields in;
-				float z1 = vertexOut[startIndex].Position.z;
-				float z2 = vertexOut[startIndex + 1].Position.z;
-				float z3 = vertexOut[startIndex + 2].Position.z;
-				float z4 = 1 / (lambda12 / z3 + lambda13 / z2 + lambda23 / z1);
-				in.Position = z4 * (lambda12 * vertexOut[startIndex + 2].Position / z3 + lambda13 * vertexOut[startIndex + 1].Position / z2 + lambda23 * vertexOut[startIndex].Position / z1);
-				in.NDC = z4 * (lambda12 * vertexOut[startIndex + 2].NDC / z3 + lambda13 * vertexOut[startIndex + 1].NDC / z2 + lambda23 * vertexOut[startIndex].NDC / z1);
-				in.texCoord = z4 * (lambda12 * vertexOut[startIndex + 2].texCoord / z3 + lambda13 * vertexOut[startIndex + 1].texCoord / z2 + lambda23 * vertexOut[startIndex].texCoord / z1);
-				in.ScreenPosition = Vector2(i, j);
-				fragmentIn.push_back(in);
+    #pragma omp parallel
+	{
+		std::vector<SkyboxShadingInOutFields> fragmentInPrivate;
+        #pragma omp for nowait
+		// Pixel is always on positions with an integer subscript, so we iterate over integers
+		for (int i = Mathf::Max((int)minX, 0); i < (int)Mathf::Min((int)maxX, Settings::ScreenWidth); i++) {
+			for (int j = Mathf::Max((int)minY, 0); j < (int)Mathf::Min((int)maxY, Settings::ScreenWidth); j++) {
+				if (InTriangle(Vector2(i + pixelSize.x / 2, j + pixelSize.y / 2), screenPos1, screenPos2, screenPos3)) {
+					// For all pixels in the triangle, we interpolate the vertex and get one ShadingInOutFields for fragment shading
+					float lambda12 = std::abs(Vector2::Cross(screenPos1 - screenPos2, Vector2(i, j) - screenPos2) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
+					float lambda13 = std::abs(Vector2::Cross(screenPos3 - screenPos1, Vector2(i, j) - screenPos1) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
+					float lambda23 = std::abs(Vector2::Cross(screenPos2 - screenPos3, Vector2(i, j) - screenPos3) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
+					SkyboxShadingInOutFields in;
+					float z1 = vertexOut[startIndex].Position.z;
+					float z2 = vertexOut[startIndex + 1].Position.z;
+					float z3 = vertexOut[startIndex + 2].Position.z;
+					float z4 = 1 / (lambda12 / z3 + lambda13 / z2 + lambda23 / z1);
+					in.Position = z4 * (lambda12 * vertexOut[startIndex + 2].Position / z3 + lambda13 * vertexOut[startIndex + 1].Position / z2 + lambda23 * vertexOut[startIndex].Position / z1);
+					in.NDC = z4 * (lambda12 * vertexOut[startIndex + 2].NDC / z3 + lambda13 * vertexOut[startIndex + 1].NDC / z2 + lambda23 * vertexOut[startIndex].NDC / z1);
+					in.texCoord = z4 * (lambda12 * vertexOut[startIndex + 2].texCoord / z3 + lambda13 * vertexOut[startIndex + 1].texCoord / z2 + lambda23 * vertexOut[startIndex].texCoord / z1);
+					in.ScreenPosition = Vector2(i, j);
+					fragmentInPrivate.push_back(in);
+				}
 			}
 		}
+        #pragma omp critical
+		fragmentIn.insert(fragmentIn.end(), fragmentInPrivate.begin(), fragmentInPrivate.end());
 	}
 }
 
 void SoftwareRendering::FragmentShadingSkybox(const std::vector<SkyboxShadingInOutFields>& inFields) {
-//    #pragma omp parallel for
+    #pragma omp parallel for
 	for (int i = 0; i < inFields.size(); i++) {
 		SkyboxShadingInOutFields in = inFields[i];
 		float depth = inFields[i].NDC.z * 0.5 + 0.5;
@@ -318,26 +325,34 @@ void SoftwareRendering::RasterizeShadow(int startIndex, const std::vector<Shadow
 	float maxX = Mathf::Max({ screenPos1.x, screenPos2.x, screenPos3.x });
 	float minY = Mathf::Min({ screenPos1.y, screenPos2.y, screenPos3.y });
 	float maxY = Mathf::Max({ screenPos1.y, screenPos2.y, screenPos3.y });
-	// Pixel is always on positions with an integer subscript, so we iterate over integers
-	for (int i = Mathf::Max((int)minX, 0); i < (int)Mathf::Min((int)maxX, Settings::ShadowWidth); i++) {
-		for (int j = Mathf::Max((int)minY, 0); j < (int)Mathf::Min((int)maxY, Settings::ShadowHeight); j++) {
-			if (InTriangle(Vector2(i + pixelSize.x / 2, j + pixelSize.y / 2), screenPos1, screenPos2, screenPos3)) {
-				// For all pixels in the triangle, we interpolate the vertex and get one ShadingInOutFields for fragment shading
-				float lambda12 = std::abs(Vector2::Cross(screenPos1 - screenPos2, Vector2(i, j) - screenPos2) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
-				float lambda13 = std::abs(Vector2::Cross(screenPos3 - screenPos1, Vector2(i, j) - screenPos1) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
-				float lambda23 = std::abs(Vector2::Cross(screenPos2 - screenPos3, Vector2(i, j) - screenPos3) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
-				ShadowShadingInOutFields in;
-				float z1 = shadowVertexOut[startIndex].LightSpacePosition.z;
-				float z2 = shadowVertexOut[startIndex + 1].LightSpacePosition.z;
-				float z3 = shadowVertexOut[startIndex + 2].LightSpacePosition.z;
-				float z4 = 1 / (lambda12 / z3 + lambda13 / z2 + lambda23 / z1);
-				in.LightSpacePosition = z4 * (lambda12 * shadowVertexOut[startIndex + 2].LightSpacePosition / z3 + lambda13 * shadowVertexOut[startIndex + 1].LightSpacePosition / z2 + lambda23 * shadowVertexOut[startIndex].LightSpacePosition / z1);
-				in.NDC = z4 * (lambda12 * shadowVertexOut[startIndex + 2].NDC / z3 + lambda13 * shadowVertexOut[startIndex + 1].NDC / z2 + lambda23 * shadowVertexOut[startIndex].NDC / z1);
-				in.ScreenPosition = Vector2(i, j);
-				shadowFragmentIn.push_back(in);
+    #pragma omp parallel
+	{
+		std::vector<ShadowShadingInOutFields> shadowInPrivate;
+        #pragma omp for nowait
+		// Pixel is always on positions with an integer subscript, so we iterate over integers
+		for (int i = Mathf::Max((int)minX, 0); i < (int)Mathf::Min((int)maxX, Settings::ShadowWidth); i++) {
+			for (int j = Mathf::Max((int)minY, 0); j < (int)Mathf::Min((int)maxY, Settings::ShadowHeight); j++) {
+				if (InTriangle(Vector2(i + pixelSize.x / 2, j + pixelSize.y / 2), screenPos1, screenPos2, screenPos3)) {
+					// For all pixels in the triangle, we interpolate the vertex and get one ShadingInOutFields for fragment shading
+					float lambda12 = std::abs(Vector2::Cross(screenPos1 - screenPos2, Vector2(i, j) - screenPos2) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
+					float lambda13 = std::abs(Vector2::Cross(screenPos3 - screenPos1, Vector2(i, j) - screenPos1) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
+					float lambda23 = std::abs(Vector2::Cross(screenPos2 - screenPos3, Vector2(i, j) - screenPos3) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
+					ShadowShadingInOutFields in;
+					float z1 = shadowVertexOut[startIndex].LightSpacePosition.z;
+					float z2 = shadowVertexOut[startIndex + 1].LightSpacePosition.z;
+					float z3 = shadowVertexOut[startIndex + 2].LightSpacePosition.z;
+					float z4 = 1 / (lambda12 / z3 + lambda13 / z2 + lambda23 / z1);
+					in.LightSpacePosition = z4 * (lambda12 * shadowVertexOut[startIndex + 2].LightSpacePosition / z3 + lambda13 * shadowVertexOut[startIndex + 1].LightSpacePosition / z2 + lambda23 * shadowVertexOut[startIndex].LightSpacePosition / z1);
+					in.NDC = z4 * (lambda12 * shadowVertexOut[startIndex + 2].NDC / z3 + lambda13 * shadowVertexOut[startIndex + 1].NDC / z2 + lambda23 * shadowVertexOut[startIndex].NDC / z1);
+					in.ScreenPosition = Vector2(i, j);
+					shadowInPrivate.push_back(in);
+				}
 			}
 		}
+        #pragma omp critical
+		shadowFragmentIn.insert(shadowFragmentIn.end(), shadowInPrivate.begin(), shadowInPrivate.end());
 	}
+	
 }
 
 Vector2 KritiaEngine::Rendering::SoftwareRendering::ViewportTransformShadow(const Vector4& ndc) {
@@ -359,6 +374,7 @@ void SoftwareRendering::FragmentShadingShadow(const std::vector<ShadowShadingInO
 }
 
 void SoftwareRendering::FragmentShadingPointShadow(const std::vector<ShadowShadingInOutFields>& inFields, Light* light, int direction) {
+    #pragma omp parallel for
 	for (int i = 0; i < inFields.size(); i++) {
 		ShadowShadingInOutFields in = inFields[i];
 		float depth = inFields[i].NDC.z * 0.5 + 0.5;
@@ -372,10 +388,10 @@ void SoftwareRendering::FragmentShadingPointShadow(const std::vector<ShadowShadi
 }
 
 void SoftwareRendering::SetupRenderSubmesh() {
+    #pragma omp parallel for
 	for (int i = 0; i < Settings::ScreenWidth; i++) {
-		depthBuffer.push_back(std::vector<float>());
 		for (int j = 0; j < Settings::ScreenHeight; j++) {
-			depthBuffer[i].push_back(FLT_MAX);
+			depthBuffer[i][j] = FLT_MAX;
 		}
 	}
 }
@@ -429,32 +445,39 @@ void SoftwareRendering::Rasterize(int startIndex, const std::vector<ShadingInOut
 	float minY = Mathf::Min({ screenPos1.y, screenPos2.y, screenPos3.y });
 	float maxY = Mathf::Max({ screenPos1.y, screenPos2.y, screenPos3.y });
 	// Pixel is always on positions with an integer subscript, so we iterate over integers
-	for (int i = Mathf::Max((int)minX, 0); i < (int)Mathf::Min((int)maxX, Settings::ScreenWidth - 1); i++) {
-		for (int j = Mathf::Max((int)minY, 0); j < (int)Mathf::Min((int)maxY, Settings::ScreenHeight - 1); j++) {
-			if (InTriangle(Vector2(i + pixelSize.x / 2, j + pixelSize.y / 2), screenPos1, screenPos2, screenPos3)) {
-				// For all pixels in the triangle, we interpolate the vertex and get one ShadingInOutFields for fragment shading
-				float lambda12 = std::abs(Vector2::Cross(screenPos1 - screenPos2, Vector2(i, j) - screenPos2) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
-				float lambda13 = std::abs(Vector2::Cross(screenPos3 - screenPos1, Vector2(i, j) - screenPos1) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
-				float lambda23 = std::abs(Vector2::Cross(screenPos2 - screenPos3, Vector2(i, j) - screenPos3) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
-				ShadingInOutFields in;
-				float z1 = vertexOutFields[startIndex].ClipSpacePosition.z;
-				float z2 = vertexOutFields[startIndex + 1].ClipSpacePosition.z;
-				float z3 = vertexOutFields[startIndex + 2].ClipSpacePosition.z;
-				float z4 = 1 / (lambda12 / z3 + lambda13 / z2 + lambda23 / z1);
-				in.ClipSpacePosition = z4 * (lambda12 * vertexOutFields[startIndex + 2].ClipSpacePosition / z3 + lambda13 * vertexOutFields[startIndex + 1].ClipSpacePosition / z2 + lambda23 * vertexOutFields[startIndex].ClipSpacePosition / z1);
-				in.NDC = z4 * (lambda12 * vertexOutFields[startIndex + 2].NDC / z3 + lambda13 * vertexOutFields[startIndex + 1].NDC / z2 + lambda23 * vertexOutFields[startIndex].NDC / z1);
-				in.FragPos = z4 * (lambda12 * vertexOutFields[startIndex + 2].FragPos / z3 + lambda13 * vertexOutFields[startIndex + 1].FragPos / z2 + lambda23 * vertexOutFields[startIndex].FragPos / z1);
-				in.FragPosLightSpace = z4 * (lambda12 * vertexOutFields[startIndex + 2].FragPosLightSpace / z3 + lambda13 * vertexOutFields[startIndex + 1].FragPosLightSpace / z2 + lambda23 * vertexOutFields[startIndex].FragPosLightSpace / z1);
-				in.Normal = Vector3::Normalize(z4 * (lambda12 * vertexOutFields[startIndex + 2].Normal / z3 + lambda13 * vertexOutFields[startIndex + 1].Normal / z2 + lambda23 * vertexOutFields[startIndex].Normal / z1));
-				in.TexCoord = z4 * (lambda12 * vertexOutFields[startIndex + 2].TexCoord / z3 + lambda13 * vertexOutFields[startIndex + 1].TexCoord / z2 + lambda23 * vertexOutFields[startIndex].TexCoord / z1);
-				in.T = z4 * (lambda12 * vertexOutFields[startIndex + 2].T / z3 + lambda13 * vertexOutFields[startIndex + 1].T / z2 + lambda23 * vertexOutFields[startIndex].T / z1);
-				in.N = z4 * (lambda12 * vertexOutFields[startIndex + 2].N / z3 + lambda13 * vertexOutFields[startIndex + 1].N / z2 + lambda23 * vertexOutFields[startIndex].N / z1);
-				in.B = z4 * (lambda12 * vertexOutFields[startIndex + 2].B / z3 + lambda13 * vertexOutFields[startIndex + 1].B / z2 + lambda23 * vertexOutFields[startIndex].B / z1);
-				in.ScreenPosition = Vector2(i, j);
+    #pragma omp parallel
+	{
+		std::vector<ShadingInOutFields> fragmentInPrivate;
+        #pragma omp for nowait
+		for (int i = Mathf::Max((int)minX, 0); i < (int)Mathf::Min((int)maxX, Settings::ScreenWidth - 1); i++) {
+			for (int j = Mathf::Max((int)minY, 0); j < (int)Mathf::Min((int)maxY, Settings::ScreenHeight - 1); j++) {
+				if (InTriangle(Vector2(i + pixelSize.x / 2, j + pixelSize.y / 2), screenPos1, screenPos2, screenPos3)) {
+					// For all pixels in the triangle, we interpolate the vertex and get one ShadingInOutFields for fragment shading
+					float lambda12 = std::abs(Vector2::Cross(screenPos1 - screenPos2, Vector2(i, j) - screenPos2) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
+					float lambda13 = std::abs(Vector2::Cross(screenPos3 - screenPos1, Vector2(i, j) - screenPos1) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
+					float lambda23 = std::abs(Vector2::Cross(screenPos2 - screenPos3, Vector2(i, j) - screenPos3) / Vector2::Cross(screenPos1 - screenPos2, screenPos3 - screenPos2));
+					ShadingInOutFields in;
+					float z1 = vertexOutFields[startIndex].ClipSpacePosition.z;
+					float z2 = vertexOutFields[startIndex + 1].ClipSpacePosition.z;
+					float z3 = vertexOutFields[startIndex + 2].ClipSpacePosition.z;
+					float z4 = 1 / (lambda12 / z3 + lambda13 / z2 + lambda23 / z1);
+					in.ClipSpacePosition = z4 * (lambda12 * vertexOutFields[startIndex + 2].ClipSpacePosition / z3 + lambda13 * vertexOutFields[startIndex + 1].ClipSpacePosition / z2 + lambda23 * vertexOutFields[startIndex].ClipSpacePosition / z1);
+					in.NDC = z4 * (lambda12 * vertexOutFields[startIndex + 2].NDC / z3 + lambda13 * vertexOutFields[startIndex + 1].NDC / z2 + lambda23 * vertexOutFields[startIndex].NDC / z1);
+					in.FragPos = z4 * (lambda12 * vertexOutFields[startIndex + 2].FragPos / z3 + lambda13 * vertexOutFields[startIndex + 1].FragPos / z2 + lambda23 * vertexOutFields[startIndex].FragPos / z1);
+					in.FragPosLightSpace = z4 * (lambda12 * vertexOutFields[startIndex + 2].FragPosLightSpace / z3 + lambda13 * vertexOutFields[startIndex + 1].FragPosLightSpace / z2 + lambda23 * vertexOutFields[startIndex].FragPosLightSpace / z1);
+					in.Normal = Vector3::Normalize(z4 * (lambda12 * vertexOutFields[startIndex + 2].Normal / z3 + lambda13 * vertexOutFields[startIndex + 1].Normal / z2 + lambda23 * vertexOutFields[startIndex].Normal / z1));
+					in.TexCoord = z4 * (lambda12 * vertexOutFields[startIndex + 2].TexCoord / z3 + lambda13 * vertexOutFields[startIndex + 1].TexCoord / z2 + lambda23 * vertexOutFields[startIndex].TexCoord / z1);
+					in.T = z4 * (lambda12 * vertexOutFields[startIndex + 2].T / z3 + lambda13 * vertexOutFields[startIndex + 1].T / z2 + lambda23 * vertexOutFields[startIndex].T / z1);
+					in.N = z4 * (lambda12 * vertexOutFields[startIndex + 2].N / z3 + lambda13 * vertexOutFields[startIndex + 1].N / z2 + lambda23 * vertexOutFields[startIndex].N / z1);
+					in.B = z4 * (lambda12 * vertexOutFields[startIndex + 2].B / z3 + lambda13 * vertexOutFields[startIndex + 1].B / z2 + lambda23 * vertexOutFields[startIndex].B / z1);
+					in.ScreenPosition = Vector2(i, j);
 
-				fragmentInFields.push_back(in);
+					fragmentInPrivate.push_back(in);
+				}
 			}
 		}
+        #pragma omp critical
+		fragmentInFields.insert(fragmentInFields.end(), fragmentInPrivate.begin(), fragmentInPrivate.end());
 	}
 }
 
@@ -473,7 +496,6 @@ bool KritiaEngine::Rendering::SoftwareRendering::InTriangle(const Vector2& p, co
 	}
 }
 void SoftwareRendering::FragmentShading(const std::shared_ptr<Material>& material, const std::vector<ShadingInOutFields>& inFields, const Vector3& viewPos, const Vector3& pos) {
-	int x = 0;
 	if (material->renderMode == Material::RenderMode::Opaque) {
         #pragma omp parallel for
 		for (int i = 0; i < inFields.size(); i++) {
@@ -484,11 +506,11 @@ void SoftwareRendering::FragmentShading(const std::shared_ptr<Material>& materia
 			}
 			float previousZ = depthBuffer[in.ScreenPosition.x][in.ScreenPosition.y];
 			depthBuffer[in.ScreenPosition.x][in.ScreenPosition.y] = in.NDC.z;
+
 			Matrix3x3 TBN = Matrix3x3(Vector3::Normalize(in.T), Vector3::Normalize(in.B), Vector3::Normalize(in.N));
 			Vector3 viewDir = Vector3::Normalize(viewPos - in.FragPos);
 			Light* mainLight = LightingSystem::GetMainLightSource();
 			Vector3 lightDir = -Vector3::Normalize(mainLight->Transform()->forward);
-
 			Vector3 norm;
 			if (material->normalMap != nullptr) {
 				norm = SampleTexture(material->normalMap, in.TexCoord).GetRGB();
@@ -535,7 +557,6 @@ void SoftwareRendering::FragmentShading(const std::shared_ptr<Material>& materia
 			frameBuffer[(int)in.ScreenPosition.x][(int)in.ScreenPosition.y] = finalColor;
 		}
 	}
-	int y = x;
 }
 
 Vector2 SoftwareRendering::ComputeParallaxMapping(const std::shared_ptr<Material>& material, const Vector2& texCoord, const Vector3& viewDir) {

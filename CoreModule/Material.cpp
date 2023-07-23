@@ -217,16 +217,24 @@ std::shared_ptr<Material> KritiaEngine::Material::DeserializeFromJson(const json
 }
 
 void KritiaEngine::Material::SerializeToFile() {
-	std::string path = ImguiAlias::OpenSaveResourceWindow("Material", KritiaEngine::Editor::materialFilePostfix, "New Material");
-	if (!path.ends_with(KritiaEngine::Editor::materialFilePostfix)) {
-		path += ("/" + (std::string)KritiaEngine::Editor::materialFilePostfix);
+	if (path.ends_with(KritiaEngine::Editor::materialFilePostfix)) {
+		std::string jsonStr = SerializeToJson();
+		std::fstream output;
+		output.open(path, std::ios::out | std::ios::trunc);
+		output << jsonStr << std::endl;
+		output.close();
+	} else {
+		std::string path = ImguiAlias::OpenSaveResourceWindow("Material", KritiaEngine::Editor::materialFilePostfix, "New Material");
+		if (!path.ends_with(KritiaEngine::Editor::materialFilePostfix)) {
+			path += ("/" + (std::string)KritiaEngine::Editor::materialFilePostfix);
+		}
+		this->path = path;
+		std::string jsonStr = SerializeToJson();
+		std::fstream output;
+		output.open(path, std::ios::out | std::ios::trunc);
+		output << jsonStr << std::endl;
+		output.close();
 	}
-	this->path = path;
-	std::string jsonStr = SerializeToJson();
-	std::fstream output;
-	output.open(path, std::ios::out | std::ios::trunc);
-	output << jsonStr << std::endl;
-	output.close();
 }
 
 void KritiaEngine::Material::OnInspector() {

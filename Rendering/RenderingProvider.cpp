@@ -193,7 +193,7 @@ void KritiaEngine::Rendering::RenderingProvider::SetupRenderSubmesh() {
 	if (backend == RenderingBackend::OpenGL) {
 		OpenGLRendering::SetupRenderSubmesh();
 	} else if (backend == RenderingBackend::Software) {
-
+		SoftwareRendering::SetupRenderSubmesh();
 	}
 }
 

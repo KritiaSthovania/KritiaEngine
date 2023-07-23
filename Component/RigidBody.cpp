@@ -131,8 +131,8 @@ std::string KritiaEngine::RigidBody::GetInspectorLabel() {
 }
 
 void KritiaEngine::RigidBody::OnObjectDestroy() {
-	delete btRB;
-	delete ms;
 	Component::OnObjectDestroy();
 	PhysicsManager::RemoveRigidBody(this);
+	delete btRB;
+	delete ms;
 }

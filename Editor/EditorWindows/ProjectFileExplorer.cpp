@@ -34,7 +34,7 @@ void KritiaEngine::Editor::GUI::ProjectFileExplorer::DisplayDirectory(const path
 			if (is_directory(v.path())) {
 				DisplayDirectory(v.path(), root + path.filename().string());
 			} else {
-				DisplayFile(v.path(), root);
+				DisplayFile(v.path().filename(), path.string() + "/");
 			}
 		}
 		ImGui::TreePop();
